@@ -4,6 +4,7 @@ from redis import Redis
 import string
 import random
 import os
+import time
 
 app = Flask(__name__, static_folder='frontend/build/static', static_url_path='/static')
 app.config.from_pyfile('app.cfg')
@@ -39,6 +40,20 @@ def serve_react(path=''):
 def get():
     id = request.form.get('id')
     info = ""
+    client_ip = request.remote_addr or 'unknown'
+    rate_key = f"rate:{id}:{client_ip}"
+    max_attempts = 5
+
+    # Incrementar contador de intentos
+    attempts = r.incr(rate_key)
+    if attempts == 1:
+        r.expire(rate_key, 3600)  # 1 hora para evitar abuso
+    if attempts > max_attempts:
+        r.delete(id)
+        r.delete(rate_key)
+        return jsonify({'info': '', 'msg': 'El mensaje fue eliminado automáticamente por exceder el límite de intentos.'}), 403
+    else:
+        intentos_restantes = max_attempts - attempts
 
     m = r.get(id)
     if m == None:
@@ -48,16 +63,15 @@ def get():
         if isinstance(m, bytes):
             m = m.decode('utf-8')
         secs = r.ttl(id)
-        info = "&nbsp; Expira en %d d&iacute;a/s" % (secs/86400)
+        info = f"&nbsp; Expira en {secs//86400} d&iacute;a/s"
         if m.find('destroy') == 0:
             destroy = 1
             m = m.replace('destroy','')
             r.delete(id) 
             info += ", destruir al leer"
-
-    # TODO
-    # el tiempo de expiracion y el flag destroy se comunican por texto
-    # se deberia informar en el json y el main.js parsearlo 
+        # Agregar info de intentos restantes si quedan menos de 5
+        if intentos_restantes >= 0:
+            info += f"<br><b>Intentos restantes:</b> {intentos_restantes}"
 
     return jsonify({'info':info,'msg':m})
 
@@ -93,6 +107,15 @@ def randstr():
 @app.route('/delete', methods=['POST'])
 def delete():
     id = request.form.get('id')
+    client_ip = request.remote_addr or 'unknown'
+    rate_key = f"delete:{id}:{client_ip}"
+    max_deletes = 3
+    # Limitar a 3 intentos de borrado por minuto por IP por id
+    deletes = r.incr(rate_key)
+    if deletes == 1:
+        r.expire(rate_key, 60)
+    if deletes > max_deletes:
+        return jsonify({'success': False, 'error': 'Demasiados intentos de borrado. Intenta más tarde.'}), 429
     if not id:
         return jsonify({'success': False, 'error': 'Falta el parámetro id'}), 400
     try:

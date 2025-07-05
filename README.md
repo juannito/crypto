@@ -1,6 +1,6 @@
 # CRYPTO - Intercambio de Mensajes Seguros
 
-Una aplicación web para el intercambio seguro de mensajes encriptados, desarrollada con React y Flask.
+Una aplicación web para el intercambio seguro de mensajes encriptados, desarrollada con React y Flask. **100% Single Page Application (SPA) y mobile-friendly**.
 
 ## ¿Qué hace esta aplicación?
 
@@ -37,7 +37,8 @@ Esta aplicación permite intercambiar mensajes de forma segura utilizando encrip
 - **React Router** para navegación
 - **CryptoJS** para encriptación del lado del cliente
 - **Axios** para comunicación con el backend
-- **CSS personalizado** con estilos Bootstrap-like
+- **Tailwind CSS** para estilos modernos, responsivos y mobile-friendly
+- **SPA 100%**: Navegación y experiencia fluida sin recargas
 
 ### Backend (Flask)
 
@@ -89,15 +90,15 @@ npm run build
 
 ## Sobre este Proyecto
 
-Esta es una **versión modernizada** del proyecto original desarrollado por [Baicom](https://github.com/baicom/crypto). El proyecto original utilizaba jQuery y Bootstrap, mientras que esta versión ha sido migrada completamente a **React con TypeScript** para una mejor experiencia de desarrollo y mantenimiento.
+Esta es una **versión modernizada** del proyecto original desarrollado por [Baicom](https://github.com/baicom/crypto). El proyecto original utilizaba jQuery y Bootstrap, mientras que esta versión ha sido migrada completamente a **React con TypeScript** y **Tailwind CSS** para una mejor experiencia de desarrollo, mantenimiento y visual.
 
 ### Principales Mejoras
 
-- ✅ **Migración completa a React** (Single Page Application)
+- ✅ **Migración completa a React** (Single Page Application, 100% SPA)
 - ✅ **TypeScript** para mejor tipado y desarrollo
 - ✅ **Componentes modulares** y reutilizables
 - ✅ **Mejor manejo de estado** con React Hooks
-- ✅ **Interfaz más moderna** y responsive
+- ✅ **Interfaz más moderna** y responsive (mobile-friendly) gracias a Tailwind CSS
 - ✅ **Código más mantenible** y escalable
 
 ### Créditos Originales
@@ -107,12 +108,3 @@ Este proyecto está basado en el trabajo original de [Baicom](https://github.com
 ## Licencia
 
 Este proyecto está bajo la licencia BEERWARE, ver [LICENSE](LICENSE) para más detalles.
-
-## Roadmap
-
-- [ ] Mejorar manejo de errores (timeouts, conexión perdida)
-- [ ] Agregar tests unitarios y de integración
-- [ ] Implementar rate limiting
-- [ ] Agregar más opciones de encriptación
-- [ ] Mejorar la documentación de la API
-- [ ] Implementar PWA (Progressive Web App)
