@@ -1,0 +1,99 @@
+{
+  "tabs": {
+    "online": "Online",
+    "traditional": "Traditional",
+    "message": "Decrypt",
+    "help": "Help"
+  },
+  "descriptions": {
+    "online": "Encrypt your message and get a secure link to share.<br/><b>Important:</b> When saving, the browser <u>first encrypts the data locally</u> and then sends it to the server to generate the exchange link. You can choose to destroy the message when read.",
+    "traditional": "Encrypt your message locally, without sending it to any server. Only you have the encrypted code.",
+    "message": "Decrypt messages by entering the secret key and encrypted code or online link."
+  },
+  "form": {
+    "secretKey": "Secret key",
+    "message": "Message",
+    "expires": "Expires:",
+    "destroyOnRead": "Destroy on read",
+    "save": "Save",
+    "saving": "Saving...",
+    "clear": "Clear",
+    "encrypt": "Encrypt",
+    "decrypt": "Decrypt",
+    "copy": "Copy",
+    "copied": "Copied!",
+    "showQR": "Show QR",
+    "hideQR": "Hide QR",
+    "loading": "Loading...",
+    "decrypting": "Decrypting...",
+    "deleteMessage": "Delete message"
+  },
+  "expiration": {
+    "1month": "1 month",
+    "1week": "1 week",
+    "1day": "1 day"
+  },
+  "strength": {
+    "insecure": "Insecure",
+    "secure": "Secure",
+    "verySecure": "Very secure",
+    "tooltip": "Help about key strength",
+    "title": "The key must have:",
+    "requirements": {
+      "length": "8+ characters",
+      "uppercase": "Uppercase",
+      "lowercase": "Lowercase",
+      "number": "Number",
+      "special": "Special character"
+    }
+  },
+  "encryptedMessage": "ENCRYPTED MESSAGE:",
+  "notifications": {
+    "success": {
+      "messageSaved": "Message encrypted and saved successfully",
+      "messageDecrypted": "Message decrypted successfully",
+      "formCleared": "Form cleared",
+      "messageLoaded": "Message loaded successfully",
+      "messageDeleted": "Message deleted successfully"
+    },
+    "error": {
+      "keyTooShort": "The key must be at least 3 characters long",
+      "messageTooLong": "The message is approaching the character limit",
+      "emptyMessage": "The encrypted message cannot be empty",
+      "decryptFailed": "Could not decrypt. Verify the key and encrypted message.",
+      "unexpectedError": "Unexpected error sending message. Try again.",
+      "copyError": "Error copying to clipboard",
+      "messageNotFound": "The message does not exist or has expired",
+      "fetchError": "Error fetching the message. Verify the link.",
+      "noMessageToDecrypt": "There is no message to decrypt",
+      "deleteError": "Could not delete the message"
+    },
+    "warning": {
+      "keyTooShort": "The key must be at least 3 characters long",
+      "messageLimit": "The message is approaching the character limit"
+    },
+    "info": {
+      "formCleared": "Form cleared"
+    }
+  },
+  "modal": {
+    "messageSaved": "Encrypted Message Saved",
+    "close": "Close"
+  },
+  "help": {
+    "description": "The system has two main modes: <strong class=\"text-blue-600\">ONLINE</strong>, which allows you to generate an encrypted message and save it to share via a link, and <strong class=\"text-blue-600\">TRADITIONAL</strong>, which offers an interface to encrypt text locally, without server storage. In both modes, it is necessary to use a key to decrypt information securely from the Message tab.",
+    "onlineSecurity": "Messages in <strong class=\"text-blue-600\">ONLINE</strong> mode are not stored in plain text. When you click the \"Save\" button, the browser first encrypts the data locally and then sends it to the server to generate the exchange link.",
+    "expiration": "Additionally, this mode allows you to set an expiration time for the message and activate the option to destroy it when read. This way, the person who receives the link will only have one opportunity to access the message.",
+    "securityRecommendation": "For greater security, it is recommended that the key be as long as possible, preferably a phrase.",
+    "sourceCode": "The source code is available on <a href=\"http://github.com/juannito/crypto\" class=\"text-blue-600 hover:underline\">GitHub</a>."
+  },
+  "characters": "characters",
+  "nearLimit": "(near limit)",
+  "messagePlaceholder": "Enter encrypted code or online link to decrypt",
+  "languageSelector": {
+    "title": "Select language",
+    "en": "English",
+    "es": "Español",
+    "pt": "Português"
+  }
+}

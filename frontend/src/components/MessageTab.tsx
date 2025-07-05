@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import CryptoJS from 'crypto-js';
 import axios from 'axios';
 import { useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useNotifications } from '../hooks/useNotifications';
 import { 
   validateKey, 
@@ -22,6 +23,7 @@ function getKeyStrengthIndicators(key: string) {
 }
 
 const MessageTab: React.FC = () => {
+  const { t } = useTranslation();
   const [key, setKey] = useState('');
   const [message, setMessage] = useState('');
   const [info, setInfo] = useState('');
@@ -57,9 +59,9 @@ const MessageTab: React.FC = () => {
       setInfo(response.data.info);
       
       if (response.data.msg === 'No existe el mensaje') {
-        showError('El mensaje no existe o ha expirado');
+        showError(t('notifications.error.messageNotFound'));
       } else {
-        showSuccess('Mensaje cargado exitosamente');
+        showSuccess(t('notifications.success.messageLoaded'));
       }
     } catch (error: any) {
       console.error('Error al obtener mensaje:', error);
@@ -67,10 +69,10 @@ const MessageTab: React.FC = () => {
       if (error.message.includes('conexión') || error.message.includes('servidor')) {
         showError(error.message);
       } else {
-        showError('Error al obtener el mensaje. Verifica el enlace.');
+        showError(t('notifications.error.fetchError'));
       }
       
-      setMessage('Error al obtener el mensaje');
+      setMessage(t('notifications.error.fetchError'));
       setInfo('');
     } finally {
       setIsLoading(false);
@@ -108,7 +110,7 @@ const MessageTab: React.FC = () => {
       validateKey(key);
       
       if (!message.trim()) {
-        showError('No hay mensaje para desencriptar');
+        showError(t('notifications.error.noMessageToDecrypt'));
         return;
       }
 
@@ -120,12 +122,12 @@ const MessageTab: React.FC = () => {
       const result = decrypted.toString(CryptoJS.enc.Utf8);
       
       if (!result) {
-        showError('No se pudo desencriptar. Verifica la clave.');
+        showError(t('notifications.error.decryptFailed'));
         return;
       }
       
       setMessage(result);
-      showSuccess('Mensaje desencriptado exitosamente');
+      showSuccess(t('notifications.success.messageDecrypted'));
     } catch (error: any) {
       console.error('Error al desencriptar:', error);
       const errorMessage = handleCryptoError(error);
@@ -141,7 +143,7 @@ const MessageTab: React.FC = () => {
     
     // Validación en tiempo real
     if (newKey.length > 0 && newKey.length < 3) {
-      showWarning('La clave debe tener al menos 3 caracteres');
+      showWarning(t('notifications.warning.keyTooShort'));
     }
   };
 
@@ -155,9 +157,9 @@ const MessageTab: React.FC = () => {
       await axios.post('/delete', formData);
       setMessage('');
       setInfo('');
-      showSuccess('Mensaje eliminado correctamente');
+      showSuccess(t('notifications.success.messageDeleted'));
     } catch (error: any) {
-      showError('No se pudo eliminar el mensaje');
+      showError(t('notifications.error.deleteError'));
     } finally {
       setIsLoading(false);
     }
@@ -165,43 +167,55 @@ const MessageTab: React.FC = () => {
 
   return (
     <div className="tab-pane fade">
-      <form className="flex items-center gap-4 mb-4">
-        <input
-          type="password"
-          className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          placeholder="Clave secreta"
-          value={key}
-          onChange={handleKeyChange}
-          required
-          disabled={isLoading}
-        />
-        <button
-          type="button"
-          className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
-          onClick={handleDecrypt}
-          disabled={isLoading || isDecrypting}
-        >
-          {isLoading ? 'Cargando...' : isDecrypting ? 'Desencriptando...' : 'Desencriptar'}
-        </button>
-        <span 
-          className="text-sm text-gray-600"
-          dangerouslySetInnerHTML={{ __html: info }} 
-        />
-      </form>
-      <div>
-        <textarea
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-vertical"
-          rows={20}
-          placeholder="Ingresa el código online o código encriptado tradicional"
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-          readOnly={isLoading}
-        />
-        {message.length > 0 && !isLoading && (
-          <small className="text-muted">
-            {message.length} caracteres
-          </small>
-        )}
+      <div className="space-y-4">
+        {/* Campo de mensaje primero */}
+        <div className="relative">
+          <textarea
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-vertical"
+            rows={20}
+            placeholder={t('messagePlaceholder')}
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            readOnly={isLoading}
+          />
+          {message.length > 0 && !isLoading && (
+            <small className="text-muted">
+              {message.length} {t('characters')}
+            </small>
+          )}
+        </div>
+        
+        {/* Campo de clave y acciones */}
+        <div className="flex flex-col gap-4 w-full max-w-2xl">
+          {/* Campo de clave */}
+          <div className="flex flex-wrap items-center gap-4 w-full">
+            <input
+              type="password"
+              className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder={t('form.secretKey')}
+              value={key}
+              onChange={handleKeyChange}
+              required
+              disabled={isLoading}
+            />
+          </div>
+          
+          {/* Botón de acción */}
+          <div className="flex flex-wrap items-center gap-4">
+            <button
+              type="button"
+              className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              onClick={handleDecrypt}
+              disabled={isLoading || isDecrypting}
+            >
+              {isLoading ? t('form.loading') : isDecrypting ? t('form.decrypting') : t('form.decrypt')}
+            </button>
+            <span 
+              className="text-sm text-gray-600"
+              dangerouslySetInnerHTML={{ __html: info }} 
+            />
+          </div>
+        </div>
       </div>
       {onlineCode && (
         <div className="flex justify-end mt-2">
@@ -211,7 +225,7 @@ const MessageTab: React.FC = () => {
             onClick={handleDeleteMessage}
             disabled={isLoading}
           >
-            Eliminar mensaje
+            {t('form.deleteMessage')}
           </button>
         </div>
       )}

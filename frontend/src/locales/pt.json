@@ -1,0 +1,99 @@
+{
+  "tabs": {
+    "online": "Online",
+    "traditional": "Tradicional",
+    "message": "Descriptografar",
+    "help": "Ajuda"
+  },
+  "descriptions": {
+    "online": "Criptografe sua mensagem e obtenha um link seguro para compartilhar.<br/><b>Importante:</b> Ao salvar, o navegador <u>primeiro criptografa os dados localmente</u> e depois os envia ao servidor para gerar o link de troca. Você pode escolher destruir a mensagem quando lida.",
+    "traditional": "Criptografe sua mensagem localmente, sem enviá-la para nenhum servidor. Apenas você tem o código criptografado.",
+    "message": "Descriptografe mensagens inserindo a chave secreta e o código criptografado ou link online."
+  },
+  "form": {
+    "secretKey": "Chave secreta",
+    "message": "Mensagem",
+    "expires": "Expira:",
+    "destroyOnRead": "Destruir ao ler",
+    "save": "Salvar",
+    "saving": "Salvando...",
+    "clear": "Limpar",
+    "encrypt": "Criptografar",
+    "decrypt": "Descriptografar",
+    "copy": "Copiar",
+    "copied": "Copiado!",
+    "showQR": "Mostrar QR",
+    "hideQR": "Ocultar QR",
+    "loading": "Carregando...",
+    "decrypting": "Descriptografando...",
+    "deleteMessage": "Excluir mensagem"
+  },
+  "expiration": {
+    "1month": "1 mês",
+    "1week": "1 semana",
+    "1day": "1 dia"
+  },
+  "strength": {
+    "insecure": "Insegura",
+    "secure": "Segura",
+    "verySecure": "Muito segura",
+    "tooltip": "Ajuda sobre a força da chave",
+    "title": "A chave deve ter:",
+    "requirements": {
+      "length": "8+ caracteres",
+      "uppercase": "Maiúscula",
+      "lowercase": "Minúscula",
+      "number": "Número",
+      "special": "Caractere especial"
+    }
+  },
+  "encryptedMessage": "MENSAGEM CRIPTOGRAFADA:",
+  "notifications": {
+    "success": {
+      "messageSaved": "Mensagem criptografada e salva com sucesso",
+      "messageDecrypted": "Mensagem descriptografada com sucesso",
+      "formCleared": "Formulário limpo",
+      "messageLoaded": "Mensagem carregada com sucesso",
+      "messageDeleted": "Mensagem excluída com sucesso"
+    },
+    "error": {
+      "keyTooShort": "A chave deve ter pelo menos 3 caracteres",
+      "messageTooLong": "A mensagem está se aproximando do limite de caracteres",
+      "emptyMessage": "A mensagem criptografada não pode estar vazia",
+      "decryptFailed": "Não foi possível descriptografar. Verifique a chave e a mensagem criptografada.",
+      "unexpectedError": "Erro inesperado ao enviar a mensagem. Tente novamente.",
+      "copyError": "Erro ao copiar para a área de transferência",
+      "messageNotFound": "A mensagem não existe ou expirou",
+      "fetchError": "Erro ao buscar a mensagem. Verifique o link.",
+      "noMessageToDecrypt": "Não há mensagem para descriptografar",
+      "deleteError": "Não foi possível excluir a mensagem"
+    },
+    "warning": {
+      "keyTooShort": "A chave deve ter pelo menos 3 caracteres",
+      "messageLimit": "A mensagem está se aproximando do limite de caracteres"
+    },
+    "info": {
+      "formCleared": "Formulário limpo"
+    }
+  },
+  "modal": {
+    "messageSaved": "Mensagem Criptografada Salva",
+    "close": "Fechar"
+  },
+  "help": {
+    "description": "O sistema possui duas modalidades principais: <strong class=\"text-blue-600\">ONLINE</strong>, que permite gerar uma mensagem criptografada e salvá-la para compartilhar através de um link, e <strong class=\"text-blue-600\">TRADICIONAL</strong>, que oferece uma interface para criptografar texto localmente, sem armazenamento no servidor. Em ambos os modos, é necessário usar uma chave para descriptografar informações de forma segura na aba Mensagem.",
+    "onlineSecurity": "As mensagens na modalidade <strong class=\"text-blue-600\">ONLINE</strong> não são armazenadas em texto simples. Ao clicar no botão \"Salvar\", o navegador primeiro criptografa os dados localmente e depois os envia ao servidor para gerar o link de troca.",
+    "expiration": "Além disso, esta modalidade permite definir um tempo de expiração para a mensagem e ativar a opção de destruí-la quando lida. Dessa forma, a pessoa que recebe o link terá apenas uma oportunidade de acessar a mensagem.",
+    "securityRecommendation": "Para maior segurança, recomenda-se que a chave seja o mais longa possível, preferencialmente uma frase.",
+    "sourceCode": "O código fonte está disponível no <a href=\"http://github.com/juannito/crypto\" class=\"text-blue-600 hover:underline\">GitHub</a>."
+  },
+  "characters": "caracteres",
+  "nearLimit": "(próximo ao limite)",
+  "messagePlaceholder": "Digite o código criptografado ou link online para descriptografar",
+  "languageSelector": {
+    "title": "Selecionar idioma",
+    "en": "English",
+    "es": "Español",
+    "pt": "Português"
+  }
+}

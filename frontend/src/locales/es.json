@@ -1,0 +1,99 @@
+{
+  "tabs": {
+    "online": "Online",
+    "traditional": "Tradicional",
+    "message": "Desencriptar",
+    "help": "Ayuda"
+  },
+  "descriptions": {
+    "online": "Encripta tu mensaje y obtén un enlace seguro para compartir.<br/><b>Importante:</b> Al grabarlo, el navegador <u>primero encripta los datos localmente</u> y luego los envía al servidor para generar el link de intercambio. Puedes elegir que el mensaje se destruya al leerlo.",
+    "traditional": "Encripta tu mensaje localmente, sin enviarlo a ningún servidor. Solo tú tienes el código encriptado.",
+    "message": "Desencripta mensajes ingresando la clave secreta y el código encriptado o enlace online."
+  },
+  "form": {
+    "secretKey": "Clave secreta",
+    "message": "Mensaje",
+    "expires": "Expira:",
+    "destroyOnRead": "Destruir al leer",
+    "save": "Grabar",
+    "saving": "Grabando...",
+    "clear": "Borrar",
+    "encrypt": "Encriptar",
+    "decrypt": "Desencriptar",
+    "copy": "Copiar",
+    "copied": "¡Copiado!",
+    "showQR": "Mostrar QR",
+    "hideQR": "Ocultar QR",
+    "loading": "Cargando...",
+    "decrypting": "Desencriptando...",
+    "deleteMessage": "Eliminar mensaje"
+  },
+  "expiration": {
+    "1month": "1 mes",
+    "1week": "1 semana",
+    "1day": "1 día"
+  },
+  "strength": {
+    "insecure": "Insegura",
+    "secure": "Segura",
+    "verySecure": "Muy segura",
+    "tooltip": "Ayuda sobre la fortaleza de la clave",
+    "title": "La clave debe tener:",
+    "requirements": {
+      "length": "8+ caracteres",
+      "uppercase": "Mayúscula",
+      "lowercase": "Minúscula",
+      "number": "Número",
+      "special": "Carácter especial"
+    }
+  },
+  "encryptedMessage": "MENSAJE ENCRIPTADO:",
+  "notifications": {
+    "success": {
+      "messageSaved": "Mensaje encriptado y guardado exitosamente",
+      "messageDecrypted": "Mensaje desencriptado exitosamente",
+      "formCleared": "Formulario limpiado",
+      "messageLoaded": "Mensaje cargado exitosamente",
+      "messageDeleted": "Mensaje eliminado correctamente"
+    },
+    "error": {
+      "keyTooShort": "La clave debe tener al menos 3 caracteres",
+      "messageTooLong": "El mensaje se acerca al límite de caracteres",
+      "emptyMessage": "El mensaje encriptado no puede estar vacío",
+      "decryptFailed": "No se pudo desencriptar. Verifica la clave y el mensaje encriptado.",
+      "unexpectedError": "Error inesperado al enviar el mensaje. Intenta nuevamente.",
+      "copyError": "Error al copiar al portapapeles",
+      "messageNotFound": "El mensaje no existe o ha expirado",
+      "fetchError": "Error al obtener el mensaje. Verifica el enlace.",
+      "noMessageToDecrypt": "No hay mensaje para desencriptar",
+      "deleteError": "No se pudo eliminar el mensaje"
+    },
+    "warning": {
+      "keyTooShort": "La clave debe tener al menos 3 caracteres",
+      "messageLimit": "El mensaje se acerca al límite de caracteres"
+    },
+    "info": {
+      "formCleared": "Formulario limpiado"
+    }
+  },
+  "modal": {
+    "messageSaved": "Mensaje Encriptado Guardado",
+    "close": "Cerrar"
+  },
+  "help": {
+    "description": "El sistema posee dos modalidades principales: <strong class=\"text-blue-600\">ONLINE</strong>, que permite generar un mensaje encriptado y guardarlo para compartir mediante un enlace, y <strong class=\"text-blue-600\">TRADICIONAL</strong>, que ofrece una interfaz para encriptar un texto localmente, sin almacenamiento en el servidor. En ambos modos, es necesario utilizar una clave para desencriptar información de forma segura desde la tab de Mensaje.",
+    "onlineSecurity": "Los mensajes en la modalidad <strong class=\"text-blue-600\">ONLINE</strong> no se almacenan en texto plano. Al hacer clic en el botón \"Grabar\", el navegador primero encripta los datos localmente y luego los envía al servidor para generar el enlace de intercambio.",
+    "expiration": "Además, esta modalidad permite establecer un tiempo de expiración para el mensaje y activar la opción de destruirlo al ser leído. De esta manera, la persona que recibe el enlace solo tendrá una oportunidad para acceder al mensaje.",
+    "securityRecommendation": "Para mayor seguridad, se recomienda que la clave sea lo más larga posible, preferentemente una frase.",
+    "sourceCode": "El código fuente está disponible en <a href=\"http://github.com/juannito/crypto\" class=\"text-blue-600 hover:underline\">GitHub</a>."
+  },
+  "characters": "caracteres",
+  "nearLimit": "(cerca del límite)",
+  "messagePlaceholder": "Ingresa el código encriptado o enlace online para desencriptar",
+  "languageSelector": {
+    "title": "Seleccionar idioma",
+    "en": "English",
+    "es": "Español",
+    "pt": "Português"
+  }
+}
