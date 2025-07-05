@@ -10,6 +10,17 @@ import {
   cleanEncryptedMessage 
 } from '../utils/errorHandler';
 
+// Función para evaluar la fortaleza de la clave
+function getKeyStrengthIndicators(key: string) {
+  return {
+    length: key.length >= 8,
+    upper: /[A-Z]/.test(key),
+    lower: /[a-z]/.test(key),
+    number: /[0-9]/.test(key),
+    special: /[^A-Za-z0-9]/.test(key),
+  };
+}
+
 const TraditionalTab: React.FC = () => {
   const [key, setKey] = useState('');
   const [message, setMessage] = useState('');
@@ -84,6 +95,8 @@ const TraditionalTab: React.FC = () => {
     }
   };
 
+  const indicators = getKeyStrengthIndicators(key);
+
   return (
     <div className="tab-pane fade">
       <form className="space-y-4">
@@ -96,6 +109,23 @@ const TraditionalTab: React.FC = () => {
             onChange={handleKeyChange}
             required
           />
+        </div>
+        <div className="flex flex-row flex-wrap gap-4 text-xs text-gray-500 mb-2">
+          <div className="flex items-center gap-1">
+            <span className={indicators.length ? 'text-green-600' : 'text-gray-400'}>●</span> 8+ caracteres
+          </div>
+          <div className="flex items-center gap-1">
+            <span className={indicators.upper ? 'text-green-600' : 'text-gray-400'}>●</span> Mayúscula
+          </div>
+          <div className="flex items-center gap-1">
+            <span className={indicators.lower ? 'text-green-600' : 'text-gray-400'}>●</span> Minúscula
+          </div>
+          <div className="flex items-center gap-1">
+            <span className={indicators.number ? 'text-green-600' : 'text-gray-400'}>●</span> Número
+          </div>
+          <div className="flex items-center gap-1">
+            <span className={indicators.special ? 'text-green-600' : 'text-gray-400'}>●</span> Carácter especial
+          </div>
         </div>
         <div className="relative">
           <textarea

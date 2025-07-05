@@ -1,6 +1,6 @@
 # CRYPTO - Intercambio de Mensajes Seguros
 
-Una aplicación web para el intercambio seguro de mensajes encriptados, desarrollada con React y Flask. **100% Single Page Application (SPA) y mobile-friendly**.
+Una aplicación web para el intercambio seguro de mensajes encriptados, desarrollada con React y Flask.
 
 ## ¿Qué hace esta aplicación?
 
@@ -12,7 +12,7 @@ Esta aplicación permite intercambiar mensajes de forma segura utilizando encrip
 - **Genera enlaces únicos** para compartir mensajes
 - **Configuración de expiración** (1 día, 1 semana, 1 mes)
 - **Opción de autodestrucción** al leer el mensaje
-- **Encriptación del lado del cliente** antes del envío
+- **Encriptación del lado del cliente** antes de guardarlo
 
 ### 🔐 Modalidad Tradicional
 
@@ -108,3 +108,76 @@ Este proyecto está basado en el trabajo original de [Baicom](https://github.com
 ## Licencia
 
 Este proyecto está bajo la licencia BEERWARE, ver [LICENSE](LICENSE) para más detalles.
+
+## Documentación de la API
+
+### 1. POST `/post`
+
+Guarda un mensaje encriptado en el servidor y devuelve un enlace único.
+
+- **Método:** POST
+- **Parámetros (form-data):**
+
+  - `msg1` (string, requerido): Mensaje encriptado (AES, generado en el frontend)
+  - `expire` (int, requerido): Tiempo de expiración en segundos (ej: 86400 para 1 día)
+  - `destroy` (opcional): Si está presente, el mensaje se autodestruirá al ser leído
+
+- **Respuesta:**
+
+  - 200 OK: URL única para acceder al mensaje
+
+- **Ejemplo curl:**
+
+```bash
+curl -X POST -F "msg1=MENSAJE_ENCRIPTADO" -F "expire=86400" -F "destroy=1" http://localhost:5001/post
+```
+
+### 2. POST `/get`
+
+Obtiene un mensaje guardado por su ID. Aplica rate limiting (5 intentos por IP, luego se borra el mensaje).
+
+- **Método:** POST
+- **Parámetros (form-data):**
+
+  - `id` (string, requerido): ID del mensaje (código online)
+
+- **Respuesta:**
+
+  - 200 OK: `{ "info": "...", "msg": "MENSAJE_ENCRIPTADO" }`
+  - 403 Forbidden: Si se superó el límite de intentos y el mensaje fue eliminado
+  - 404: Si el mensaje no existe
+
+- **Notas:**
+
+  - El campo `info` puede incluir información de expiración y cantidad de intentos restantes.
+
+- **Ejemplo curl:**
+
+```bash
+curl -X POST -F "id=CODIGO_ONLINE" http://localhost:5001/get
+```
+
+### 3. POST `/delete`
+
+Elimina un mensaje guardado por su ID. Rate limit: 3 intentos por minuto por IP.
+
+- **Método:** POST
+- **Parámetros (form-data):**
+
+  - `id` (string, requerido): ID del mensaje (código online)
+
+- **Respuesta:**
+
+  - 200 OK: `{ "success": true }`
+  - 404: Si el mensaje no existe
+  - 429: Si se supera el límite de borrados
+
+- **Ejemplo curl:**
+
+```bash
+curl -X POST -F "id=CODIGO_ONLINE" http://localhost:5001/delete
+```
+
+---
+
+**Nota:** Todos los endpoints devuelven respuestas en formato JSON. Se recomienda usar HTTPS en producción.

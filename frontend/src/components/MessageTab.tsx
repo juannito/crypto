@@ -165,7 +165,7 @@ const MessageTab: React.FC = () => {
 
   return (
     <div className="tab-pane fade">
-      <form className="flex items-center gap-4 mb-2">
+      <form className="flex items-center gap-4 mb-4">
         <input
           type="password"
           className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -175,23 +175,6 @@ const MessageTab: React.FC = () => {
           required
           disabled={isLoading}
         />
-        <div className="flex flex-col gap-1 text-xs text-gray-500 min-w-[120px]">
-          <div className="flex items-center gap-1">
-            <span className={indicators.length ? 'text-green-600' : 'text-gray-400'}>●</span> 8+ caracteres
-          </div>
-          <div className="flex items-center gap-1">
-            <span className={indicators.upper ? 'text-green-600' : 'text-gray-400'}>●</span> Mayúscula
-          </div>
-          <div className="flex items-center gap-1">
-            <span className={indicators.lower ? 'text-green-600' : 'text-gray-400'}>●</span> Minúscula
-          </div>
-          <div className="flex items-center gap-1">
-            <span className={indicators.number ? 'text-green-600' : 'text-gray-400'}>●</span> Número
-          </div>
-          <div className="flex items-center gap-1">
-            <span className={indicators.special ? 'text-green-600' : 'text-gray-400'}>●</span> Carácter especial
-          </div>
-        </div>
         <button
           type="button"
           className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
