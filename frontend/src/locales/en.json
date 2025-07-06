@@ -21,7 +21,13 @@
     "encryptFiles": "Encrypt files with the same key",
     "encryptingFiles": "Encrypting files...",
     "encrypt": "Encrypt",
-    "decrypt": "Decrypt"
+    "decrypt": "Decrypt",
+    "deleteMessage": "Delete Message",
+    "copy": "Copy",
+    "showQR": "Show QR",
+    "hideQR": "Hide QR",
+    "loading": "Loading...",
+    "decrypting": "Decrypting..."
   },
   "expiration": {
     "1month": "1 month",

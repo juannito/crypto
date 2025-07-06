@@ -21,7 +21,13 @@
     "encryptFiles": "Criptografar arquivos com a mesma chave",
     "encryptingFiles": "Criptografando arquivos...",
     "encrypt": "Criptografar",
-    "decrypt": "Descriptografar"
+    "decrypt": "Descriptografar",
+    "deleteMessage": "Excluir Mensagem",
+    "copy": "Copiar",
+    "showQR": "Mostrar QR",
+    "hideQR": "Ocultar QR",
+    "loading": "Carregando...",
+    "decrypting": "Descriptografando..."
   },
   "expiration": {
     "1month": "1 mês",

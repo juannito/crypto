@@ -161,7 +161,7 @@ const MessageTab: React.FC = () => {
             if (response.data.attempts_left === 0) {
               setMessageDeleted(true);
               showError(t('notifications.error.tooManyAttempts'));
-              setMessage('');
+              setMessage(t('notifications.error.messageNotFound'));
               setInfo('');
               setDestroyOnRead(false);
               setFiles([]);
@@ -173,7 +173,7 @@ const MessageTab: React.FC = () => {
               setAttemptsLeft(0);
               setMessageDeleted(true);
               showError(t('notifications.error.tooManyAttempts'));
-              setMessage('');
+              setMessage(t('notifications.error.messageNotFound'));
               setInfo('');
               setDestroyOnRead(false);
               setFiles([]);

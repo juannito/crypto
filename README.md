@@ -1,66 +1,109 @@
-# CRYPTO - Intercambio de Mensajes Seguros
+# 🔐 CRYPTO - Plataforma de Intercambio Seguro de Mensajes
 
-Una aplicación web para el intercambio seguro de mensajes encriptados, desarrollada con React y Flask.
+[![React](https://img.shields.io/badge/React-19-blue?logo=react)](https://reactjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue?logo=typescript)](https://www.typescriptlang.org/)
+[![Flask](https://img.shields.io/badge/Flask-3.1-green?logo=flask)](https://flask.palletsprojects.com/)
+[![Redis](https://img.shields.io/badge/Redis-6.2-red?logo=redis)](https://redis.io/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.3-38B2AC?logo=tailwind-css)](https://tailwindcss.com/)
+[![License](https://img.shields.io/badge/License-BEERWARE-yellow)](LICENSE)
 
-## ¿Qué hace esta aplicación?
+> **Una plataforma moderna y segura para el intercambio de mensajes encriptados, desarrollada con las mejores prácticas de seguridad y tecnologías actuales.**
 
-Esta aplicación permite intercambiar mensajes de forma segura utilizando encriptación AES. Ofrece dos modalidades principales:
+## 🚀 Características Principales
 
-### 🔗 Modalidad Online
-
-- **Encripta y almacena** mensajes en el servidor
-- **Genera enlaces únicos** para compartir mensajes
-- **Configuración de expiración** (1 día, 1 semana, 1 mes)
-- **Opción de autodestrucción** al leer el mensaje
-- **Encriptación del lado del cliente** antes de guardarlo
-
-### 🔐 Modalidad Tradicional
-
-- **Encriptación local** sin almacenamiento en servidor
-- **Interfaz simple** para encriptar/desencriptar texto
-- **Ideal para** intercambios directos sin persistencia
-
-## Características de Seguridad
+### 🔒 **Seguridad de Nivel Empresarial**
 
 - **Encriptación AES-256** implementada con CryptoJS
-- **Claves secretas** requeridas para encriptar/desencriptar
-- **Sin almacenamiento en texto plano** en el servidor
-- **Enlaces únicos** de 10 caracteres generados aleatoriamente
-- **Expiración automática** de mensajes
+- **Encriptación del lado del cliente** antes de cualquier transmisión
+- **Rate limiting inteligente** para prevenir ataques de fuerza bruta
+- **Autodestrucción automática** después de múltiples intentos fallidos
+- **Sin almacenamiento de texto plano** en el servidor
+
+### 🌐 **Dos Modalidades de Uso**
+
+#### **🔗 Modalidad Online (Compartir)**
+
+- **Encripta y almacena** mensajes de forma segura en el servidor
+- **Genera enlaces únicos** de 10 caracteres para compartir
+- **Configuración flexible de expiración** (1 día, 1 semana, 1 mes)
 - **Opción de autodestrucción** al primer acceso
+- **Soporte para archivos adjuntos** con encriptación individual
+- **Interfaz moderna y responsive** optimizada para móviles
 
-## Tecnologías Utilizadas
+#### **🔐 Modalidad Tradicional (Encriptar)**
 
-### Frontend (React)
+- **Encriptación 100% local** sin almacenamiento en servidor
+- **Interfaz intuitiva** para encriptar/desencriptar texto
+- **Generación de códigos QR** para compartir fácilmente
+- **Ideal para** intercambios directos sin persistencia
+- **Validación de fortaleza de claves** en tiempo real
 
-- **React 19** con TypeScript
-- **React Router** para navegación
-- **CryptoJS** para encriptación del lado del cliente
-- **Axios** para comunicación con el backend
-- **Tailwind CSS** para estilos modernos, responsivos y mobile-friendly
-- **SPA 100%**: Navegación y experiencia fluida sin recargas
+### 📱 **Experiencia de Usuario Moderna**
 
-### Backend (Flask)
+- **Single Page Application (SPA)** con navegación fluida
+- **Interfaz responsive** optimizada para todos los dispositivos
+- **Soporte multiidioma** (Español, Inglés, Portugués)
+- **Notificaciones en tiempo real** con feedback visual
+- **Indicadores de fortaleza de contraseñas** interactivos
+- **Drag & Drop** para subida de archivos
 
-- **Python Flask** como servidor web
-- **Redis** para almacenamiento de mensajes
-- **Flask-CORS** para comunicación cross-origin
-- **Generación de IDs únicos** para enlaces
+## 🛠️ Stack Tecnológico
 
-## Instalación y Configuración
+### **Frontend (React + TypeScript)**
 
-### Prerrequisitos
+```typescript
+├── React 19 (Hooks, Context API)
+├── TypeScript 5.0 (Tipado estático)
+├── React Router (Navegación SPA)
+├── CryptoJS (Encriptación AES-256)
+├── Axios (Comunicación HTTP)
+├── Tailwind CSS (Estilos modernos)
+└── React i18next (Internacionalización)
+```
 
-- Python 3.11+
-- Node.js 18+
-- Redis
+### **Backend (Python + Flask)**
 
-### Backend
+```python
+├── Flask 3.1 (Framework web)
+├── Redis 6.2 (Almacenamiento en memoria)
+├── Flask-CORS (Cross-origin requests)
+├── Rate Limiting (Protección contra ataques)
+└── WSGI (Despliegue en producción)
+```
+
+### **Características de Seguridad**
+
+- ✅ **Encriptación AES-256** del lado del cliente
+- ✅ **Rate limiting** por IP (5 intentos máximo)
+- ✅ **Autodestrucción** después de intentos fallidos
+- ✅ **Validación de entrada** y sanitización
+- ✅ **Headers de seguridad** HTTP
+- ✅ **Logging de eventos** de seguridad
+
+## 📦 Instalación y Configuración
+
+### **Prerrequisitos**
+
+```bash
+# Versiones mínimas requeridas
+Python 3.11+
+Node.js 18+
+Redis 6.2+
+```
+
+### **1. Clonar el Repositorio**
+
+```bash
+git clone https://github.com/juannito/crypto.git
+cd crypto
+```
+
+### **2. Configurar Backend**
 
 ```bash
 # Crear entorno virtual
 python -m venv venv
-source venv/bin/activate  # En Windows: venv\Scripts\activate
+source venv/bin/activate  # Windows: venv\Scripts\activate
 
 # Instalar dependencias
 pip install -r requirements.txt
@@ -73,7 +116,7 @@ cp app.cfg-sample app.cfg
 python app.py
 ```
 
-### Frontend
+### **3. Configurar Frontend**
 
 ```bash
 cd frontend
@@ -81,103 +124,155 @@ cd frontend
 # Instalar dependencias
 npm install
 
-# Desarrollo
+# Desarrollo (con hot reload)
 npm start
 
 # Construir para producción
 npm run build
 ```
 
-## Sobre este Proyecto
+### **4. Acceder a la Aplicación**
 
-Esta es una **versión modernizada** del proyecto original desarrollado por [Baicom](https://github.com/baicom/crypto). El proyecto original utilizaba jQuery y Bootstrap, mientras que esta versión ha sido migrada completamente a **React con TypeScript** y **Tailwind CSS** para una mejor experiencia de desarrollo, mantenimiento y visual.
+- **Desarrollo**: http://localhost:3000
+- **Backend**: http://localhost:5001
 
-### Principales Mejoras
+## 🔧 Configuración de Producción
 
-- ✅ **Migración completa a React** (Single Page Application, 100% SPA)
-- ✅ **TypeScript** para mejor tipado y desarrollo
-- ✅ **Componentes modulares** y reutilizables
-- ✅ **Mejor manejo de estado** con React Hooks
-- ✅ **Interfaz más moderna** y responsive (mobile-friendly) gracias a Tailwind CSS
+### **Variables de Entorno**
+
+```bash
+# app.cfg
+REDIS_HOST=localhost
+REDIS_PASSWORD=your_redis_password
+SECRET_KEY=your_secret_key
+```
+
+### **Despliegue con Docker**
+
+```dockerfile
+# Dockerfile (ejemplo)
+FROM python:3.11-slim
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install -r requirements.txt
+COPY . .
+EXPOSE 5001
+CMD ["python", "app.py"]
+```
+
+## 📚 API Documentation
+
+### **Endpoints Principales**
+
+#### **POST `/post`** - Crear Mensaje Encriptado
+
+```bash
+curl -X POST http://localhost:5001/post \
+  -F "msg1=MENSAJE_ENCRIPTADO" \
+  -F "expire=86400" \
+  -F "destroy=1"
+```
+
+#### **POST `/get`** - Obtener Mensaje
+
+```bash
+curl -X POST http://localhost:5001/get \
+  -F "id=CODIGO_ONLINE"
+```
+
+#### **POST `/delete`** - Eliminar Mensaje
+
+```bash
+curl -X POST http://localhost:5001/delete \
+  -F "id=CODIGO_ONLINE"
+```
+
+### **Respuestas de Error**
+
+```json
+{
+  "error": "too_many_attempts",
+  "attempts_left": 0
+}
+```
+
+## 🚀 Características Avanzadas
+
+### **Gestión de Archivos**
+
+- **Soporte para múltiples archivos** (hasta 20 archivos)
+- **Encriptación individual** de cada archivo
+- **Límite de tamaño** configurable (5MB por archivo)
+- **Descarga segura** con desencriptación automática
+
+### **Seguridad Adicional**
+
+- **Validación de fortaleza de claves** en tiempo real
+- **Indicadores visuales** de seguridad
+- **Prevención de ataques** de timing
+- **Logging detallado** de eventos de seguridad
+
+### **Experiencia de Usuario**
+
+- **Interfaz intuitiva** con feedback visual
+- **Soporte para códigos QR** para compartir fácilmente
+- **Notificaciones toast** para acciones importantes
+- **Modo oscuro** (preparado para futuras implementaciones)
+
+## 🤝 Contribuir
+
+### **Estructura del Proyecto**
+
+```
+crypto/
+├── app.py                 # Servidor Flask
+├── requirements.txt       # Dependencias Python
+├── frontend/             # Aplicación React
+│   ├── src/
+│   │   ├── components/   # Componentes React
+│   │   ├── locales/      # Traducciones
+│   │   └── utils/        # Utilidades
+│   └── package.json
+└── README.md
+```
+
+### **Guidelines de Contribución**
+
+1. Fork el proyecto
+2. Crea una rama para tu feature (`git checkout -b feature/AmazingFeature`)
+3. Commit tus cambios (`git commit -m 'Add some AmazingFeature'`)
+4. Push a la rama (`git push origin feature/AmazingFeature`)
+5. Abre un Pull Request
+
+## 📄 Licencia
+
+Este proyecto está bajo la licencia **BEERWARE**. Si encuentras este software útil, puedes comprar una cerveza al autor en algún momento. Ver [LICENSE](LICENSE) para más detalles.
+
+## 🙏 Créditos y Agradecimientos
+
+### **Proyecto Original**
+
+Este proyecto es una **modernización completa** del trabajo original de [Baicom](https://github.com/baicom/crypto), que desarrolló la aplicación original en jQuery y Flask.
+
+### **Principales Mejoras Implementadas**
+
+- ✅ **Migración completa a React 19** con TypeScript
+- ✅ **Arquitectura SPA moderna** con React Router
+- ✅ **Interfaz responsive** con Tailwind CSS
+- ✅ **Sistema de seguridad mejorado** con rate limiting
+- ✅ **Soporte multiidioma** completo
+- ✅ **Gestión de archivos** avanzada
 - ✅ **Código más mantenible** y escalable
 
-### Créditos Originales
+### **Enlaces Útiles**
 
-Este proyecto está basado en el trabajo original de [Baicom](https://github.com/baicom/crypto), que desarrolló la aplicación original en jQuery y Flask. Puedes encontrar el código fuente original en: https://github.com/baicom/crypto
-
-## Licencia
-
-Este proyecto está bajo la licencia BEERWARE, ver [LICENSE](LICENSE) para más detalles.
-
-## Documentación de la API
-
-### 1. POST `/post`
-
-Guarda un mensaje encriptado en el servidor y devuelve un enlace único.
-
-- **Método:** POST
-- **Parámetros (form-data):**
-
-  - `msg1` (string, requerido): Mensaje encriptado (AES, generado en el frontend)
-  - `expire` (int, requerido): Tiempo de expiración en segundos (ej: 86400 para 1 día)
-  - `destroy` (opcional): Si está presente, el mensaje se autodestruirá al ser leído
-
-- **Respuesta:**
-
-  - 200 OK: URL única para acceder al mensaje
-
-- **Ejemplo curl:**
-
-```bash
-curl -X POST -F "msg1=MENSAJE_ENCRIPTADO" -F "expire=86400" -F "destroy=1" http://localhost:5001/post
-```
-
-### 2. POST `/get`
-
-Obtiene un mensaje guardado por su ID. Aplica rate limiting (5 intentos por IP, luego se borra el mensaje).
-
-- **Método:** POST
-- **Parámetros (form-data):**
-
-  - `id` (string, requerido): ID del mensaje (código online)
-
-- **Respuesta:**
-
-  - 200 OK: `{ "info": "...", "msg": "MENSAJE_ENCRIPTADO" }`
-  - 403 Forbidden: Si se superó el límite de intentos y el mensaje fue eliminado
-  - 404: Si el mensaje no existe
-
-- **Notas:**
-
-  - El campo `info` puede incluir información de expiración y cantidad de intentos restantes.
-
-- **Ejemplo curl:**
-
-```bash
-curl -X POST -F "id=CODIGO_ONLINE" http://localhost:5001/get
-```
-
-### 3. POST `/delete`
-
-Elimina un mensaje guardado por su ID. Rate limit: 3 intentos por minuto por IP.
-
-- **Método:** POST
-- **Parámetros (form-data):**
-
-  - `id` (string, requerido): ID del mensaje (código online)
-
-- **Respuesta:**
-
-  - 200 OK: `{ "success": true }`
-  - 404: Si el mensaje no existe
-  - 429: Si se supera el límite de borrados
-
-- **Ejemplo curl:**
-
-```bash
-curl -X POST -F "id=CODIGO_ONLINE" http://localhost:5001/delete
-```
+- **Proyecto Original**: https://github.com/baicom/crypto
+- **Documentación React**: https://reactjs.org/
+- **Documentación Flask**: https://flask.palletsprojects.com/
+- **Documentación Redis**: https://redis.io/
 
 ---
 
-**Nota:** Todos los endpoints devuelven respuestas en formato JSON. Se recomienda usar HTTPS en producción.
+**⭐ Si este proyecto te resulta útil, considera darle una estrella en GitHub!**
+
+**🔒 La seguridad es nuestra prioridad. Reporta cualquier vulnerabilidad encontrada.**

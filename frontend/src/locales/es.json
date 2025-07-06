@@ -21,7 +21,13 @@
     "encryptFiles": "Encriptar archivos con la misma clave",
     "encryptingFiles": "Encriptando archivos...",
     "encrypt": "Encriptar",
-    "decrypt": "Desencriptar"
+    "decrypt": "Desencriptar",
+    "deleteMessage": "Eliminar Mensaje",
+    "copy": "Copiar",
+    "showQR": "Mostrar QR",
+    "hideQR": "Ocultar QR",
+    "loading": "Cargando...",
+    "decrypting": "Desencriptando..."
   },
   "expiration": {
     "1month": "1 mes",
