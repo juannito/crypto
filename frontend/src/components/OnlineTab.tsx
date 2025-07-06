@@ -8,6 +8,7 @@ import {
   validateKey, 
   retryRequest
 } from '../utils/errorHandler';
+import FileUpload from './FileUpload';
 
 interface OnlineTabProps {
   onSuccess: (title: string, content: string) => void;
@@ -34,6 +35,7 @@ const OnlineTab: React.FC<OnlineTabProps> = ({ onSuccess }) => {
   const { t } = useTranslation();
   const [key, setKey] = useState('');
   const [message, setMessage] = useState('');
+  const [files, setFiles] = useState<File[]>([]);
   const [expire, setExpire] = useState('604800');
   const [destroy, setDestroy] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -58,6 +60,13 @@ const OnlineTab: React.FC<OnlineTabProps> = ({ onSuccess }) => {
       formData.append('expire', expire);
       if (destroy) {
         formData.append('destroy', 'on');
+      }
+      
+      // Agregar archivos si existen
+      if (files.length > 0) {
+        files.forEach((file) => {
+          formData.append('files', file);
+        });
       }
 
       // Enviar al servidor con reintentos
@@ -99,6 +108,7 @@ const OnlineTab: React.FC<OnlineTabProps> = ({ onSuccess }) => {
   const handleReset = () => {
     setKey('');
     setMessage('');
+    setFiles([]);
     setExpire('604800');
     setDestroy(false);
     showInfo(t('notifications.info.formCleared'));
@@ -140,7 +150,6 @@ const OnlineTab: React.FC<OnlineTabProps> = ({ onSuccess }) => {
             placeholder={t('form.message')}
             value={message}
             onChange={handleMessageChange}
-            required
             disabled={isSubmitting}
           />
           {message.length > 0 && (
@@ -149,6 +158,12 @@ const OnlineTab: React.FC<OnlineTabProps> = ({ onSuccess }) => {
             </small>
           )}
         </div>
+        
+        {/* Componente de subida de archivos */}
+        <FileUpload 
+          onFilesChange={setFiles}
+          disabled={isSubmitting}
+        />
         
         {/* Campo de clave, barra de fortaleza y acciones */}
         <div className="flex flex-col gap-4 w-full">

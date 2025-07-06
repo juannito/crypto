@@ -5,6 +5,8 @@ import string
 import random
 import os
 import time
+import json
+import base64
 
 app = Flask(__name__, static_folder='frontend/build/static', static_url_path='/static')
 app.config.from_pyfile('app.cfg')
@@ -64,16 +66,63 @@ def get():
             m = m.decode('utf-8')
         secs = r.ttl(id)
         info = f"&nbsp; Expira en {secs//86400} d&iacute;a/s"
-        if m.find('destroy') == 0:
-            destroy = 1
-            m = m.replace('destroy','')
-            r.delete(id) 
-            info += ", destruir al leer"
+        
+        # Verificar si es el nuevo formato con archivos
+        try:
+            if m.find('destroy') == 0:
+                destroy = 1
+                m = m.replace('destroy','')
+                r.delete(id) 
+                info += ", destruir al leer"
+            
+            # Intentar parsear como JSON para el nuevo formato
+            data = json.loads(m)
+            if isinstance(data, dict) and 'message' in data:
+                # Es el nuevo formato con archivos
+                m = data['message']
+                files = data.get('files', [])
+                if files:
+                    info += f"<br><b>Archivos adjuntos:</b> {len(files)} archivo(s)"
+            else:
+                # Es el formato antiguo, mantener como está
+                pass
+        except (json.JSONDecodeError, TypeError):
+            # Es el formato antiguo, mantener como está
+            pass
+            
         # Agregar info de intentos restantes si quedan menos de 5
         if intentos_restantes >= 0:
             info += f"<br><b>Intentos restantes:</b> {intentos_restantes}"
 
     return jsonify({'info':info,'msg':m})
+
+@app.route('/get_files', methods=['POST'])
+def get_files():
+    id = request.form.get('id')
+    if not id:
+        return jsonify({'error': 'Falta el parámetro id'}), 400
+    
+    m = r.get(id)
+    if m == None:
+        return jsonify({'error': 'No existe el mensaje'}), 404
+    
+    # Si m es bytes, decodificar a str
+    if isinstance(m, bytes):
+        m = m.decode('utf-8')
+    
+    try:
+        # Verificar si es el nuevo formato con archivos
+        if m.find('destroy') == 0:
+            m = m.replace('destroy','')
+        
+        data = json.loads(m)
+        if isinstance(data, dict) and 'files' in data:
+            files = data['files']
+            return jsonify({'files': files})
+        else:
+            return jsonify({'files': []})
+    except (json.JSONDecodeError, TypeError):
+        return jsonify({'files': []})
 
 #
 # Manejamos /post via un formulario
@@ -81,16 +130,40 @@ def get():
 #
 @app.route('/post', methods=['POST'])
 def post():
-    msg1 = request.form['msg1']
+    msg1 = request.form.get('msg1', '')
     expire = request.form['expire']
     rand = randstr()
-
+    
+    # Manejar archivos si existen
+    files_data = []
+    if 'files' in request.files:
+        uploaded_files = request.files.getlist('files')
+        for file in uploaded_files:
+            if file and file.filename:
+                # Leer el archivo y convertirlo a base64
+                file_content = file.read()
+                file_data = {
+                    'name': file.filename,
+                    'content': base64.b64encode(file_content).decode('utf-8'),
+                    'size': len(file_content)
+                }
+                files_data.append(file_data)
+    
+    # Crear el objeto de datos
+    data = {
+        'message': msg1,
+        'files': files_data
+    }
+    
+    # Convertir a JSON string
+    data_json = json.dumps(data)
+    
     if 'destroy' in request.form:
-        msg1 = 'destroy' + msg1
+        data_json = 'destroy' + data_json
 
     p = r.pipeline()
-    p.set(rand,msg1)
-    p.expire(rand,expire)
+    p.set(rand, data_json)
+    p.expire(rand, expire)
     p.execute()
 
     return request.url_root + rand, 200 

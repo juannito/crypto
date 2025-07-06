@@ -94,6 +94,23 @@
     "title": "Important:",
     "text": "When saving, the browser first encrypts the data locally and then sends it to the server to generate the exchange link. You can choose to destroy the message when read."
   },
+  "fileUpload": {
+    "clickToUpload": "Click to upload",
+    "orDragDrop": "or drag and drop",
+    "maxFiles": "Up to {{maxFiles}} files",
+    "maxSize": "Max {{maxSize}} each",
+    "selectedFiles": "Selected files",
+    "errors": {
+      "fileTooLarge": "File is too large. Maximum size is {{maxSize}}"
+    }
+  },
+  "fileDownload": {
+    "title": "Attached files",
+    "download": "Download",
+    "errors": {
+      "downloadFailed": "Failed to download file"
+    }
+  },
   "languageSelector": {
     "title": "Select language",
     "en": "English",

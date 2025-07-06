@@ -10,6 +10,7 @@ import {
   cleanEncryptedMessage,
   retryRequest 
 } from '../utils/errorHandler';
+import FileDownload from './FileDownload';
 
 // Función para evaluar la fortaleza de la clave
 function getKeyStrengthIndicators(key: string) {
@@ -26,6 +27,7 @@ const MessageTab: React.FC = () => {
   const { t } = useTranslation();
   const [key, setKey] = useState('');
   const [message, setMessage] = useState('');
+  const [files, setFiles] = useState<any[]>([]);
   const [info, setInfo] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isDecrypting, setIsDecrypting] = useState(false);
@@ -62,6 +64,17 @@ const MessageTab: React.FC = () => {
         showError(t('notifications.error.messageNotFound'));
       } else {
         showSuccess(t('notifications.success.messageLoaded'));
+        
+        // Obtener archivos si existen
+        try {
+          const filesResponse = await axios.post('/get_files', formData);
+          if (filesResponse.data.files && filesResponse.data.files.length > 0) {
+            setFiles(filesResponse.data.files);
+          }
+        } catch (error) {
+          // Si no hay archivos o hay error, no hacer nada
+          console.log('No files found or error getting files');
+        }
       }
     } catch (error: any) {
       console.error('Error al obtener mensaje:', error);
@@ -126,7 +139,20 @@ const MessageTab: React.FC = () => {
         return;
       }
       
-      setMessage(result);
+      // Intentar parsear como JSON para ver si contiene archivos
+      try {
+        const data = JSON.parse(result);
+        if (data.message && data.files) {
+          setMessage(data.message);
+          setFiles(data.files);
+        } else {
+          setMessage(result);
+        }
+      } catch (e) {
+        // Si no es JSON, es un mensaje simple
+        setMessage(result);
+      }
+      
       showSuccess(t('notifications.success.messageDecrypted'));
     } catch (error: any) {
       console.error('Error al desencriptar:', error);
@@ -229,6 +255,9 @@ const MessageTab: React.FC = () => {
           </div>
         </div>
       </div>
+      
+      {/* Componente de descarga de archivos */}
+      <FileDownload files={files} />
     </div>
   );
 };

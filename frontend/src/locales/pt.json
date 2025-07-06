@@ -94,6 +94,23 @@
     "title": "Importante:",
     "text": "Ao salvar, o navegador primeiro criptografa os dados localmente e depois os envia ao servidor para gerar o link de troca. Você pode escolher destruir a mensagem quando lida."
   },
+  "fileUpload": {
+    "clickToUpload": "Clique para fazer upload",
+    "orDragDrop": "ou arraste e solte",
+    "maxFiles": "Até {{maxFiles}} arquivos",
+    "maxSize": "Máx {{maxSize}} cada",
+    "selectedFiles": "Arquivos selecionados",
+    "errors": {
+      "fileTooLarge": "O arquivo é muito grande. Tamanho máximo é {{maxSize}}"
+    }
+  },
+  "fileDownload": {
+    "title": "Arquivos anexados",
+    "download": "Baixar",
+    "errors": {
+      "downloadFailed": "Erro ao baixar o arquivo"
+    }
+  },
   "languageSelector": {
     "title": "Selecionar idioma",
     "en": "English",
