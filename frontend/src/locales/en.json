@@ -11,22 +11,17 @@
     "message": "Decrypt messages by entering the secret key and encrypted code or online link."
   },
   "form": {
-    "message": "Enter your message (optional)",
+    "message": "Enter your message here...",
     "secretKey": "Enter your secret key",
-    "expires": "Expires:",
-    "destroyOnRead": "Destroy on read",
-    "save": "Share",
-    "saving": "Sharing...",
+    "save": "SHARE",
+    "saving": "Saving...",
     "clear": "Clear",
+    "expires": "Expires in:",
+    "destroyOnRead": "Destroy on read",
+    "encryptFiles": "Encrypt files with the same key",
+    "encryptingFiles": "Encrypting files...",
     "encrypt": "Encrypt",
-    "decrypt": "Decrypt",
-    "copy": "Copy",
-    "copied": "Copied!",
-    "showQR": "Show QR",
-    "hideQR": "Hide QR",
-    "loading": "Loading...",
-    "decrypting": "Decrypting...",
-    "deleteMessage": "Delete message"
+    "decrypt": "Decrypt"
   },
   "expiration": {
     "1month": "1 month",
@@ -107,8 +102,11 @@
   "fileDownload": {
     "title": "Attached files",
     "download": "Download",
+    "decrypting": "Decrypting...",
+    "decryptAll": "Decrypt All",
     "errors": {
-      "downloadFailed": "Failed to download file"
+      "downloadFailed": "Failed to download file",
+      "decryptionFailed": "Failed to decrypt file"
     }
   },
   "languageSelector": {

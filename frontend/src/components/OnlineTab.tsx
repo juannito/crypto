@@ -39,6 +39,8 @@ const OnlineTab: React.FC<OnlineTabProps> = ({ onSuccess }) => {
   const [expire, setExpire] = useState('604800');
   const [destroy, setDestroy] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [encryptFiles, setEncryptFiles] = useState(true); // Nuevo toggle para encriptar archivos
+  const [isEncrypting, setIsEncrypting] = useState(false); // Para mostrar loading
   const { showSuccess, showError, showWarning, showInfo } = useNotifications();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -56,8 +58,9 @@ const OnlineTab: React.FC<OnlineTabProps> = ({ onSuccess }) => {
       }
 
       setIsSubmitting(true);
+      setIsEncrypting(true);
 
-      // Encriptar el mensaje (puede estar vacío)
+      // Encriptar mensaje
       const messageToEncrypt = message.trim() || '';
       const encrypted = CryptoJS.AES.encrypt(messageToEncrypt, key);
       
@@ -69,12 +72,29 @@ const OnlineTab: React.FC<OnlineTabProps> = ({ onSuccess }) => {
         formData.append('destroy', 'on');
       }
       
-      // Agregar archivos si existen
+      // Archivos
       if (files.length > 0) {
-        files.forEach((file) => {
-          formData.append('files', file);
-        });
+        if (encryptFiles) {
+          // Serializar y encriptar archivos
+          const fileObjs = await Promise.all(files.map(async (file) => {
+            const content = await new Promise<string>((resolve, reject) => {
+              const reader = new FileReader();
+              reader.onload = () => resolve(btoa(reader.result as string));
+              reader.onerror = reject;
+              reader.readAsBinaryString(file);
+            });
+            // Encriptar el contenido base64
+            const encryptedContent = CryptoJS.AES.encrypt(content, key).toString();
+            return { name: file.name, size: file.size, content: encryptedContent };
+          }));
+          formData.append('files', new Blob([JSON.stringify(fileObjs)], { type: 'application/json' }));
+        } else {
+          files.forEach((file) => {
+            formData.append('files', file);
+          });
+        }
       }
+      setIsEncrypting(false);
 
       // Enviar al servidor con reintentos
       const response = await retryRequest(async () => {
@@ -283,6 +303,27 @@ const OnlineTab: React.FC<OnlineTabProps> = ({ onSuccess }) => {
                       </div>
           </div>
           
+          {/* Toggle para encriptar archivos */}
+          <div className="flex items-center mt-2">
+            <input
+              type="checkbox"
+              id="encryptFiles"
+              checked={encryptFiles}
+              onChange={e => setEncryptFiles(e.target.checked)}
+              className="mr-2 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+              disabled={isSubmitting}
+            />
+            <label htmlFor="encryptFiles" className="text-sm text-gray-700">
+              {t('form.encryptFiles')}
+            </label>
+          </div>
+          {/* Loading mientras encripta */}
+          {isEncrypting && (
+            <div className="flex items-center gap-2 text-blue-600 mt-2">
+              <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" /></svg>
+              <span>{t('form.encryptingFiles')}</span>
+            </div>
+          )}
           {/* Nota importante */}
           <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
             <div className="flex items-start">

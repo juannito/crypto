@@ -134,18 +134,31 @@ def post():
         uploaded_files = request.files.getlist('files')
         print(f"Procesando {len(uploaded_files)} archivos...")  # Debug info
         
-        for i, file in enumerate(uploaded_files):
-            if file and file.filename:
-                print(f"Procesando archivo {i+1}/{len(uploaded_files)}: {file.filename}")  # Debug info
-                # Leer el archivo y convertirlo a base64
-                file_content = file.read()
-                file_data = {
-                    'name': file.filename,
-                    'content': base64.b64encode(file_content).decode('utf-8'),
-                    'size': len(file_content)
-                }
-                files_data.append(file_data)
-                print(f"Archivo {file.filename} procesado: {len(file_content)} bytes")  # Debug info
+        # Verificar si los archivos están encriptados (JSON blob)
+        if len(uploaded_files) == 1 and uploaded_files[0].filename == 'blob':
+            # Archivos encriptados desde el frontend
+            try:
+                file_content = uploaded_files[0].read()
+                files_json = json.loads(file_content.decode('utf-8'))
+                files_data = files_json  # Usar directamente el JSON encriptado
+                print(f"Archivos encriptados recibidos: {len(files_json)} archivos")
+            except (json.JSONDecodeError, UnicodeDecodeError) as e:
+                print(f"Error procesando archivos encriptados: {e}")
+                files_data = []
+        else:
+            # Archivos normales (no encriptados)
+            for i, file in enumerate(uploaded_files):
+                if file and file.filename:
+                    print(f"Procesando archivo {i+1}/{len(uploaded_files)}: {file.filename}")  # Debug info
+                    # Leer el archivo y convertirlo a base64
+                    file_content = file.read()
+                    file_data = {
+                        'name': file.filename,
+                        'content': base64.b64encode(file_content).decode('utf-8'),
+                        'size': len(file_content)
+                    }
+                    files_data.append(file_data)
+                    print(f"Archivo {file.filename} procesado: {len(file_content)} bytes")  # Debug info
     
     print(f"Total de archivos procesados: {len(files_data)}")  # Debug info
     

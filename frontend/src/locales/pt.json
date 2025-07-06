@@ -11,22 +11,17 @@
     "message": "Descriptografe mensagens inserindo a chave secreta e o código criptografado ou link online."
   },
   "form": {
-    "message": "Digite sua mensagem (opcional)",
+    "message": "Digite sua mensagem aqui...",
     "secretKey": "Digite sua chave secreta",
-    "expires": "Expira:",
-    "destroyOnRead": "Destruir ao ler",
-    "save": "Compartilhar",
-    "saving": "Compartilhando...",
+    "save": "COMPARTILHAR",
+    "saving": "Salvando...",
     "clear": "Limpar",
+    "expires": "Expira em:",
+    "destroyOnRead": "Destruir ao ler",
+    "encryptFiles": "Criptografar arquivos com a mesma chave",
+    "encryptingFiles": "Criptografando arquivos...",
     "encrypt": "Criptografar",
-    "decrypt": "Descriptografar",
-    "copy": "Copiar",
-    "copied": "Copiado!",
-    "showQR": "Mostrar QR",
-    "hideQR": "Ocultar QR",
-    "loading": "Carregando...",
-    "decrypting": "Descriptografando...",
-    "deleteMessage": "Excluir mensagem"
+    "decrypt": "Descriptografar"
   },
   "expiration": {
     "1month": "1 mês",
@@ -111,8 +106,11 @@
   "fileDownload": {
     "title": "Arquivos anexados",
     "download": "Baixar",
+    "decrypting": "Descriptografando...",
+    "decryptAll": "Descriptografar Tudo",
     "errors": {
-      "downloadFailed": "Erro ao baixar o arquivo"
+      "downloadFailed": "Erro ao baixar arquivo",
+      "decryptionFailed": "Erro ao descriptografar arquivo"
     }
   },
   "languageSelector": {

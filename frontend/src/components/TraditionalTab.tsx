@@ -38,30 +38,82 @@ const TraditionalTab: React.FC = () => {
   const [copied, setCopied] = useState(false);
   const { showSuccess, showError, showWarning, showInfo } = useNotifications();
   const [encrypted, setEncrypted] = useState('');
+  const [isEncrypting, setIsEncrypting] = useState(false);
+  const [hasEncrypted, setHasEncrypted] = useState(false); // Nuevo estado para controlar si se ha encriptado
 
-  // Verificar si el formulario es válido para generar el mensaje encriptado
+  // Verificar si el formulario es válido para habilitar el botón
   const isFormValid = key.length >= 8 && ((message && message.trim()) || files.length > 0);
 
-  useEffect(() => {
-    if (isFormValid) {
-      try {
-        // Crear el objeto de datos con mensaje y archivos
-        const data = {
-          message: message.trim() || '',
-          files: files
+  // Serializar archivos a base64 y armar array {name, content, size}
+  const serializeFiles = async (fileList: File[]): Promise<any[]> => {
+    const promises = fileList.map(file => {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          resolve({
+            name: file.name,
+            content: (reader.result as string).split(',')[1], // quitar el prefijo data:...base64,
+            size: file.size
+          });
         };
-        
-        // Encriptar el objeto completo
-        const encryptedData = CryptoJS.AES.encrypt(JSON.stringify(data), key);
-        setEncrypted(formatEncryptedMessage(encryptedData.toString()));
-      } catch (error) {
-        console.error('Error al encriptar:', error);
-        setEncrypted('');
-      }
-    } else {
-      setEncrypted('');
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    });
+    return Promise.all(promises);
+  };
+
+  // Nuevo handler para encriptar al hacer clic
+  const handleEncrypt = async () => {
+    if (!isFormValid) {
+      showWarning(t('notifications.error.noContent'));
+      return;
     }
-  }, [message, key, files, isFormValid]);
+    setIsEncrypting(true);
+    try {
+      let filesData: any[] = [];
+      if (files.length > 0) {
+        filesData = await serializeFiles(files);
+      }
+      const data = {
+        message: message.trim() || '',
+        files: filesData
+      };
+      const encryptedData = CryptoJS.AES.encrypt(JSON.stringify(data), key);
+      setEncrypted(formatEncryptedMessage(encryptedData.toString()));
+      setHasEncrypted(true); // Marcar como encriptado
+      showSuccess(t('notifications.success.messageSaved'));
+    } catch (error) {
+      console.error('Error al encriptar:', error);
+      setEncrypted('');
+      setHasEncrypted(false);
+      showError(t('notifications.error.unexpectedError'));
+    } finally {
+      setIsEncrypting(false);
+    }
+  };
+
+  // Remover el useEffect que encriptaba automáticamente
+  // useEffect(() => {
+  //   if (isFormValid) {
+  //     try {
+  //       // Crear el objeto de datos con mensaje y archivos
+  //       const data = {
+  //         message: message.trim() || '',
+  //         files: files
+  //       };
+  //       
+  //       // Encriptar el objeto completo
+  //       const encryptedData = CryptoJS.AES.encrypt(JSON.stringify(data), key);
+  //       setEncrypted(formatEncryptedMessage(encryptedData.toString()));
+  //     } catch (error) {
+  //       console.error('Error al encriptar:', error);
+  //       setEncrypted('');
+  //     }
+  //   } else {
+  //     setEncrypted('');
+  //   }
+  // }, [message, key, files, isFormValid]);
 
   const handleDecrypt = () => {
     try {
@@ -105,6 +157,8 @@ const TraditionalTab: React.FC = () => {
     setKey('');
     setMessage('');
     setFiles([]);
+    setEncrypted(''); // Limpiar mensaje encriptado
+    setHasEncrypted(false); // Resetear estado de encriptación
     showInfo(t('notifications.info.formCleared'));
   };
 
@@ -141,7 +195,7 @@ const TraditionalTab: React.FC = () => {
 
   return (
     <div className="tab-pane fade">
-      <form className="space-y-4">
+      <form className="space-y-4" onSubmit={e => e.preventDefault()}>
         {/* Campo de mensaje primero */}
         <div className="relative">
           <textarea
@@ -222,8 +276,15 @@ const TraditionalTab: React.FC = () => {
             </div>
           </div>
           
-          {/* Botón de acción */}
           <div className="flex flex-wrap items-center gap-4">
+            <button
+              type="button"
+              onClick={handleEncrypt}
+              className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={!isFormValid || isEncrypting}
+            >
+              {isEncrypting ? t('form.saving') : t('form.encrypt')}
+            </button>
             <button
               type="button"
               onClick={handleReset}
@@ -233,8 +294,8 @@ const TraditionalTab: React.FC = () => {
             </button>
           </div>
         </div>
-        {/* Mensaje encriptado resultante */}
-        {encrypted && (
+        {/* Mensaje encriptado resultante - solo mostrar si se ha encriptado */}
+        {hasEncrypted && encrypted && (
           <div className="relative mt-2">
             <div className="flex items-center justify-between mb-2">
               <div className="text-xs text-gray-600 font-semibold uppercase tracking-wide">{t('encryptedMessage')}</div>

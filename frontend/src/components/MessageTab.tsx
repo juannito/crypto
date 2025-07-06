@@ -12,6 +12,15 @@ import {
 } from '../utils/errorHandler';
 import FileDownload from './FileDownload';
 
+// Función para verificar si una cadena es base64 válido
+function isValidBase64(str: string): boolean {
+  try {
+    return btoa(atob(str)) === str;
+  } catch (e) {
+    return false;
+  }
+}
+
 // Función para evaluar la fortaleza de la clave
 function getKeyStrengthIndicators(key: string) {
   return {
@@ -184,7 +193,7 @@ const MessageTab: React.FC = () => {
         if (data.message !== undefined && data.files) {
           // Es el nuevo formato con archivos
           setMessage(data.message || ''); // Permitir mensaje vacío
-          setFiles(data.files);
+          setFiles(data.files); // Guardar archivos tal como están (encriptados o no)
         } else {
           setMessage(result);
         }
@@ -339,7 +348,7 @@ const MessageTab: React.FC = () => {
       </div>
       
       {/* Componente de descarga de archivos - solo mostrar si el mensaje fue descifrado */}
-      {isDecrypted && files.length > 0 && <FileDownload files={files} />}
+      {isDecrypted && files.length > 0 && <FileDownload files={files} decryptionKey={key} />}
     </div>
   );
 };

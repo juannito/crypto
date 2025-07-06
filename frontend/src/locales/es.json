@@ -11,22 +11,17 @@
     "message": "Desencripta mensajes ingresando la clave secreta y el código encriptado o enlace online."
   },
   "form": {
-    "message": "Ingresa tu mensaje (opcional)",
+    "message": "Ingresa tu mensaje aquí...",
     "secretKey": "Ingresa tu clave secreta",
-    "expires": "Expira:",
+    "save": "COMPARTIR",
+    "saving": "Guardando...",
+    "clear": "Limpiar",
+    "expires": "Expira en:",
     "destroyOnRead": "Destruir al leer",
-    "save": "Compartir",
-    "saving": "Compartiendo...",
-    "clear": "Borrar",
+    "encryptFiles": "Encriptar archivos con la misma clave",
+    "encryptingFiles": "Encriptando archivos...",
     "encrypt": "Encriptar",
-    "decrypt": "Desencriptar",
-    "copy": "Copiar",
-    "copied": "¡Copiado!",
-    "showQR": "Mostrar QR",
-    "hideQR": "Ocultar QR",
-    "loading": "Cargando...",
-    "decrypting": "Desencriptando...",
-    "deleteMessage": "Eliminar mensaje"
+    "decrypt": "Desencriptar"
   },
   "expiration": {
     "1month": "1 mes",
@@ -111,8 +106,11 @@
   "fileDownload": {
     "title": "Archivos adjuntos",
     "download": "Descargar",
+    "decrypting": "Desencriptando...",
+    "decryptAll": "Desencriptar Todo",
     "errors": {
-      "downloadFailed": "Error al descargar el archivo"
+      "downloadFailed": "Error al descargar archivo",
+      "decryptionFailed": "Error al desencriptar archivo"
     }
   },
   "languageSelector": {
