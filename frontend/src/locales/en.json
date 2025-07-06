@@ -1,12 +1,12 @@
 {
   "tabs": {
-    "online": "Online",
-    "traditional": "Traditional",
+    "online": "Share",
+    "traditional": "Encrypt",
     "message": "Decrypt",
     "help": "Help"
   },
   "descriptions": {
-    "online": "Encrypt your message and get a secure link to share.<br/><b>Important:</b> When saving, the browser <u>first encrypts the data locally</u> and then sends it to the server to generate the exchange link. You can choose to destroy the message when read.",
+    "online": "Encrypt your message and get a secure link to share.",
     "traditional": "Encrypt your message locally, without sending it to any server. Only you have the encrypted code.",
     "message": "Decrypt messages by entering the secret key and encrypted code or online link."
   },
@@ -90,6 +90,10 @@
   "characters": "characters",
   "nearLimit": "(near limit)",
   "messagePlaceholder": "Enter encrypted code or online link to decrypt",
+  "importantNote": {
+    "title": "Important:",
+    "text": "When saving, the browser first encrypts the data locally and then sends it to the server to generate the exchange link. You can choose to destroy the message when read."
+  },
   "languageSelector": {
     "title": "Select language",
     "en": "English",

@@ -1,12 +1,12 @@
 {
   "tabs": {
-    "online": "Online",
-    "traditional": "Tradicional",
+    "online": "Compartir",
+    "traditional": "Encriptar",
     "message": "Desencriptar",
     "help": "Ayuda"
   },
   "descriptions": {
-    "online": "Encripta tu mensaje y obtén un enlace seguro para compartir.<br/><b>Importante:</b> Al grabarlo, el navegador <u>primero encripta los datos localmente</u> y luego los envía al servidor para generar el link de intercambio. Puedes elegir que el mensaje se destruya al leerlo.",
+    "online": "Encripta tu mensaje y obtén un enlace seguro para compartir.",
     "traditional": "Encripta tu mensaje localmente, sin enviarlo a ningún servidor. Solo tú tienes el código encriptado.",
     "message": "Desencripta mensajes ingresando la clave secreta y el código encriptado o enlace online."
   },
@@ -90,6 +90,10 @@
   "characters": "caracteres",
   "nearLimit": "(cerca del límite)",
   "messagePlaceholder": "Ingresa el código encriptado o enlace online para desencriptar",
+  "importantNote": {
+    "title": "Importante:",
+    "text": "Al guardar, el navegador primero encripta los datos localmente y luego los envía al servidor para generar el enlace de intercambio. Puedes elegir que el mensaje se destruya al leerlo."
+  },
   "languageSelector": {
     "title": "Seleccionar idioma",
     "en": "English",

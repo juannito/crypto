@@ -1,12 +1,12 @@
 {
   "tabs": {
-    "online": "Online",
-    "traditional": "Tradicional",
+    "online": "Compartilhar",
+    "traditional": "Criptografar",
     "message": "Descriptografar",
     "help": "Ajuda"
   },
   "descriptions": {
-    "online": "Criptografe sua mensagem e obtenha um link seguro para compartilhar.<br/><b>Importante:</b> Ao salvar, o navegador <u>primeiro criptografa os dados localmente</u> e depois os envia ao servidor para gerar o link de troca. Você pode escolher destruir a mensagem quando lida.",
+    "online": "Criptografe sua mensagem e obtenha um link seguro para compartilhar.",
     "traditional": "Criptografe sua mensagem localmente, sem enviá-la para nenhum servidor. Apenas você tem o código criptografado.",
     "message": "Descriptografe mensagens inserindo a chave secreta e o código criptografado ou link online."
   },
@@ -90,6 +90,10 @@
   "characters": "caracteres",
   "nearLimit": "(próximo ao limite)",
   "messagePlaceholder": "Digite o código criptografado ou link online para descriptografar",
+  "importantNote": {
+    "title": "Importante:",
+    "text": "Ao salvar, o navegador primeiro criptografa os dados localmente e depois os envia ao servidor para gerar o link de troca. Você pode escolher destruir a mensagem quando lida."
+  },
   "languageSelector": {
     "title": "Selecionar idioma",
     "en": "English",

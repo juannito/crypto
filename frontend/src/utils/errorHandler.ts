@@ -1,5 +1,8 @@
 import axios, { AxiosError } from 'axios';
 
+// Configurar axios para apuntar al backend
+axios.defaults.baseURL = 'http://127.0.0.1:5001';
+
 // Configurar timeout y reintentos para axios
 axios.defaults.timeout = 10000; // 10 segundos
 

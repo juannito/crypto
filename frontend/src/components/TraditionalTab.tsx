@@ -127,12 +127,12 @@ const TraditionalTab: React.FC = () => {
           )}
         </div>
         {/* Campo de clave, barra de fortaleza y acciones */}
-        <div className="flex flex-col gap-4 w-full max-w-2xl">
+        <div className="flex flex-col gap-4 w-full">
           {/* Campo de clave */}
           <div className="flex flex-wrap items-center gap-4 w-full">
             <input
               type="password"
-              className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder={t('form.secretKey')}
               value={key}
               onChange={handleKeyChange}

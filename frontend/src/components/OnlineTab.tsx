@@ -151,12 +151,12 @@ const OnlineTab: React.FC<OnlineTabProps> = ({ onSuccess }) => {
         </div>
         
         {/* Campo de clave, barra de fortaleza y acciones */}
-        <div className="flex flex-col gap-4 w-full max-w-2xl">
+        <div className="flex flex-col gap-4 w-full">
           {/* Campo de clave */}
           <div className="flex flex-wrap items-center gap-4 w-full">
             <input
               type="password"
-              className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder={t('form.secretKey')}
               value={key}
               onChange={handleKeyChange}
@@ -210,51 +210,71 @@ const OnlineTab: React.FC<OnlineTabProps> = ({ onSuccess }) => {
           </div>
           
           {/* Opciones y botones de acción */}
-          <div className="flex flex-wrap items-center gap-4">
-            <div className="flex items-center">
-              <label className="mr-2 text-sm font-medium text-gray-700">{t('form.expires')}</label>
-              <select
-                className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                value={expire}
-                onChange={(e) => setExpire(e.target.value)}
+          <div className="flex flex-col gap-4 w-full">
+            <div className="flex flex-wrap items-center gap-4">
+              <div className="flex items-center">
+                <label className="mr-2 text-sm font-medium text-gray-700">{t('form.expires')}</label>
+                <select
+                  className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  value={expire}
+                  onChange={(e) => setExpire(e.target.value)}
+                >
+                  <option value="2592000">{t('expiration.1month')}</option>
+                  <option value="604800">{t('expiration.1week')}</option>
+                  <option value="86400">{t('expiration.1day')}</option>
+                </select>
+              </div>
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  id="destroy"
+                  checked={destroy}
+                  onChange={(e) => setDestroy(e.target.checked)}
+                  className="mr-2 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                />
+                <label htmlFor="destroy" className="text-sm text-gray-700">
+                  {t('form.destroyOnRead')}
+                </label>
+              </div>
+            </div>
+            <div className="flex gap-4 w-full">
+              <button
+                type="submit"
+                className="flex-1 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={isSubmitting}
               >
-                <option value="2592000">{t('expiration.1month')}</option>
-                <option value="604800">{t('expiration.1week')}</option>
-                <option value="86400">{t('expiration.1day')}</option>
-              </select>
+                {isSubmitting ? t('form.saving') : t('form.save')}
+              </button>
+              <button
+                type="button"
+                className="flex-1 px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                onClick={handleReset}
+                disabled={isSubmitting}
+              >
+                {t('form.clear')}
+              </button>
             </div>
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="destroy"
-                checked={destroy}
-                onChange={(e) => setDestroy(e.target.checked)}
-                className="mr-2 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-              />
-              <label htmlFor="destroy" className="text-sm text-gray-700">
-                {t('form.destroyOnRead')}
-              </label>
-            </div>
-            <button
-              type="submit"
-              className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? t('form.saving') : t('form.save')}
-            </button>
-            <button
-              type="button"
-              className="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
-              onClick={handleReset}
-              disabled={isSubmitting}
-            >
-              {t('form.clear')}
-            </button>
+                      </div>
           </div>
-        </div>
-      </form>
-    </div>
-  );
-};
+          
+          {/* Nota importante */}
+          <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <div className="flex items-start">
+              <div className="flex-shrink-0">
+                <svg className="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <div className="ml-3">
+                <p className="text-sm text-blue-800">
+                  <strong>{t('importantNote.title')}</strong> {t('importantNote.text')}
+                </p>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+    );
+  };
 
 export default OnlineTab; 
