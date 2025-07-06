@@ -11,12 +11,12 @@
     "message": "Desencripta mensajes ingresando la clave secreta y el código encriptado o enlace online."
   },
   "form": {
-    "secretKey": "Clave secreta",
-    "message": "Mensaje",
+    "message": "Ingresa tu mensaje (opcional)",
+    "secretKey": "Ingresa tu clave secreta",
     "expires": "Expira:",
     "destroyOnRead": "Destruir al leer",
-    "save": "Grabar",
-    "saving": "Grabando...",
+    "save": "Compartir",
+    "saving": "Compartiendo...",
     "clear": "Borrar",
     "encrypt": "Encriptar",
     "decrypt": "Desencriptar",
@@ -61,15 +61,18 @@
       "messageTooLong": "El mensaje se acerca al límite de caracteres",
       "emptyMessage": "El mensaje encriptado no puede estar vacío",
       "decryptFailed": "No se pudo desencriptar. Verifica la clave y el mensaje encriptado.",
-      "unexpectedError": "Error inesperado al enviar el mensaje. Intenta nuevamente.",
+      "unexpectedError": "Ocurrió un error inesperado",
       "copyError": "Error al copiar al portapapeles",
-      "messageNotFound": "El mensaje no existe o ha expirado",
-      "fetchError": "Error al obtener el mensaje. Verifica el enlace.",
+      "messageNotFound": "Mensaje no encontrado o ha expirado",
+      "fetchError": "Error al obtener el mensaje",
       "noMessageToDecrypt": "No hay mensaje para desencriptar",
-      "deleteError": "No se pudo eliminar el mensaje"
+      "deleteError": "No se pudo eliminar el mensaje",
+      "noContent": "Por favor proporciona un mensaje o sube archivos",
+      "wrongKey": "Clave incorrecta",
+      "tooManyAttempts": "Demasiados intentos fallidos. El mensaje ha sido eliminado."
     },
     "warning": {
-      "keyTooShort": "La clave debe tener al menos 3 caracteres",
+      "keyTooShort": "La clave debe tener al menos 8 caracteres",
       "messageLimit": "El mensaje se acerca al límite de caracteres"
     },
     "info": {
@@ -77,9 +80,10 @@
     }
   },
   "modal": {
-    "messageSaved": "Mensaje Encriptado Guardado",
+    "messageSaved": "Mensaje Encriptado y Compartido",
     "close": "Cerrar"
   },
+  "destroyMessage": "El mensaje se borrará después de ser visualizado",
   "help": {
     "description": "El sistema posee dos modalidades principales: <strong class=\"text-blue-600\">ONLINE</strong>, que permite generar un mensaje encriptado y guardarlo para compartir mediante un enlace, y <strong class=\"text-blue-600\">TRADICIONAL</strong>, que ofrece una interfaz para encriptar un texto localmente, sin almacenamiento en el servidor. En ambos modos, es necesario utilizar una clave para desencriptar información de forma segura desde la tab de Mensaje.",
     "onlineSecurity": "Los mensajes en la modalidad <strong class=\"text-blue-600\">ONLINE</strong> no se almacenan en texto plano. Al hacer clic en el botón \"Grabar\", el navegador primero encripta los datos localmente y luego los envía al servidor para generar el enlace de intercambio.",
@@ -116,5 +120,9 @@
     "en": "English",
     "es": "Español",
     "pt": "Português"
-  }
+  },
+  "decryptAttemptsLeft": "Intentos restantes de descifrado: {{count}}",
+  "decryptAttemptsHelp": "Si fallas demasiados intentos de descifrado, el mensaje se eliminará por seguridad.",
+  "decryptWrongKeyAndAttempts": "Clave incorrecta. Intentos de descifrado restantes: {{count}}",
+  "destroyOnNextFail": "El mensaje se eliminará si fallas el próximo intento"
 }

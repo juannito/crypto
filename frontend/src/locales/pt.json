@@ -11,12 +11,12 @@
     "message": "Descriptografe mensagens inserindo a chave secreta e o código criptografado ou link online."
   },
   "form": {
-    "secretKey": "Chave secreta",
-    "message": "Mensagem",
+    "message": "Digite sua mensagem (opcional)",
+    "secretKey": "Digite sua chave secreta",
     "expires": "Expira:",
     "destroyOnRead": "Destruir ao ler",
-    "save": "Salvar",
-    "saving": "Salvando...",
+    "save": "Compartilhar",
+    "saving": "Compartilhando...",
     "clear": "Limpar",
     "encrypt": "Criptografar",
     "decrypt": "Descriptografar",
@@ -61,15 +61,18 @@
       "messageTooLong": "A mensagem está se aproximando do limite de caracteres",
       "emptyMessage": "A mensagem criptografada não pode estar vazia",
       "decryptFailed": "Não foi possível descriptografar. Verifique a chave e a mensagem criptografada.",
-      "unexpectedError": "Erro inesperado ao enviar a mensagem. Tente novamente.",
-      "copyError": "Erro ao copiar para a área de transferência",
-      "messageNotFound": "A mensagem não existe ou expirou",
-      "fetchError": "Erro ao buscar a mensagem. Verifique o link.",
+              "unexpectedError": "Ocorreu um erro inesperado",
+        "copyError": "Erro ao copiar para a área de transferência",
+        "messageNotFound": "Mensagem não encontrada ou expirou",
+      "fetchError": "Erro ao buscar a mensagem",
       "noMessageToDecrypt": "Não há mensagem para descriptografar",
-      "deleteError": "Não foi possível excluir a mensagem"
+      "deleteError": "Erro ao excluir a mensagem",
+      "noContent": "Por favor, forneça uma mensagem ou faça upload de arquivos",
+      "wrongKey": "Chave incorreta",
+      "tooManyAttempts": "Muitas tentativas falharam. A mensagem foi excluída."
     },
     "warning": {
-      "keyTooShort": "A chave deve ter pelo menos 3 caracteres",
+      "keyTooShort": "A chave deve ter pelo menos 8 caracteres",
       "messageLimit": "A mensagem está se aproximando do limite de caracteres"
     },
     "info": {
@@ -77,9 +80,10 @@
     }
   },
   "modal": {
-    "messageSaved": "Mensagem Criptografada Salva",
+    "messageSaved": "Mensagem Criptografada e Compartilhada",
     "close": "Fechar"
   },
+  "destroyMessage": "A mensagem será excluída após ser visualizada",
   "help": {
     "description": "O sistema possui duas modalidades principais: <strong class=\"text-blue-600\">ONLINE</strong>, que permite gerar uma mensagem criptografada e salvá-la para compartilhar através de um link, e <strong class=\"text-blue-600\">TRADICIONAL</strong>, que oferece uma interface para criptografar texto localmente, sem armazenamento no servidor. Em ambos os modos, é necessário usar uma chave para descriptografar informações de forma segura na aba Mensagem.",
     "onlineSecurity": "As mensagens na modalidade <strong class=\"text-blue-600\">ONLINE</strong> não são armazenadas em texto simples. Ao clicar no botão \"Salvar\", o navegador primeiro criptografa os dados localmente e depois os envia ao servidor para gerar o link de troca.",
@@ -116,5 +120,9 @@
     "en": "English",
     "es": "Español",
     "pt": "Português"
-  }
+  },
+  "decryptAttemptsLeft": "Tentativas de descriptografia restantes: {{count}}",
+  "decryptAttemptsHelp": "Se você errar muitas tentativas de descriptografia, a mensagem será excluída por segurança.",
+  "decryptWrongKeyAndAttempts": "Chave incorreta. Tentativas de descriptografia restantes: {{count}}",
+  "destroyOnNextFail": "A mensagem será excluída se você errar a próxima tentativa"
 }

@@ -49,10 +49,17 @@ const OnlineTab: React.FC<OnlineTabProps> = ({ onSuccess }) => {
       validateKey(key);
       validateMessage(message);
 
+      // Verificar que al menos haya un mensaje o archivos
+      if ((!message || !message.trim()) && files.length === 0) {
+        showError(t('notifications.error.noContent'));
+        return;
+      }
+
       setIsSubmitting(true);
 
-      // Encriptar el mensaje
-      const encrypted = CryptoJS.AES.encrypt(message, key);
+      // Encriptar el mensaje (puede estar vacío)
+      const messageToEncrypt = message.trim() || '';
+      const encrypted = CryptoJS.AES.encrypt(messageToEncrypt, key);
       
       // Preparar datos para enviar
       const formData = new FormData();
@@ -87,6 +94,7 @@ const OnlineTab: React.FC<OnlineTabProps> = ({ onSuccess }) => {
       // Limpiar formulario
       setKey('');
       setMessage('');
+      setFiles([]);
       setDestroy(false);
     } catch (error: any) {
       console.error('Error al enviar mensaje:', error);
@@ -119,10 +127,13 @@ const OnlineTab: React.FC<OnlineTabProps> = ({ onSuccess }) => {
     setKey(newKey);
     
     // Validación en tiempo real
-    if (newKey.length > 0 && newKey.length < 3) {
+    if (newKey.length > 0 && newKey.length < 8) {
       showWarning(t('notifications.warning.keyTooShort'));
     }
   };
+
+  // Verificar si el formulario es válido para habilitar el botón
+  const isFormValid = key.length >= 8 && ((message && message.trim()) || files.length > 0);
 
   const handleMessageChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const newMessage = e.target.value;
@@ -256,7 +267,7 @@ const OnlineTab: React.FC<OnlineTabProps> = ({ onSuccess }) => {
               <button
                 type="submit"
                 className="flex-1 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                disabled={isSubmitting}
+                disabled={isSubmitting || !isFormValid}
               >
                 {isSubmitting ? t('form.saving') : t('form.save')}
               </button>

@@ -42,20 +42,14 @@ def serve_react(path=''):
 def get():
     id = request.form.get('id')
     info = ""
+    destroy_on_read = False
     client_ip = request.remote_addr or 'unknown'
     rate_key = f"rate:{id}:{client_ip}"
     max_attempts = 5
 
-    # Incrementar contador de intentos
-    attempts = r.incr(rate_key)
-    if attempts == 1:
-        r.expire(rate_key, 3600)  # 1 hora para evitar abuso
-    if attempts > max_attempts:
-        r.delete(id)
-        r.delete(rate_key)
-        return jsonify({'info': '', 'msg': 'El mensaje fue eliminado automáticamente por exceder el límite de intentos.'}), 403
-    else:
-        intentos_restantes = max_attempts - attempts
+    # Obtener intentos actuales sin incrementar
+    attempts = int(r.get(rate_key) or 0)
+    attempts_left = max_attempts - attempts
 
     m = r.get(id)
     if m == None:
@@ -72,29 +66,23 @@ def get():
             if m.find('destroy') == 0:
                 destroy = 1
                 m = m.replace('destroy','')
-                r.delete(id) 
-                info += ", destruir al leer"
+                r.delete(id)
+                destroy_on_read = True
             
             # Intentar parsear como JSON para el nuevo formato
             data = json.loads(m)
             if isinstance(data, dict) and 'message' in data:
                 # Es el nuevo formato con archivos
                 m = data['message']
-                files = data.get('files', [])
-                if files:
-                    info += f"<br><b>Archivos adjuntos:</b> {len(files)} archivo(s)"
             else:
                 # Es el formato antiguo, mantener como está
                 pass
         except (json.JSONDecodeError, TypeError):
             # Es el formato antiguo, mantener como está
             pass
-            
-        # Agregar info de intentos restantes si quedan menos de 5
-        if intentos_restantes >= 0:
-            info += f"<br><b>Intentos restantes:</b> {intentos_restantes}"
+        # Ya no agregar info de intentos restantes aquí
 
-    return jsonify({'info':info,'msg':m})
+    return jsonify({'info':info,'msg':m, 'destroy_on_read': destroy_on_read, 'attempts_left': attempts_left})
 
 @app.route('/get_files', methods=['POST'])
 def get_files():
@@ -199,6 +187,27 @@ def delete():
             return jsonify({'success': False, 'error': 'No se encontró el mensaje'}), 404
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/fail_attempt', methods=['POST'])
+def fail_attempt():
+    id = request.form.get('id')
+    if not id:
+        return jsonify({'error': 'Falta el parámetro id'}), 400
+    client_ip = request.remote_addr or 'unknown'
+    rate_key = f"rate:{id}:{client_ip}"
+    max_attempts = 5
+    # Inicializar intentos si no existen
+    if not r.exists(rate_key):
+        r.set(rate_key, 0)
+        r.expire(rate_key, 3600)
+    # Incrementar contador de intentos
+    attempts = r.incr(rate_key)
+    attempts_left = max_attempts - attempts
+    if attempts > max_attempts:
+        r.delete(id)
+        r.delete(rate_key)
+        return jsonify({'error': 'too_many_attempts', 'attempts_left': 0}), 403
+    return jsonify({'success': True, 'attempts_left': attempts_left})
 
 if __name__ == '__main__':
     app.run(debug = True, port=5001)

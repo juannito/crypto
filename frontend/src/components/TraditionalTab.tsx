@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useRef } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import CryptoJS from 'crypto-js';
 import QRCode from 'react-qr-code';
 import { useTranslation } from 'react-i18next';
@@ -10,6 +10,7 @@ import {
   formatEncryptedMessage,
   cleanEncryptedMessage 
 } from '../utils/errorHandler';
+import FileUpload from './FileUpload';
 
 // Función para evaluar la fortaleza de la clave
 function getKeyStrengthIndicators(key: string) {
@@ -32,21 +33,35 @@ const TraditionalTab: React.FC = () => {
   const { t } = useTranslation();
   const [key, setKey] = useState('');
   const [message, setMessage] = useState('');
+  const [files, setFiles] = useState<File[]>([]);
   const [showQR, setShowQR] = useState(false);
   const [copied, setCopied] = useState(false);
   const { showSuccess, showError, showWarning, showInfo } = useNotifications();
+  const [encrypted, setEncrypted] = useState('');
 
-  // Encriptación en tiempo real
-  const encrypted = useMemo(() => {
-    try {
-      validateKey(key);
-      validateMessage(message);
-      const enc = CryptoJS.AES.encrypt(message, key);
-      return formatEncryptedMessage(enc.toString());
-    } catch {
-      return '';
+  // Verificar si el formulario es válido para generar el mensaje encriptado
+  const isFormValid = key.length >= 8 && ((message && message.trim()) || files.length > 0);
+
+  useEffect(() => {
+    if (isFormValid) {
+      try {
+        // Crear el objeto de datos con mensaje y archivos
+        const data = {
+          message: message.trim() || '',
+          files: files
+        };
+        
+        // Encriptar el objeto completo
+        const encryptedData = CryptoJS.AES.encrypt(JSON.stringify(data), key);
+        setEncrypted(formatEncryptedMessage(encryptedData.toString()));
+      } catch (error) {
+        console.error('Error al encriptar:', error);
+        setEncrypted('');
+      }
+    } else {
+      setEncrypted('');
     }
-  }, [key, message]);
+  }, [message, key, files, isFormValid]);
 
   const handleDecrypt = () => {
     try {
@@ -62,7 +77,22 @@ const TraditionalTab: React.FC = () => {
         showError(t('notifications.error.decryptFailed'));
         return;
       }
-      setMessage(result);
+      
+      // Intentar parsear como JSON para ver si contiene archivos
+      try {
+        const data = JSON.parse(result);
+        if (data.message !== undefined && data.files) {
+          // Es el nuevo formato con archivos
+          setMessage(data.message || '');
+          // Los archivos se mostrarían aquí si tuviéramos un componente para descargarlos
+        } else {
+          setMessage(result);
+        }
+      } catch (e) {
+        // Si no es JSON, es un mensaje simple
+        setMessage(result);
+      }
+      
       showSuccess(t('notifications.success.messageDecrypted'));
     } catch (error: any) {
       console.error('Error al desencriptar:', error);
@@ -74,13 +104,14 @@ const TraditionalTab: React.FC = () => {
   const handleReset = () => {
     setKey('');
     setMessage('');
+    setFiles([]);
     showInfo(t('notifications.info.formCleared'));
   };
 
   const handleKeyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newKey = e.target.value;
     setKey(newKey);
-    if (newKey.length > 0 && newKey.length < 3) {
+    if (newKey.length > 0 && newKey.length < 8) {
       showWarning(t('notifications.warning.keyTooShort'));
     }
   };
@@ -126,6 +157,13 @@ const TraditionalTab: React.FC = () => {
             </small>
           )}
         </div>
+        
+        {/* Componente de subida de archivos */}
+        <FileUpload 
+          onFilesChange={setFiles}
+          disabled={false}
+        />
+        
         {/* Campo de clave, barra de fortaleza y acciones */}
         <div className="flex flex-col gap-4 w-full">
           {/* Campo de clave */}

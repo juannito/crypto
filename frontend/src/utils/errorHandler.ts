@@ -61,18 +61,17 @@ export const retryRequest = async <T>(
 
 // Validaciones de entrada
 export const validateMessage = (message: string): void => {
-  if (!message || !message.trim()) {
-    throw new Error('El mensaje no puede estar vacío');
-  }
-  
-  if (message.length > 10000) {
-    throw new Error('El mensaje es demasiado largo (máximo 10,000 caracteres)');
-  }
-  
-  // Verificar caracteres especiales problemáticos
-  // eslint-disable-next-line no-control-regex
-  if (/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/.test(message)) {
-    throw new Error('El mensaje contiene caracteres no válidos');
+  // El mensaje es opcional, solo validar si no está vacío
+  if (message && message.trim()) {
+    if (message.length > 10000) {
+      throw new Error('El mensaje es demasiado largo (máximo 10,000 caracteres)');
+    }
+    
+    // Verificar caracteres especiales problemáticos
+    // eslint-disable-next-line no-control-regex
+    if (/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/.test(message)) {
+      throw new Error('El mensaje contiene caracteres no válidos');
+    }
   }
 };
 
@@ -81,12 +80,19 @@ export const validateKey = (key: string): void => {
     throw new Error('La clave secreta no puede estar vacía');
   }
   
-  if (key.length < 3) {
-    throw new Error('La clave debe tener al menos 3 caracteres');
+  if (key.length < 8) {
+    throw new Error('La clave debe tener al menos 8 caracteres');
   }
   
   if (key.length > 1000) {
     throw new Error('La clave es demasiado larga');
+  }
+};
+
+// Función para validar clave solo en descifrado (sin validar longitud)
+export const validateKeyForDecrypt = (key: string): void => {
+  if (!key || !key.trim()) {
+    throw new Error('La clave no puede estar vacía');
   }
 };
 
