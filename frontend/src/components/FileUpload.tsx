@@ -17,7 +17,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFilesChange, disabled = false
   const [dragActive, setDragActive] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const MAX_FILES = 5;
+  const MAX_FILES = 20; // Aumentado de 5 a 20 para pruebas de rendimiento
   const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
   const formatFileSize = (bytes: number): string => {

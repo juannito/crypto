@@ -10,6 +10,12 @@ import base64
 
 app = Flask(__name__, static_folder='frontend/build/static', static_url_path='/static')
 app.config.from_pyfile('app.cfg')
+
+# Configuraciones para optimizar el manejo de múltiples archivos
+app.config['MAX_CONTENT_LENGTH'] = 100 * 1024 * 1024  # 100MB límite total
+app.config['MAX_CONTENT_PATH'] = None  # Sin límite de ruta
+app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0  # No cache para archivos
+
 CORS(app)  # Habilitar CORS para peticiones desde React
 r = Redis(host=app.config['REDIS_HOST'],password=app.config['REDIS_PASSWORD'])
 
@@ -126,8 +132,11 @@ def post():
     files_data = []
     if 'files' in request.files:
         uploaded_files = request.files.getlist('files')
-        for file in uploaded_files:
+        print(f"Procesando {len(uploaded_files)} archivos...")  # Debug info
+        
+        for i, file in enumerate(uploaded_files):
             if file and file.filename:
+                print(f"Procesando archivo {i+1}/{len(uploaded_files)}: {file.filename}")  # Debug info
                 # Leer el archivo y convertirlo a base64
                 file_content = file.read()
                 file_data = {
@@ -136,6 +145,9 @@ def post():
                     'size': len(file_content)
                 }
                 files_data.append(file_data)
+                print(f"Archivo {file.filename} procesado: {len(file_content)} bytes")  # Debug info
+    
+    print(f"Total de archivos procesados: {len(files_data)}")  # Debug info
     
     # Crear el objeto de datos
     data = {
@@ -154,7 +166,7 @@ def post():
     p.expire(rand, expire)
     p.execute()
 
-    return request.url_root + rand, 200 
+    return request.url_root + rand, 200
 
 #
 # Genera el random string (mayusculas, minusculas y digitos)
