@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import OnlineTab from './components/OnlineTab';
-import TraditionalTab from './components/TraditionalTab';
-import MessageTab from './components/MessageTab';
+import ShareTab from './components/ShareTab';
+import EncryptTab from './components/EncryptTab';
+import DecryptTab from './components/DecryptTab';
 import HelpTab from './components/HelpTab';
 import Modal from './components/Modal';
 import NotificationContainer from './components/NotificationContainer';
@@ -101,9 +101,9 @@ function App() {
             </div>
 
             <div className="tab-content">
-              {activeTab === 'online' && <OnlineTab onSuccess={showSuccessModal} />}
-              {activeTab === 'traditional' && <TraditionalTab />}
-              {activeTab === 'message' && <MessageTab />}
+              {activeTab === 'online' && <ShareTab onSuccess={showSuccessModal} />}
+              {activeTab === 'traditional' && <EncryptTab />}
+              {activeTab === 'message' && <DecryptTab />}
               {activeTab === 'help' && <HelpTab />}
             </div>
           </div>

@@ -1,10 +1,9 @@
-import React, { useState, useMemo, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import CryptoJS from 'crypto-js';
 import QRCode from 'react-qr-code';
 import { useTranslation } from 'react-i18next';
 import { useNotifications } from '../hooks/useNotifications';
 import { 
-  validateMessage, 
   validateKey, 
   handleCryptoError, 
   formatEncryptedMessage,
@@ -29,7 +28,7 @@ function getStrengthLevel(indicators: ReturnType<typeof getKeyStrengthIndicators
   return { color: 'bg-green-500', label: t('strength.verySecure'), score };
 }
 
-const TraditionalTab: React.FC = () => {
+const EncryptTab: React.FC = () => {
   const { t } = useTranslation();
   const [key, setKey] = useState('');
   const [message, setMessage] = useState('');
@@ -40,6 +39,9 @@ const TraditionalTab: React.FC = () => {
   const [encrypted, setEncrypted] = useState('');
   const [isEncrypting, setIsEncrypting] = useState(false);
   const [hasEncrypted, setHasEncrypted] = useState(false); // Nuevo estado para controlar si se ha encriptado
+  const [showKey, setShowKey] = useState(false); // Estado para mostrar/ocultar clave
+  const [showFileUpload, setShowFileUpload] = useState(false); // Estado para mostrar/ocultar área de archivos
+  const [encryptFiles, setEncryptFiles] = useState(true); // Toggle para encriptar archivos
 
   // Verificar si el formulario es válido para habilitar el botón
   const isFormValid = key.length >= 8 && ((message && message.trim()) || files.length > 0);
@@ -72,7 +74,7 @@ const TraditionalTab: React.FC = () => {
     setIsEncrypting(true);
     try {
       let filesData: any[] = [];
-      if (files.length > 0) {
+      if (files.length > 0 && encryptFiles) {
         filesData = await serializeFiles(files);
       }
       const data = {
@@ -83,6 +85,16 @@ const TraditionalTab: React.FC = () => {
       setEncrypted(formatEncryptedMessage(encryptedData.toString()));
       setHasEncrypted(true); // Marcar como encriptado
       showSuccess(t('notifications.success.messageSaved'));
+      
+      // Scroll automático para mostrar el resultado
+      setTimeout(() => {
+        const encryptedTitle = document.querySelector('[data-encrypted-title]');
+        if (encryptedTitle) {
+          const rect = encryptedTitle.getBoundingClientRect();
+          const scrollTop = window.pageYOffset + rect.top - 20; // 20px de margen arriba
+          window.scrollTo({ top: scrollTop, behavior: 'smooth' });
+        }
+      }, 100);
     } catch (error) {
       console.error('Error al encriptar:', error);
       setEncrypted('');
@@ -115,43 +127,7 @@ const TraditionalTab: React.FC = () => {
   //   }
   // }, [message, key, files, isFormValid]);
 
-  const handleDecrypt = () => {
-    try {
-      validateKey(key);
-      if (!message.trim()) {
-        showError(t('notifications.error.emptyMessage'));
-        return;
-      }
-      const cleaned = cleanEncryptedMessage(message);
-      const decrypted = CryptoJS.AES.decrypt(cleaned, key);
-      const result = decrypted.toString(CryptoJS.enc.Utf8);
-      if (!result) {
-        showError(t('notifications.error.decryptFailed'));
-        return;
-      }
-      
-      // Intentar parsear como JSON para ver si contiene archivos
-      try {
-        const data = JSON.parse(result);
-        if (data.message !== undefined && data.files) {
-          // Es el nuevo formato con archivos
-          setMessage(data.message || '');
-          // Los archivos se mostrarían aquí si tuviéramos un componente para descargarlos
-        } else {
-          setMessage(result);
-        }
-      } catch (e) {
-        // Si no es JSON, es un mensaje simple
-        setMessage(result);
-      }
-      
-      showSuccess(t('notifications.success.messageDecrypted'));
-    } catch (error: any) {
-      console.error('Error al desencriptar:', error);
-      const errorMessage = handleCryptoError(error);
-      showError(errorMessage);
-    }
-  };
+
 
   const handleReset = () => {
     setKey('');
@@ -159,6 +135,7 @@ const TraditionalTab: React.FC = () => {
     setFiles([]);
     setEncrypted(''); // Limpiar mensaje encriptado
     setHasEncrypted(false); // Resetear estado de encriptación
+    setEncryptFiles(true); // Resetear toggle de encriptar archivos
     showInfo(t('notifications.info.formCleared'));
   };
 
@@ -212,24 +189,96 @@ const TraditionalTab: React.FC = () => {
           )}
         </div>
         
-        {/* Componente de subida de archivos */}
-        <FileUpload 
-          onFilesChange={setFiles}
-          disabled={false}
-        />
+        {/* Botón para alternar entre mensaje y archivos */}
+        <button
+          type="button"
+          onClick={() => {
+            if (showFileUpload) {
+              // Si está mostrando archivos, limpiar y ocultar
+              setFiles([]);
+              setShowFileUpload(false);
+            } else {
+              // Si no está mostrando archivos, mostrar área de archivos
+              setShowFileUpload(true);
+            }
+          }}
+          className="w-full flex items-center justify-center gap-2 px-4 py-3 text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-colors border border-gray-200 hover:border-blue-300 rounded-lg font-medium"
+        >
+          {showFileUpload ? (
+            <>
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              {t('form.onlyMessage')}
+            </>
+          ) : (
+            <>
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+              </svg>
+              {t('form.addFiles')}
+            </>
+          )}
+        </button>
+        
+        {/* Componente de subida de archivos - solo mostrar si está activado */}
+        {showFileUpload && (
+          <div className="transition-all duration-300 ease-in-out">
+            <FileUpload 
+              onFilesChange={setFiles}
+              disabled={false}
+            />
+          </div>
+        )}
         
         {/* Campo de clave, barra de fortaleza y acciones */}
         <div className="flex flex-col gap-4 w-full">
-          {/* Campo de clave */}
+          {/* Campo de clave y toggle de encriptar archivos */}
           <div className="flex flex-wrap items-center gap-4 w-full">
-            <input
-              type="password"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder={t('form.secretKey')}
-              value={key}
-              onChange={handleKeyChange}
-              required
-            />
+            <div className="relative flex-1">
+              <input
+                type={showKey ? "text" : "password"}
+                className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder={t('form.secretKey')}
+                value={key}
+                onChange={handleKeyChange}
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowKey(!showKey)}
+                className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
+                aria-label={showKey ? "Ocultar clave" : "Mostrar clave"}
+              >
+                {showKey ? (
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21" />
+                  </svg>
+                ) : (
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                  </svg>
+                )}
+              </button>
+            </div>
+            
+            {/* Toggle para encriptar archivos - mostrar cuando se activa la subida de archivos */}
+            {showFileUpload && (
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  id="encryptFiles"
+                  checked={encryptFiles}
+                  onChange={e => setEncryptFiles(e.target.checked)}
+                  className="mr-2 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  disabled={false}
+                />
+                <label htmlFor="encryptFiles" className="text-sm text-gray-700 whitespace-nowrap">
+                  {t('form.encryptFiles')}
+                </label>
+              </div>
+            )}
           </div>
           
           {/* Barra de fortaleza */}
@@ -294,11 +343,28 @@ const TraditionalTab: React.FC = () => {
             </button>
           </div>
         </div>
+        
+        {/* Nota importante */}
+        <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+          <div className="flex items-start">
+            <div className="flex-shrink-0">
+              <svg className="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <div className="ml-3">
+              <p className="text-sm text-blue-800">
+                <strong>Important:</strong> When saving, the browser first encrypts the data locally and then sends it to the server to generate the exchange link. You can choose to destroy the message when read.
+              </p>
+            </div>
+          </div>
+        </div>
+        
         {/* Mensaje encriptado resultante - solo mostrar si se ha encriptado */}
         {hasEncrypted && encrypted && (
           <div className="relative mt-2">
             <div className="flex items-center justify-between mb-2">
-              <div className="text-xs text-gray-600 font-semibold uppercase tracking-wide">{t('encryptedMessage')}</div>
+              <div className="text-xs text-gray-600 font-semibold uppercase tracking-wide" data-encrypted-title>{t('encryptedMessage')}</div>
               <div className="flex gap-2">
                 <button
                   type="button"
@@ -370,4 +436,4 @@ const TraditionalTab: React.FC = () => {
   );
 };
 
-export default TraditionalTab; 
+export default EncryptTab; 

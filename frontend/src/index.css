@@ -71,19 +71,33 @@
 
   /* Estilos para el modal */
   .modal {
-    @apply fixed inset-0 z-50 overflow-hidden outline-none;
+    @apply fixed inset-0 z-50 overflow-hidden outline-none flex items-center justify-center p-4;
+    /* iOS specific fixes */
+    -webkit-overflow-scrolling: touch;
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
   }
 
   .modal-backdrop {
     @apply fixed inset-0 z-40 bg-black opacity-50;
+    /* iOS specific fixes */
+    -webkit-backdrop-filter: blur(2px);
+    backdrop-filter: blur(2px);
   }
 
   .modal-dialog {
-    @apply relative w-auto m-2 z-50;
+    @apply relative w-full max-w-md mx-auto z-50;
+    /* iOS specific fixes */
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
   }
 
   .modal-content {
-    @apply relative bg-white border border-gray-300 rounded-lg shadow-lg bg-clip-padding outline-none z-50;
+    @apply relative bg-white border border-gray-300 rounded-lg shadow-lg bg-clip-padding outline-none z-50 max-h-[90vh] overflow-y-auto;
+    /* iOS specific fixes */
+    -webkit-overflow-scrolling: touch;
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
   }
 
   .modal-header {
@@ -117,7 +131,7 @@
 /* Responsive */
 @media (min-width: 768px) {
   .modal-dialog {
-    @apply w-96 mx-auto my-8;
+    @apply w-96 mx-auto;
   }
 }
 
@@ -132,5 +146,39 @@
   
   .notification-message {
     @apply text-xs;
+  }
+  
+  .modal {
+    @apply p-2;
+    /* iOS specific mobile fixes */
+    -webkit-overflow-scrolling: touch;
+    position: fixed !important;
+  }
+  
+  .modal-dialog {
+    @apply w-full max-w-sm;
+    /* iOS specific mobile fixes */
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+  }
+  
+  .modal-content {
+    @apply max-h-[95vh];
+    /* iOS specific mobile fixes */
+    -webkit-overflow-scrolling: touch;
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+  }
+}
+
+/* iOS Safari specific fixes */
+@supports (-webkit-touch-callout: none) {
+  .modal {
+    position: fixed !important;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .modal-content {
+    -webkit-overflow-scrolling: touch;
   }
 }

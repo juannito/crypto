@@ -18,9 +18,11 @@
     "clear": "Clear",
     "expires": "Expires in:",
     "destroyOnRead": "Destroy on read",
-    "encryptFiles": "Encrypt files with the same key",
+    "encryptFiles": "Encrypt files",
     "encryptingFiles": "Encrypting files...",
     "encrypt": "Encrypt",
+    "addFiles": "Add files",
+    "onlyMessage": "Only message",
     "decrypt": "Decrypt",
     "deleteMessage": "Delete Message",
     "copy": "Copy",
@@ -78,12 +80,13 @@
   },
   "modal": {
     "messageSaved": "Message Encrypted and Shared",
-    "close": "Close"
+    "close": "Close",
+    "createNewMessage": "Create new message"
   },
   "destroyMessage": "Message will be deleted after viewing",
   "help": {
-    "description": "The system has two main modes: <strong class=\"text-blue-600\">ONLINE</strong>, which allows you to generate an encrypted message and save it to share via a link, and <strong class=\"text-blue-600\">TRADITIONAL</strong>, which offers an interface to encrypt text locally, without server storage. In both modes, it is necessary to use a key to decrypt information securely from the Message tab.",
-    "onlineSecurity": "Messages in <strong class=\"text-blue-600\">ONLINE</strong> mode are not stored in plain text. When you click the \"Save\" button, the browser first encrypts the data locally and then sends it to the server to generate the exchange link.",
+    "description": "The system has two main modes: <strong class=\"text-blue-600\">SHARE</strong>, which allows you to generate an encrypted message and save it to share via a link, and <strong class=\"text-blue-600\">ENCRYPT</strong>, which offers an interface to encrypt text locally, without server storage. In both modes, it is necessary to use a key to decrypt information securely from the Decrypt tab.",
+    "onlineSecurity": "Messages in <strong class=\"text-blue-600\">SHARE</strong> mode are not stored in plain text. When you click the \"Save\" button, the browser first encrypts the data locally and then sends it to the server to generate the exchange link.",
     "expiration": "Additionally, this mode allows you to set an expiration time for the message and activate the option to destroy it when read. This way, the person who receives the link will only have one opportunity to access the message.",
     "securityRecommendation": "For greater security, it is recommended that the key be as long as possible, preferably a phrase.",
     "sourceCode": "The source code is available on <a href=\"http://github.com/juannito/crypto\" class=\"text-blue-600 hover:underline\">GitHub</a>."
@@ -104,6 +107,14 @@
     "errors": {
       "fileTooLarge": "File is too large. Maximum size is {{maxSize}}"
     }
+  },
+  "response": {
+    "shareLink": "Share link:",
+    "qrCode": "QR Code:",
+    "scanWithPhone": "Scan with your phone",
+    "copyUrl": "Copy URL",
+    "copyLinkCode": "Copy link code",
+    "copied": "Copied"
   },
   "fileDownload": {
     "title": "Attached files",

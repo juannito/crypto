@@ -32,7 +32,7 @@ function getKeyStrengthIndicators(key: string) {
   };
 }
 
-const MessageTab: React.FC = () => {
+const DecryptTab: React.FC = () => {
   const { t } = useTranslation();
   const [key, setKey] = useState('');
   const [message, setMessage] = useState('');
@@ -353,4 +353,4 @@ const MessageTab: React.FC = () => {
   );
 };
 
-export default MessageTab; 
+export default DecryptTab; 

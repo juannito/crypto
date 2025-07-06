@@ -18,7 +18,7 @@
     "clear": "Limpar",
     "expires": "Expira em:",
     "destroyOnRead": "Destruir ao ler",
-    "encryptFiles": "Criptografar arquivos com a mesma chave",
+    "encryptFiles": "Criptografar arquivos",
     "encryptingFiles": "Criptografando arquivos...",
     "encrypt": "Criptografar",
     "decrypt": "Descriptografar",
@@ -82,12 +82,13 @@
   },
   "modal": {
     "messageSaved": "Mensagem Criptografada e Compartilhada",
-    "close": "Fechar"
+    "close": "Fechar",
+    "createNewMessage": "Criar nova mensagem"
   },
   "destroyMessage": "A mensagem será excluída após ser visualizada",
   "help": {
-    "description": "O sistema possui duas modalidades principais: <strong class=\"text-blue-600\">ONLINE</strong>, que permite gerar uma mensagem criptografada e salvá-la para compartilhar através de um link, e <strong class=\"text-blue-600\">TRADICIONAL</strong>, que oferece uma interface para criptografar texto localmente, sem armazenamento no servidor. Em ambos os modos, é necessário usar uma chave para descriptografar informações de forma segura na aba Mensagem.",
-    "onlineSecurity": "As mensagens na modalidade <strong class=\"text-blue-600\">ONLINE</strong> não são armazenadas em texto simples. Ao clicar no botão \"Salvar\", o navegador primeiro criptografa os dados localmente e depois os envia ao servidor para gerar o link de troca.",
+    "description": "O sistema possui duas modalidades principais: <strong class=\"text-blue-600\">COMPARTILHAR</strong>, que permite gerar uma mensagem criptografada e salvá-la para compartilhar através de um link, e <strong class=\"text-blue-600\">CRIPTOGRAFAR</strong>, que oferece uma interface para criptografar texto localmente, sem armazenamento no servidor. Em ambos os modos, é necessário usar uma chave para descriptografar informações de forma segura na aba Descriptografar.",
+    "onlineSecurity": "As mensagens na modalidade <strong class=\"text-blue-600\">COMPARTILHAR</strong> não são armazenadas em texto simples. Ao clicar no botón \"Salvar\", o navegador primeiro criptografa os dados localmente e depois os envia ao servidor para gerar o link de troca.",
     "expiration": "Além disso, esta modalidade permite definir um tempo de expiração para a mensagem e ativar a opção de destruí-la quando lida. Dessa forma, a pessoa que recebe o link terá apenas uma oportunidade de acessar a mensagem.",
     "securityRecommendation": "Para maior segurança, recomenda-se que a chave seja o mais longa possível, preferencialmente uma frase.",
     "sourceCode": "O código fonte está disponível no <a href=\"http://github.com/juannito/crypto\" class=\"text-blue-600 hover:underline\">GitHub</a>."
@@ -108,6 +109,14 @@
     "errors": {
       "fileTooLarge": "O arquivo é muito grande. Tamanho máximo é {{maxSize}}"
     }
+  },
+  "response": {
+    "shareLink": "Link para compartilhar:",
+    "qrCode": "Código QR:",
+    "scanWithPhone": "Escaneie com seu celular",
+    "copyUrl": "Copiar link",
+    "copyLinkCode": "Copiar código do link",
+    "copied": "Copiado"
   },
   "fileDownload": {
     "title": "Arquivos anexados",
