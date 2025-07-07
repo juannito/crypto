@@ -37,6 +37,7 @@
 - **Generación de códigos QR** para compartir fácilmente
 - **Ideal para** intercambios directos sin persistencia
 - **Validación de fortaleza de claves** en tiempo real
+- **Icono de ojo** para mostrar/ocultar contraseñas durante la entrada
 
 ### 📱 **Experiencia de Usuario Moderna**
 
@@ -46,6 +47,10 @@
 - **Notificaciones en tiempo real** con feedback visual
 - **Indicadores de fortaleza de contraseñas** interactivos
 - **Drag & Drop** para subida de archivos
+- **Flujo de desencriptación optimizado** con ocultación automática de elementos innecesarios
+- **Icono de ojo** para mostrar/ocultar contraseñas
+- **Mensaje desencriptado destacado** en contenedor visual
+- **Gestión de archivos mejorada** con preview de imágenes
 
 ## 🛠️ Stack Tecnológico
 
@@ -218,6 +223,12 @@ curl -X POST http://localhost:5001/delete \
 - **Soporte para códigos QR** para compartir fácilmente
 - **Notificaciones toast** para acciones importantes
 - **Modo oscuro** (preparado para futuras implementaciones)
+- **Flujo de desencriptación optimizado** que oculta elementos innecesarios
+- **Icono de ojo** para mostrar/ocultar contraseñas durante la entrada
+- **Mensaje desencriptado destacado** en contenedor verde
+- **Archivos listados después del mensaje** en orden lógico
+- **Botón de eliminación centrado** debajo de la lista de archivos
+- **Preview automático de imágenes** después del desencriptado
 
 ## 🤝 Contribuir
 
@@ -263,6 +274,10 @@ Este proyecto es una **modernización completa** del trabajo original de [Baicom
 - ✅ **Soporte multiidioma** completo
 - ✅ **Gestión de archivos** avanzada
 - ✅ **Código más mantenible** y escalable
+- ✅ **Flujo de desencriptación optimizado** con UX mejorada
+- ✅ **Icono de ojo** para mostrar/ocultar contraseñas
+- ✅ **Mensaje desencriptado destacado** en contenedor visual
+- ✅ **Gestión inteligente de archivos** con preview de imágenes
 
 ### **Enlaces Útiles**
 

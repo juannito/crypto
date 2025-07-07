@@ -39,7 +39,6 @@ const ShareTab: React.FC<ShareTabProps> = ({ onSuccess }) => {
   const [expire, setExpire] = useState('604800');
   const [destroy, setDestroy] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [encryptFiles, setEncryptFiles] = useState(true); // Nuevo toggle para encriptar archivos
   const [isEncrypting, setIsEncrypting] = useState(false); // Para mostrar loading
   const { showSuccess, showError, showWarning, showInfo } = useNotifications();
   
@@ -80,25 +79,19 @@ const ShareTab: React.FC<ShareTabProps> = ({ onSuccess }) => {
       
       // Archivos
       if (files.length > 0) {
-        if (encryptFiles) {
-          // Serializar y encriptar archivos
-          const fileObjs = await Promise.all(files.map(async (file) => {
-            const content = await new Promise<string>((resolve, reject) => {
-              const reader = new FileReader();
-              reader.onload = () => resolve(btoa(reader.result as string));
-              reader.onerror = reject;
-              reader.readAsBinaryString(file);
-            });
-            // Encriptar el contenido base64
-            const encryptedContent = CryptoJS.AES.encrypt(content, key).toString();
-            return { name: file.name, size: file.size, content: encryptedContent };
-          }));
-          formData.append('files', new Blob([JSON.stringify(fileObjs)], { type: 'application/json' }));
-        } else {
-          files.forEach((file) => {
-            formData.append('files', file);
+        // Serializar y encriptar archivos SIEMPRE
+        const fileObjs = await Promise.all(files.map(async (file) => {
+          const content = await new Promise<string>((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(btoa(reader.result as string));
+            reader.onerror = reject;
+            reader.readAsBinaryString(file);
           });
-        }
+          // Encriptar el contenido base64
+          const encryptedContent = CryptoJS.AES.encrypt(content, key).toString();
+          return { name: file.name, size: file.size, content: encryptedContent };
+        }));
+        formData.append('files', new Blob([JSON.stringify(fileObjs)], { type: 'application/json' }));
       }
       setIsEncrypting(false);
 
@@ -185,6 +178,7 @@ const ShareTab: React.FC<ShareTabProps> = ({ onSuccess }) => {
 
   return (
     <div className="tab-pane fade in active">
+      
       <form className="space-y-4" onSubmit={handleSubmit}>
         {/* Campo de mensaje primero */}
         <div className="relative">
@@ -248,52 +242,33 @@ const ShareTab: React.FC<ShareTabProps> = ({ onSuccess }) => {
         
         {/* Campo de clave, barra de fortaleza y acciones */}
         <div className="flex flex-col gap-4 w-full">
-          {/* Campo de clave y toggle de encriptar archivos */}
-          <div className="flex flex-wrap items-center gap-4 w-full">
-            <div className="relative flex-1">
-              <input
-                type={showKey ? "text" : "password"}
-                className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder={t('form.secretKey')}
-                value={key}
-                onChange={handleKeyChange}
-                required
-              />
-              <button
-                type="button"
-                onClick={() => setShowKey(!showKey)}
-                className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
-                aria-label={showKey ? "Ocultar clave" : "Mostrar clave"}
-              >
-                {showKey ? (
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21" />
-                  </svg>
-                ) : (
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                  </svg>
-                )}
-              </button>
-            </div>
-            
-            {/* Toggle para encriptar archivos - mostrar cuando se activa la subida de archivos */}
-            {showFileUpload && (
-              <div className="flex items-center">
-                <input
-                  type="checkbox"
-                  id="encryptFiles"
-                  checked={encryptFiles}
-                  onChange={e => setEncryptFiles(e.target.checked)}
-                  className="mr-2 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                  disabled={isSubmitting}
-                />
-                <label htmlFor="encryptFiles" className="text-sm text-gray-700 whitespace-nowrap">
-                  {t('form.encryptFiles')}
-                </label>
-              </div>
-            )}
+          {/* Campo de clave */}
+          <div className="relative flex-1">
+            <input
+              type={showKey ? "text" : "password"}
+              className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder={t('form.secretKey')}
+              value={key}
+              onChange={handleKeyChange}
+              required
+            />
+            <button
+              type="button"
+              onClick={() => setShowKey(!showKey)}
+              className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
+              aria-label={showKey ? "Ocultar clave" : "Mostrar clave"}
+            >
+              {showKey ? (
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21" />
+                </svg>
+              ) : (
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                </svg>
+              )}
+            </button>
           </div>
           
           {/* Barra de fortaleza */}
@@ -351,9 +326,11 @@ const ShareTab: React.FC<ShareTabProps> = ({ onSuccess }) => {
                   value={expire}
                   onChange={(e) => setExpire(e.target.value)}
                 >
-                  <option value="2592000">{t('expiration.1month')}</option>
-                  <option value="604800">{t('expiration.1week')}</option>
+                  <option value="0">{t('expiration.never')}</option>
+                  <option value="30">{t('expiration.30seconds')}</option>
                   <option value="86400">{t('expiration.1day')}</option>
+                  <option value="604800">{t('expiration.1week')}</option>
+                  <option value="2592000">{t('expiration.1month')}</option>
                 </select>
               </div>
               <div className="flex items-center">

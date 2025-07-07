@@ -1,5 +1,72 @@
 import React, { useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
+import { 
+  FileText, 
+  FileImage, 
+  FileVideo, 
+  FileAudio, 
+  Archive, 
+  File,
+  FileSpreadsheet,
+  Presentation,
+  FileCode,
+  FileX,
+  FileCheck,
+  FileArchive
+} from 'lucide-react';
+
+// Función para obtener el icono según el tipo de archivo
+const getFileIcon = (fileName: string, mimeType: string) => {
+  const extension = fileName.toLowerCase().split('.').pop() || '';
+  
+  // Imágenes
+  if (mimeType.startsWith('image/')) {
+    return <FileImage className="w-6 h-6 text-green-600" />;
+  }
+  
+  // PDF y Documentos de Word
+  if (extension === 'pdf' || mimeType === 'application/pdf' || ['doc', 'docx'].includes(extension) || mimeType.includes('word')) {
+    return <FileText className="w-6 h-6 text-blue-600" />;
+  }
+  
+  // Hojas de cálculo Excel
+  if (['xls', 'xlsx', 'csv'].includes(extension) || mimeType.includes('spreadsheet') || mimeType.includes('excel')) {
+    return <FileSpreadsheet className="w-6 h-6 text-green-600" />;
+  }
+  
+  // Presentaciones PowerPoint
+  if (['ppt', 'pptx'].includes(extension) || mimeType.includes('presentation') || mimeType.includes('powerpoint')) {
+    return <Presentation className="w-6 h-6 text-orange-600" />;
+  }
+  
+  // Archivos de código
+  if (['js', 'ts', 'jsx', 'tsx', 'html', 'css', 'scss', 'json', 'xml', 'py', 'java', 'cpp', 'c', 'php', 'rb', 'go', 'rs', 'swift', 'kt'].includes(extension)) {
+    return <FileCode className="w-6 h-6 text-purple-600" />;
+  }
+  
+  // Archivos de texto
+  if (['txt', 'md', 'rtf'].includes(extension) || mimeType.startsWith('text/')) {
+    return <FileText className="w-6 h-6 text-gray-600" />;
+  }
+  
+  // Archivos comprimidos
+  if (['zip', 'rar', '7z', 'tar', 'gz', 'bz2'].includes(extension) || mimeType.includes('compressed') || mimeType.includes('archive')) {
+    return <FileArchive className="w-6 h-6 text-purple-600" />;
+  }
+  
+  // Archivos de audio
+  if (mimeType.startsWith('audio/')) {
+    return <FileAudio className="w-6 h-6 text-blue-600" />;
+  }
+  
+  // Archivos de video
+  if (mimeType.startsWith('video/')) {
+    return <FileVideo className="w-6 h-6 text-red-600" />;
+  }
+  
+  // Archivo genérico (fallback)
+  return <File className="w-6 h-6 text-gray-400" />;
+};
 
 interface FileUploadProps {
   onFilesChange: (files: File[]) => void;
@@ -35,37 +102,49 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFilesChange, disabled = false
     return null;
   };
 
-  const handleFiles = (newFiles: FileList | File[]) => {
+  const handleFiles = async (newFiles: FileList | File[]) => {
     const fileArray = Array.from(newFiles);
     const validFiles: FileWithPreview[] = [];
     const errors: string[] = [];
 
-    fileArray.forEach((file) => {
+    // Procesar archivos y crear previews de forma asíncrona
+    const processFile = async (file: File): Promise<FileWithPreview | null> => {
       const error = validateFile(file);
       if (error) {
         errors.push(`${file.name}: ${error}`);
-      } else {
-        const fileWithPreview = file as FileWithPreview;
-        fileWithPreview.id = Math.random().toString(36).substr(2, 9);
-        
-        // Crear preview para imágenes
-        if (file.type.startsWith('image/')) {
-          const reader = new FileReader();
-          reader.onload = (e) => {
-            fileWithPreview.preview = e.target?.result as string;
-          };
-          reader.readAsDataURL(file);
-        }
-        
-        validFiles.push(fileWithPreview);
+        return null;
       }
-    });
+
+      const fileWithPreview = file as FileWithPreview;
+      fileWithPreview.id = Math.random().toString(36).substr(2, 9);
+      
+      // Crear preview para imágenes de forma asíncrona
+      if (file.type.startsWith('image/')) {
+        try {
+          const preview = await new Promise<string>((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = (e) => resolve(e.target?.result as string);
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
+          });
+          fileWithPreview.preview = preview;
+        } catch (error) {
+          console.error('Error reading file preview:', error);
+        }
+      }
+      
+      return fileWithPreview;
+    };
+
+    // Procesar todos los archivos en paralelo
+    const processedFiles = await Promise.all(fileArray.map(processFile));
+    const validProcessedFiles = processedFiles.filter(file => file !== null) as FileWithPreview[];
 
     if (errors.length > 0) {
       alert(errors.join('\n'));
     }
 
-    const updatedFiles = [...files, ...validFiles].slice(0, MAX_FILES);
+    const updatedFiles = [...files, ...validProcessedFiles].slice(0, MAX_FILES);
     setFiles(updatedFiles);
     onFilesChange(updatedFiles);
   };
@@ -86,19 +165,19 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFilesChange, disabled = false
     }
   };
 
-  const handleDrop = (e: React.DragEvent) => {
+  const handleDrop = async (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
     setDragActive(false);
     
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      handleFiles(e.dataTransfer.files);
+      await handleFiles(e.dataTransfer.files);
     }
   };
 
-  const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileInput = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      handleFiles(e.target.files);
+      await handleFiles(e.target.files);
     }
   };
 
@@ -160,10 +239,8 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFilesChange, disabled = false
                   {file.preview ? (
                     <img src={file.preview} alt={file.name} className="w-10 h-10 object-cover rounded" />
                   ) : (
-                    <div className="w-10 h-10 bg-gray-200 rounded flex items-center justify-center">
-                      <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                      </svg>
+                    <div className="w-10 h-10 bg-gray-100 rounded flex items-center justify-center">
+                      {getFileIcon(file.name, file.type)}
                     </div>
                   )}
                   <div className="flex-1 min-w-0">

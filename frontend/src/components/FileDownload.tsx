@@ -1,6 +1,73 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import CryptoJS from 'crypto-js';
+import { 
+  FileText, 
+  FileImage, 
+  FileVideo, 
+  FileAudio, 
+  Archive, 
+  File,
+  FileSpreadsheet,
+  Presentation,
+  FileCode,
+  FileX,
+  FileCheck,
+  FileArchive
+} from 'lucide-react';
+
+// Función para obtener el icono según el tipo de archivo
+const getFileIcon = (fileName: string, mimeType: string) => {
+  const extension = fileName.toLowerCase().split('.').pop() || '';
+  
+  // Imágenes
+  if (mimeType.startsWith('image/')) {
+    return <FileImage className="w-6 h-6 text-green-600" />;
+  }
+  
+  // PDF y Documentos de Word
+  if (extension === 'pdf' || mimeType === 'application/pdf' || ['doc', 'docx'].includes(extension) || mimeType.includes('word')) {
+    return <FileText className="w-6 h-6 text-blue-600" />;
+  }
+  
+  // Hojas de cálculo Excel
+  if (['xls', 'xlsx', 'csv'].includes(extension) || mimeType.includes('spreadsheet') || mimeType.includes('excel')) {
+    return <FileSpreadsheet className="w-6 h-6 text-green-600" />;
+  }
+  
+  // Presentaciones PowerPoint
+  if (['ppt', 'pptx'].includes(extension) || mimeType.includes('presentation') || mimeType.includes('powerpoint')) {
+    return <Presentation className="w-6 h-6 text-orange-600" />;
+  }
+  
+  // Archivos de código
+  if (['js', 'ts', 'jsx', 'tsx', 'html', 'css', 'scss', 'json', 'xml', 'py', 'java', 'cpp', 'c', 'php', 'rb', 'go', 'rs', 'swift', 'kt'].includes(extension)) {
+    return <FileCode className="w-6 h-6 text-purple-600" />;
+  }
+  
+  // Archivos de texto
+  if (['txt', 'md', 'rtf'].includes(extension) || mimeType.startsWith('text/')) {
+    return <FileText className="w-6 h-6 text-gray-600" />;
+  }
+  
+  // Archivos comprimidos
+  if (['zip', 'rar', '7z', 'tar', 'gz', 'bz2'].includes(extension) || mimeType.includes('compressed') || mimeType.includes('archive')) {
+    return <FileArchive className="w-6 h-6 text-purple-600" />;
+  }
+  
+  // Archivos de audio
+  if (mimeType.startsWith('audio/')) {
+    return <FileAudio className="w-6 h-6 text-blue-600" />;
+  }
+  
+  // Archivos de video
+  if (mimeType.startsWith('video/') || extension === 'mp4') {
+    return <FileVideo className="w-6 h-6 text-red-600" />;
+  }
+  
+  // Archivo genérico (fallback)
+  return <File className="w-6 h-6 text-gray-400" />;
+};
 
 interface FileData {
   name: string;
@@ -36,19 +103,31 @@ function isImageFile(filename: string): boolean {
   return imageExtensions.includes(ext);
 }
 
-const FileDownload: React.FC<FileDownloadProps> = ({ files, decryptionKey }) => {
+// Añade función para obtener el tipo MIME según la extensión
+function getMimeType(filename: string): string {
+  const ext = filename.toLowerCase().substring(filename.lastIndexOf('.'));
+  switch (ext) {
+    case '.jpg':
+    case '.jpeg':
+      return 'image/jpeg';
+    case '.png':
+      return 'image/png';
+    case '.gif':
+      return 'image/gif';
+    case '.bmp':
+      return 'image/bmp';
+    case '.webp':
+      return 'image/webp';
+    default:
+      return 'application/octet-stream';
+  }
+}
+
+const FileDownload: React.FC<FileDownloadProps> = ({ files }) => {
   const { t } = useTranslation();
-  const [decryptedFiles, setDecryptedFiles] = useState<DecryptedFileData[]>(
-    files.map(file => ({ ...file, isDecrypted: false, isDecrypting: false }))
-  );
-
-  // Actualizar estado cuando cambian los archivos
-  useEffect(() => {
-    setDecryptedFiles(
-      files.map(file => ({ ...file, isDecrypted: false, isDecrypting: false }))
-    );
-  }, [files]);
-
+  if (files.length === 0) {
+    return null;
+  }
   const formatFileSize = (bytes: number): string => {
     if (bytes === 0) return '0 Bytes';
     const k = 1024;
@@ -56,99 +135,15 @@ const FileDownload: React.FC<FileDownloadProps> = ({ files, decryptionKey }) => 
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
-
-  const decryptFile = async (fileIndex: number) => {
-    const file = decryptedFiles[fileIndex];
-    
-    // Si ya está desencriptado, no hacer nada
-    if (file.isDecrypted) return;
-    
-    // Si no es base64 válido y tenemos clave, desencriptar
-    if (!isValidBase64(file.content) && decryptionKey) {
-      setDecryptedFiles(prev => 
-        prev.map((f, i) => 
-          i === fileIndex ? { ...f, isDecrypting: true } : f
-        )
-      );
-
-      try {
-        const decrypted = CryptoJS.AES.decrypt(file.content, decryptionKey);
-        const decryptedBase64 = decrypted.toString(CryptoJS.enc.Utf8);
-        
-        // Crear preview URL si es imagen
-        let previewUrl = undefined;
-        if (isImageFile(file.name)) {
-          try {
-            const byteCharacters = atob(decryptedBase64);
-            const byteNumbers = new Array(byteCharacters.length);
-            for (let i = 0; i < byteCharacters.length; i++) {
-              byteNumbers[i] = byteCharacters.charCodeAt(i);
-            }
-            const byteArray = new Uint8Array(byteNumbers);
-            const blob = new Blob([byteArray], { type: 'image/*' });
-            previewUrl = URL.createObjectURL(blob);
-          } catch (error) {
-            console.error('Error creating preview:', error);
-          }
-        }
-
-        setDecryptedFiles(prev => 
-          prev.map((f, i) => 
-            i === fileIndex ? { 
-              ...f, 
-              decryptedContent: decryptedBase64,
-              isDecrypted: true,
-              isDecrypting: false,
-              previewUrl
-            } : f
-          )
-        );
-      } catch (error) {
-        console.error('Error decrypting file:', error);
-        setDecryptedFiles(prev => 
-          prev.map((f, i) => 
-            i === fileIndex ? { ...f, isDecrypting: false } : f
-          )
-        );
-        alert(t('fileDownload.errors.decryptionFailed'));
-      }
-    } else {
-      // Archivo no encriptado, marcar como desencriptado
-      setDecryptedFiles(prev => 
-        prev.map((f, i) => 
-          i === fileIndex ? { 
-            ...f, 
-            decryptedContent: f.content,
-            isDecrypted: true,
-            previewUrl: isImageFile(f.name) ? `data:image/*;base64,${f.content}` : undefined
-          } : f
-        )
-      );
-    }
-  };
-
-  const downloadFile = (fileIndex: number) => {
-    const file = decryptedFiles[fileIndex];
-    
-    // Si no está desencriptado, desencriptar primero
-    if (!file.isDecrypted) {
-      decryptFile(fileIndex);
-      return;
-    }
-
+  const downloadFile = (file: FileData) => {
     try {
-      const contentToUse = file.decryptedContent || file.content;
-      
-      // Convertir base64 a blob
-      const byteCharacters = atob(contentToUse);
+      const byteCharacters = atob(file.content);
       const byteNumbers = new Array(byteCharacters.length);
       for (let i = 0; i < byteCharacters.length; i++) {
         byteNumbers[i] = byteCharacters.charCodeAt(i);
       }
       const byteArray = new Uint8Array(byteNumbers);
-      const blob = new Blob([byteArray]);
-
-      // Crear URL y descargar
+      const blob = new Blob([byteArray], { type: getMimeType(file.name) });
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
@@ -162,26 +157,6 @@ const FileDownload: React.FC<FileDownloadProps> = ({ files, decryptionKey }) => 
       alert(t('fileDownload.errors.downloadFailed'));
     }
   };
-
-  // Función para desencriptar todos los archivos
-  const decryptAllFiles = async () => {
-    for (let i = 0; i < decryptedFiles.length; i++) {
-      if (!decryptedFiles[i].isDecrypted && !decryptedFiles[i].isDecrypting) {
-        await decryptFile(i);
-        // Pequeña pausa entre archivos para mejor UX
-        await new Promise(resolve => setTimeout(resolve, 100));
-      }
-    }
-  };
-
-  // Verificar si todos los archivos están desencriptados
-  const allFilesDecrypted = decryptedFiles.every(file => file.isDecrypted);
-  const anyFileDecrypting = decryptedFiles.some(file => file.isDecrypting);
-
-  if (files.length === 0) {
-    return null;
-  }
-
   return (
     <div className="mt-6 space-y-4">
       <div className="border-t pt-4">
@@ -189,57 +164,33 @@ const FileDownload: React.FC<FileDownloadProps> = ({ files, decryptionKey }) => 
           <h3 className="text-lg font-medium text-gray-900">
             {t('fileDownload.title')} ({files.length})
           </h3>
-          {/* Botón para desencriptar todos */}
-          {!allFilesDecrypted && (
-            <button
-              type="button"
-              onClick={decryptAllFiles}
-              disabled={anyFileDecrypting}
-              className="px-3 py-1 bg-green-500 text-white text-sm rounded hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {anyFileDecrypting ? t('fileDownload.decrypting') : t('fileDownload.decryptAll')}
-            </button>
-          )}
         </div>
         <div className="space-y-2">
-          {decryptedFiles.map((file, index) => (
+          {files.map((file, index) => (
             <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
               <div className="flex items-center space-x-3">
                 <div className="w-10 h-10 bg-blue-100 rounded flex items-center justify-center">
-                  {file.previewUrl && isImageFile(file.name) ? (
+                  {isImageFile(file.name) ? (
                     <img 
-                      src={file.previewUrl} 
+                      src={`data:${getMimeType(file.name)};base64,${file.content}`} 
                       alt={file.name}
                       className="w-10 h-10 rounded object-cover"
                     />
                   ) : (
-                    <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
+                    getFileIcon(file.name, getMimeType(file.name))
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-gray-900 truncate">{file.name}</p>
                   <p className="text-sm text-gray-500">{formatFileSize(file.size)}</p>
-                  {file.isDecrypting && (
-                    <p className="text-xs text-blue-600">Desencriptando...</p>
-                  )}
-                  {file.isDecrypted && (
-                    <p className="text-xs text-green-600">✓ Listo para descargar</p>
-                  )}
                 </div>
               </div>
               <button
                 type="button"
-                onClick={() => downloadFile(index)}
-                disabled={!file.isDecrypted || file.isDecrypting}
-                className={`px-3 py-1 text-sm rounded focus:outline-none focus:ring-2 focus:ring-offset-2 ${
-                  file.isDecrypted 
-                    ? 'bg-blue-500 text-white hover:bg-blue-600 focus:ring-blue-500' 
-                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                }`}
+                onClick={() => downloadFile(file)}
+                className="px-3 py-1 text-sm rounded bg-blue-500 text-white hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
               >
-                {file.isDecrypting ? t('fileDownload.decrypting') : t('fileDownload.download')}
+                {t('fileDownload.download')}
               </button>
             </div>
           ))}

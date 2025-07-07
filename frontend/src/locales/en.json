@@ -29,12 +29,15 @@
     "showQR": "Show QR",
     "hideQR": "Hide QR",
     "loading": "Loading...",
-    "decrypting": "Decrypting..."
+    "decrypting": "Decrypting...",
+    "deleteNow": "Delete message now"
   },
   "expiration": {
-    "1month": "1 month",
+    "never": "Never expires",
+    "30seconds": "30 seconds",
+    "1day": "1 day",
     "1week": "1 week",
-    "1day": "1 day"
+    "1month": "1 month"
   },
   "strength": {
     "insecure": "Insecure",
@@ -65,6 +68,7 @@
       "decryptFailed": "Failed to decrypt message. Check your key.",
       "noMessageToDecrypt": "No message to decrypt",
       "messageNotFound": "Message not found or has expired",
+      "messageDeleted": "Message was deleted",
       "deleteError": "Error deleting message",
       "noContent": "Please provide a message or upload files",
       "wrongKey": "Incorrect key",
@@ -81,9 +85,15 @@
   "modal": {
     "messageSaved": "Message Encrypted and Shared",
     "close": "Close",
+    "preview": "Preview",
     "createNewMessage": "Create new message"
   },
   "destroyMessage": "Message will be deleted after viewing",
+  "countdown": {
+    "expiresIn": "Expires in",
+    "expired": "Message expired!",
+    "deleted": "Message deleted!"
+  },
   "help": {
     "description": "The system has two main modes: <strong class=\"text-blue-600\">SHARE</strong>, which allows you to generate an encrypted message and save it to share via a link, and <strong class=\"text-blue-600\">ENCRYPT</strong>, which offers an interface to encrypt text locally, without server storage. In both modes, it is necessary to use a key to decrypt information securely from the Decrypt tab.",
     "onlineSecurity": "Messages in <strong class=\"text-blue-600\">SHARE</strong> mode are not stored in plain text. When you click the \"Save\" button, the browser first encrypts the data locally and then sends it to the server to generate the exchange link.",
@@ -135,5 +145,6 @@
   "decryptAttemptsLeft": "Decryption attempts left: {{count}}",
   "decryptAttemptsHelp": "If you fail too many decryption attempts, the message will be deleted for security.",
   "decryptWrongKeyAndAttempts": "Incorrect key. Decryption attempts left: {{count}}",
-  "destroyOnNextFail": "The message will be deleted if you fail the next attempt"
+  "destroyOnNextFail": "The message will be deleted if you fail the next attempt",
+  "decryptedMessage": "Decrypted Message"
 }

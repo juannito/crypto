@@ -69,6 +69,49 @@
     @apply bg-blue-100 text-blue-800 border border-blue-200;
   }
 
+  /* Efecto de flash para la explosión */
+  @keyframes flash-explosion {
+    0% {
+      opacity: 0;
+    }
+    50% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+    }
+  }
+
+  /* Animación para el confeti explosivo */
+  @keyframes confetti-explosion {
+    0% {
+      transform: translate(-50%, 0) scale(0);
+      opacity: 1;
+    }
+    5% {
+      transform: translate(-50%, 0) scale(1);
+      opacity: 1;
+    }
+    50% {
+      transform: 
+        translate(
+          calc(-50% + cos(var(--angle)) * var(--velocity) * 0.5),
+          calc(sin(var(--angle)) * var(--velocity) * 0.5 * var(--gravity))
+        ) 
+        rotate(calc(var(--angle) * 180deg));
+      opacity: 1;
+    }
+    100% {
+      transform: 
+        translate(
+          calc(-50% + cos(var(--angle)) * var(--velocity)),
+          calc(sin(var(--angle)) * var(--velocity) * var(--gravity) - 50vh)
+        ) 
+        rotate(calc(var(--angle) * 720deg));
+      opacity: 0;
+    }
+  }
+
   /* Estilos para el modal */
   .modal {
     @apply fixed inset-0 z-50 overflow-hidden outline-none flex items-center justify-center p-4;

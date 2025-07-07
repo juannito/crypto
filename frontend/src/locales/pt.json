@@ -27,12 +27,15 @@
     "showQR": "Mostrar QR",
     "hideQR": "Ocultar QR",
     "loading": "Carregando...",
-    "decrypting": "Descriptografando..."
+    "decrypting": "Descriptografando...",
+    "deleteNow": "Excluir mensagem agora"
   },
   "expiration": {
-    "1month": "1 mês",
+    "never": "Nunca expira",
+    "30seconds": "30 segundos",
+    "1day": "1 dia",
     "1week": "1 semana",
-    "1day": "1 dia"
+    "1month": "1 mês"
   },
   "strength": {
     "insecure": "Insegura",
@@ -65,6 +68,7 @@
               "unexpectedError": "Ocorreu um erro inesperado",
         "copyError": "Erro ao copiar para a área de transferência",
         "messageNotFound": "Mensagem não encontrada ou expirou",
+      "messageDeleted": "A mensagem foi excluída",
       "fetchError": "Erro ao buscar a mensagem",
       "noMessageToDecrypt": "Não há mensagem para descriptografar",
       "deleteError": "Erro ao excluir a mensagem",
@@ -83,9 +87,15 @@
   "modal": {
     "messageSaved": "Mensagem Criptografada e Compartilhada",
     "close": "Fechar",
+    "preview": "Visualizar",
     "createNewMessage": "Criar nova mensagem"
   },
   "destroyMessage": "A mensagem será excluída após ser visualizada",
+  "countdown": {
+    "expiresIn": "Expira em",
+    "expired": "Mensagem expirada!",
+    "deleted": "Mensagem excluída!"
+  },
   "help": {
     "description": "O sistema possui duas modalidades principais: <strong class=\"text-blue-600\">COMPARTILHAR</strong>, que permite gerar uma mensagem criptografada e salvá-la para compartilhar através de um link, e <strong class=\"text-blue-600\">CRIPTOGRAFAR</strong>, que oferece uma interface para criptografar texto localmente, sem armazenamento no servidor. Em ambos os modos, é necessário usar uma chave para descriptografar informações de forma segura na aba Descriptografar.",
     "onlineSecurity": "As mensagens na modalidade <strong class=\"text-blue-600\">COMPARTILHAR</strong> não são armazenadas em texto simples. Ao clicar no botón \"Salvar\", o navegador primeiro criptografa os dados localmente e depois os envia ao servidor para gerar o link de troca.",
@@ -137,5 +147,6 @@
   "decryptAttemptsLeft": "Tentativas de descriptografia restantes: {{count}}",
   "decryptAttemptsHelp": "Se você errar muitas tentativas de descriptografia, a mensagem será excluída por segurança.",
   "decryptWrongKeyAndAttempts": "Chave incorreta. Tentativas de descriptografia restantes: {{count}}",
-  "destroyOnNextFail": "A mensagem será excluída se você errar a próxima tentativa"
+  "destroyOnNextFail": "A mensagem será excluída se você errar a próxima tentativa",
+  "decryptedMessage": "Mensagem Descriptografada"
 }

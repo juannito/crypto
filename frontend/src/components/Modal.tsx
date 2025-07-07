@@ -7,9 +7,10 @@ interface ModalProps {
   content: string;
   status: string;
   onClose: () => void;
+  onPreview?: (code: string) => void;
 }
 
-const Modal: React.FC<ModalProps> = ({ title, content, status, onClose }) => {
+const Modal: React.FC<ModalProps> = ({ title, content, status, onClose, onPreview }) => {
   const [copied, setCopied] = useState(false);
   const { t } = useTranslation();
 
@@ -53,16 +54,39 @@ const Modal: React.FC<ModalProps> = ({ title, content, status, onClose }) => {
   const url = extractUrl();
   const code = extractCode();
 
-  const handleCopyUrl = async () => {
-    if (!url) return;
+  // Helper to get the correct base URL (IP or localhost)
+  const getBaseUrl = () => {
+    const { protocol, hostname, port } = window.location;
+    // Si es localhost, pero la IP está en window.location, usar la IP
+    if (hostname !== 'localhost' && hostname !== '127.0.0.1') {
+      return `${protocol}//${hostname}${port ? `:${port}` : ''}`;
+    }
+    // Si es localhost, pero hay una IP en la URL original (por ejemplo, accedido desde 192.168.x.x)
+    // No se puede detectar la IP real del servidor desde el cliente, así que usamos el hostname
+    return `${protocol}//${hostname}${port ? `:${port}` : ''}`;
+  };
+
+  // Cuando se copia el link, reemplazar el host por el correcto
+  const getCorrectUrl = () => {
+    if (!url) return '';
     try {
-      // Fallback para navegadores que no soportan clipboard API
+      const u = new URL(url);
+      const base = getBaseUrl();
+      return `${base}${u.pathname}${u.search}${u.hash}`;
+    } catch {
+      return url;
+    }
+  };
+
+  const handleCopyUrl = async () => {
+    const copyUrl = getCorrectUrl();
+    if (!copyUrl) return;
+    try {
       if (navigator.clipboard && window.isSecureContext) {
-        await navigator.clipboard.writeText(url);
+        await navigator.clipboard.writeText(copyUrl);
       } else {
-        // Fallback para navegadores más antiguos
         const textArea = document.createElement('textarea');
-        textArea.value = url;
+        textArea.value = copyUrl;
         textArea.style.position = 'fixed';
         textArea.style.left = '-999999px';
         textArea.style.top = '-999999px';
@@ -79,7 +103,7 @@ const Modal: React.FC<ModalProps> = ({ title, content, status, onClose }) => {
       // Fallback adicional
       try {
         const textArea = document.createElement('textarea');
-        textArea.value = url;
+        textArea.value = copyUrl;
         document.body.appendChild(textArea);
         textArea.select();
         document.execCommand('copy');
@@ -155,7 +179,19 @@ const Modal: React.FC<ModalProps> = ({ title, content, status, onClose }) => {
               </div>
             )}
           </div>
-          <div className="modal-footer flex justify-center">
+          <div className="modal-footer flex justify-center gap-3">
+            {code && onPreview && (
+              <button
+                type="button"
+                className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors"
+                onClick={() => {
+                  onPreview(code);
+                  setTimeout(onClose, 50); // Delay para mobile
+                }}
+              >
+                {t('modal.preview')}
+              </button>
+            )}
             <button
               type="button"
               className="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"

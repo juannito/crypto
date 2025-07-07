@@ -27,12 +27,15 @@
     "showQR": "Mostrar QR",
     "hideQR": "Ocultar QR",
     "loading": "Cargando...",
-    "decrypting": "Desencriptando..."
+    "decrypting": "Desencriptando...",
+    "deleteNow": "Borrar mensaje ahora"
   },
   "expiration": {
-    "1month": "1 mes",
+    "never": "No expira",
+    "30seconds": "30 segundos",
+    "1day": "1 día",
     "1week": "1 semana",
-    "1day": "1 día"
+    "1month": "1 mes"
   },
   "strength": {
     "insecure": "Insegura",
@@ -65,6 +68,7 @@
       "unexpectedError": "Ocurrió un error inesperado",
       "copyError": "Error al copiar al portapapeles",
       "messageNotFound": "Mensaje no encontrado o ha expirado",
+      "messageDeleted": "El mensaje fue eliminado",
       "fetchError": "Error al obtener el mensaje",
       "noMessageToDecrypt": "No hay mensaje para desencriptar",
       "deleteError": "No se pudo eliminar el mensaje",
@@ -83,9 +87,15 @@
   "modal": {
     "messageSaved": "Mensaje Encriptado y Compartido",
     "close": "Cerrar",
+    "preview": "Vista Previa",
     "createNewMessage": "Crear nuevo mensaje"
   },
   "destroyMessage": "El mensaje se borrará después de ser visualizado",
+  "countdown": {
+    "expiresIn": "Expira en",
+    "expired": "¡Mensaje expirado!",
+    "deleted": "¡Mensaje eliminado!"
+  },
   "help": {
     "description": "El sistema posee dos modalidades principales: <strong class=\"text-blue-600\">COMPARTIR</strong>, que permite generar un mensaje encriptado y guardarlo para compartir mediante un enlace, y <strong class=\"text-blue-600\">ENCRIPTAR</strong>, que ofrece una interfaz para encriptar un texto localmente, sin almacenamiento en el servidor. En ambos modos, es necesario utilizar una clave para desencriptar información de forma segura desde la tab de Desencriptar.",
     "onlineSecurity": "Los mensajes en la modalidad <strong class=\"text-blue-600\">COMPARTIR</strong> no se almacenan en texto plano. Al hacer clic en el botón \"Grabar\", el navegador primero encripta los datos localmente y luego los envía al servidor para generar el enlace de intercambio.",
@@ -137,5 +147,6 @@
   "decryptAttemptsLeft": "Intentos restantes de descifrado: {{count}}",
   "decryptAttemptsHelp": "Si fallas demasiados intentos de descifrado, el mensaje se eliminará por seguridad.",
   "decryptWrongKeyAndAttempts": "Clave incorrecta. Intentos de descifrado restantes: {{count}}",
-  "destroyOnNextFail": "El mensaje se eliminará si fallas el próximo intento"
+  "destroyOnNextFail": "El mensaje se eliminará si fallas el próximo intento",
+  "decryptedMessage": "Mensaje Desencriptado"
 }

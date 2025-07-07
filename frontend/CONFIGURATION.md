@@ -26,26 +26,26 @@ const localIP = "192.168.1.231"; // Cambia esta IP por la tuya
 
 ### Opción 2: Usar variables de entorno (Recomendado)
 
-1. Crea un archivo `.env` en la carpeta `frontend/`:
+1. Crea un archivo `.env.local` en la carpeta `frontend/`:
 
 ```bash
 # Configuración del backend
-REACT_APP_BACKEND_URL=http://tu-ip-local:5001
+VITE_BACKEND_URL=http://tu-ip-local:5001
 ```
 
 2. Modifica `src/config.ts` para usar la variable de entorno:
 
 ```typescript
 const getBackendConfig = (): Config => {
-  const isDevelopment = process.env.NODE_ENV === "development";
-  const isProduction = process.env.NODE_ENV === "production";
+  const isDevelopment = import.meta.env.DEV;
+  const isProduction = import.meta.env.PROD;
 
   let backendURL: string;
 
   if (isDevelopment) {
     // Usar variable de entorno si está disponible, sino usar IP por defecto
     backendURL =
-      process.env.REACT_APP_BACKEND_URL || "http://192.168.1.231:5001";
+      import.meta.env.VITE_BACKEND_URL || "http://192.168.1.231:5001";
   } else {
     backendURL = window.location.origin;
   }

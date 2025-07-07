@@ -43,12 +43,15 @@
 - **Generación de códigos QR** para compartir
 - **Validación de fortaleza de claves** en tiempo real
 
-#### **📨 MessageTab (Desencriptar)**
+#### **📨 DecryptTab (Desencriptar)**
 
 - **Desencriptación de mensajes** con validación de claves
 - **Sistema de intentos** con autodestrucción automática
-- **Descarga segura** de archivos adjuntos
-- **Gestión de archivos** con desencriptación automática
+- **Interfaz mejorada** que oculta el input de clave después del desencriptado exitoso
+- **Mensaje desencriptado** se muestra en un contenedor destacado
+- **Archivos adjuntos** se muestran después del mensaje desencriptado
+- **Botón de eliminación** centrado debajo de la lista de archivos
+- **Icono de ojo** para mostrar/ocultar la contraseña durante la entrada
 
 ## 🛠️ Stack Tecnológico
 
@@ -151,14 +154,18 @@ frontend/
 ├── public/                 # Archivos estáticos
 ├── src/
 │   ├── components/         # Componentes React
+│   │   ├── CountdownTimer.tsx
+│   │   ├── DecryptTab.tsx
 │   │   ├── FileDownload.tsx
 │   │   ├── FileUpload.tsx
 │   │   ├── HelpTab.tsx
 │   │   ├── LanguageSelector.tsx
-│   │   ├── MessageTab.tsx
 │   │   ├── Modal.tsx
 │   │   ├── Notification.tsx
+│   │   ├── NotificationContainer.tsx
 │   │   ├── OnlineTab.tsx
+│   │   ├── ResponseView.tsx
+│   │   ├── ShareTab.tsx
 │   │   └── TraditionalTab.tsx
 │   ├── hooks/             # Custom Hooks
 │   │   └── useNotifications.ts
@@ -201,16 +208,25 @@ const TraditionalTab: React.FC = () => {
 - **Propósito**: Encriptación local sin almacenamiento
 - **Características**: Generación de QR, validación de fortaleza
 
-#### **MessageTab**
+#### **DecryptTab**
 
 ```typescript
-const MessageTab: React.FC = () => {
-  // Desencriptación de mensajes
+const DecryptTab: React.FC<DecryptTabProps> = ({
+  onMessageDeleted,
+  onDecryptError,
+}) => {
+  // Desencriptación de mensajes con interfaz mejorada
 };
 ```
 
-- **Propósito**: Desencriptar mensajes y archivos
-- **Características**: Sistema de intentos, descarga de archivos
+- **Propósito**: Desencriptar mensajes y archivos con UX optimizada
+- **Características**:
+  - Sistema de intentos con autodestrucción
+  - Input de clave con icono de ojo para mostrar/ocultar
+  - Mensaje desencriptado en contenedor destacado
+  - Archivos mostrados después del mensaje
+  - Botón de eliminación centrado
+  - Ocultación automática del input de clave tras desencriptado exitoso
 
 ## 🔧 Configuración Avanzada
 
@@ -292,6 +308,38 @@ const MyComponent = () => {
   return <div>{t("form.message")}</div>;
 };
 ```
+
+## 🎨 Mejoras de Experiencia de Usuario
+
+### **Flujo de Desencriptación Optimizado**
+
+#### **Antes del Desencriptado**
+
+- Campo de entrada de clave con **icono de ojo** para mostrar/ocultar contraseña
+- Validación en tiempo real de la fortaleza de la clave
+- Botón "Decrypt" para iniciar el proceso
+
+#### **Después del Desencriptado Exitoso**
+
+- **Input de clave desaparece** automáticamente (no tiene sentido visual mantenerlo)
+- **Mensaje desencriptado** se muestra en un contenedor verde destacado
+- **Archivos adjuntos** se listan después del mensaje (orden lógico)
+- **Botón de eliminación** aparece centrado debajo de la lista de archivos
+- **Botón "Decrypt All"** desaparece cuando todos los archivos están desencriptados
+
+#### **Gestión de Archivos Mejorada**
+
+- **Imágenes**: Se muestran con preview automático después del desencriptado
+- **Botones individuales**: Cada archivo tiene su propio botón "Download"
+- **Estados visuales**: Indicadores claros de "Desencriptando..." y "✓ Listo para descargar"
+- **Responsive**: Botones se adaptan a dispositivos móviles
+
+### **Características de Accesibilidad**
+
+- **Navegación por teclado** en todos los componentes
+- **ARIA labels** para lectores de pantalla
+- **Contraste adecuado** en todos los elementos
+- **Feedback visual** inmediato para todas las acciones
 
 ## 🔒 Seguridad Implementada
 

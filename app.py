@@ -58,6 +58,7 @@ def get():
     attempts_left = max_attempts - attempts
 
     m = r.get(id)
+    expiration_ts = None
     if m == None:
         m = "No existe el mensaje. Fue destruido o expiró."
     else:
@@ -65,7 +66,19 @@ def get():
         if isinstance(m, bytes):
             m = m.decode('utf-8')
         secs = r.ttl(id)
-        info = f"&nbsp; Expira en {secs//86400} d&iacute;a/s"
+        if secs > 0:
+            expiration_ts = int(time.time()) + secs
+            if secs < 60:
+                info = f"&nbsp; Expira en {secs} segundos"
+            elif secs < 3600:
+                info = f"&nbsp; Expira en {secs//60} minutos"
+            elif secs < 86400:
+                info = f"&nbsp; Expira en {secs//3600} horas"
+            else:
+                info = f"&nbsp; Expira en {secs//86400} d&iacute;a/s"
+        else:
+            info = "&nbsp; No expira"
+            expiration_ts = None
         
         # Verificar si es el nuevo formato con archivos
         try:
@@ -88,7 +101,7 @@ def get():
             pass
         # Ya no agregar info de intentos restantes aquí
 
-    return jsonify({'info':info,'msg':m, 'destroy_on_read': destroy_on_read, 'attempts_left': attempts_left})
+    return jsonify({'info':info,'msg':m, 'destroy_on_read': destroy_on_read, 'attempts_left': attempts_left, 'expiration_ts': expiration_ts})
 
 @app.route('/get_files', methods=['POST'])
 def get_files():

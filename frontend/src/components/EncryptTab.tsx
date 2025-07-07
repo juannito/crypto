@@ -41,7 +41,9 @@ const EncryptTab: React.FC = () => {
   const [hasEncrypted, setHasEncrypted] = useState(false); // Nuevo estado para controlar si se ha encriptado
   const [showKey, setShowKey] = useState(false); // Estado para mostrar/ocultar clave
   const [showFileUpload, setShowFileUpload] = useState(false); // Estado para mostrar/ocultar área de archivos
-  const [encryptFiles, setEncryptFiles] = useState(true); // Toggle para encriptar archivos
+  // Eliminar el estado y el toggle de encryptFiles
+  const [expire, setExpire] = useState('0'); // Opción de expiración
+  const [destroy, setDestroy] = useState(false); // Destruir al leer
 
   // Verificar si el formulario es válido para habilitar el botón
   const isFormValid = key.length >= 8 && ((message && message.trim()) || files.length > 0);
@@ -74,8 +76,21 @@ const EncryptTab: React.FC = () => {
     setIsEncrypting(true);
     try {
       let filesData: any[] = [];
-      if (files.length > 0 && encryptFiles) {
-        filesData = await serializeFiles(files);
+      // Archivos
+      if (files.length > 0) {
+        // Serializar y encriptar archivos SIEMPRE
+        const fileObjs = await Promise.all(files.map(async (file) => {
+          const content = await new Promise<string>((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(btoa(reader.result as string));
+            reader.onerror = reject;
+            reader.readAsBinaryString(file);
+          });
+          // Encriptar el contenido base64
+          const encryptedContent = CryptoJS.AES.encrypt(content, key).toString();
+          return { name: file.name, size: file.size, content: encryptedContent };
+        }));
+        filesData = fileObjs;
       }
       const data = {
         message: message.trim() || '',
@@ -135,7 +150,9 @@ const EncryptTab: React.FC = () => {
     setFiles([]);
     setEncrypted(''); // Limpiar mensaje encriptado
     setHasEncrypted(false); // Resetear estado de encriptación
-    setEncryptFiles(true); // Resetear toggle de encriptar archivos
+    // Eliminar el toggle del formulario
+    setExpire('0'); // Resetear expiración
+    setDestroy(false); // Resetear destruir al leer
     showInfo(t('notifications.info.formCleared'));
   };
 
@@ -263,22 +280,37 @@ const EncryptTab: React.FC = () => {
               </button>
             </div>
             
-            {/* Toggle para encriptar archivos - mostrar cuando se activa la subida de archivos */}
-            {showFileUpload && (
+            {/* Eliminar el toggle para encriptar archivos */}
+            
+            {/* Opciones de expiración */}
+            <div className="flex flex-wrap items-center gap-4">
+              <div className="flex items-center">
+                <label className="mr-2 text-sm font-medium text-gray-700">{t('form.expires')}</label>
+                <select
+                  className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  value={expire}
+                  onChange={(e) => setExpire(e.target.value)}
+                >
+                  <option value="0">{t('expiration.never')}</option>
+                  <option value="30">{t('expiration.30seconds')}</option>
+                  <option value="86400">{t('expiration.1day')}</option>
+                  <option value="604800">{t('expiration.1week')}</option>
+                  <option value="2592000">{t('expiration.1month')}</option>
+                </select>
+              </div>
               <div className="flex items-center">
                 <input
                   type="checkbox"
-                  id="encryptFiles"
-                  checked={encryptFiles}
-                  onChange={e => setEncryptFiles(e.target.checked)}
+                  id="destroy"
+                  checked={destroy}
+                  onChange={(e) => setDestroy(e.target.checked)}
                   className="mr-2 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                  disabled={false}
                 />
-                <label htmlFor="encryptFiles" className="text-sm text-gray-700 whitespace-nowrap">
-                  {t('form.encryptFiles')}
+                <label htmlFor="destroy" className="text-sm text-gray-700">
+                  {t('form.destroyOnRead')}
                 </label>
               </div>
-            )}
+            </div>
           </div>
           
           {/* Barra de fortaleza */}
@@ -395,7 +427,7 @@ const EncryptTab: React.FC = () => {
                 </button>
               </div>
             </div>
-            <pre className="whitespace-pre-wrap break-all text-gray-800 bg-white rounded p-3 text-sm border overflow-x-auto pr-14">
+            <pre className="whitespace-pre-wrap break-all text-gray-800 bg-white rounded p-3 text-sm border overflow-x-auto overflow-y-auto pr-14" style={{ maxHeight: '10rem', minHeight: '2.5rem' }}>
               {encrypted}
             </pre>
             {/* Modal QR */}
