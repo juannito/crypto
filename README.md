@@ -39,26 +39,75 @@ También hay un **cliente de línea de comandos** para scripts, servidores y age
 
 Requisitos: Python 3.11+, Node.js 18+ y Redis 6.2+.
 
+### Instalar (una vez)
+
 ```bash
 git clone https://github.com/juannito/crypto.git && cd crypto
 
-# Backend
-python -m venv venv && source venv/bin/activate
-pip install -r requirements.txt
-cp app.cfg-sample app.cfg        # datos de Redis
+python -m venv venv
+venv/bin/pip install -r requirements.txt
+npm --prefix frontend install
 
-# Frontend (Flask sirve el build)
-cd frontend && npm install && npm run build && cd ..
-
-python app.py                    # http://localhost:5001
-LAN=1 python app.py              # accesible desde tu red, muestra la IP
+cp app.cfg-sample app.cfg
 ```
 
-`LAN=1` levanta https con un certificado autofirmado (`.devcert/`), porque fuera de localhost el navegador solo permite el cifrado en contextos seguros. La primera vez hay que aceptar el aviso del certificado.
+En `app.cfg` van los datos de Redis. Para un Redis local sin contraseña (`brew install redis && brew services start redis`):
 
-Para desarrollar con recarga en caliente: `npm start` (o `npm run start:lan` para probar desde el celular), con el backend corriendo en el puerto 5001. Más detalles en [frontend/CONFIGURATION.md](frontend/CONFIGURATION.md).
+```python
+REDIS_HOST = 'localhost'
+REDIS_PASSWORD = None
+```
 
-Pruebas: `CRYPTO_SETTINGS=tests/test.cfg python tests/test_api.py` para el backend (contra Redis; el formato de `test.cfg` está al inicio del archivo) y `npm test` para el frontend.
+### Levantar
+
+Todos los comandos se ejecutan desde la raíz del proyecto (`crypto/`):
+
+```bash
+npm --prefix frontend run build      # build del frontend (Flask lo sirve); repetir si cambia el frontend
+
+venv/bin/python app.py               # solo en esta máquina: http://localhost:5001
+LAN=1 venv/bin/python app.py         # accesible desde tu red (celular, otra PC)
+```
+
+Con `LAN=1` la terminal muestra la dirección para entrar desde otros equipos:
+
+```
+  Crypto Messenger
+  Local:      https://localhost:5001
+  En tu red:  https://192.168.1.231:5001
+```
+
+Usa https con un certificado autofirmado (`.devcert/`), porque fuera de localhost el navegador solo habilita el cifrado en contextos seguros. La primera vez, cada dispositivo muestra un aviso del certificado que hay que aceptar. Otras variables: `PORT=5002` para cambiar el puerto y `HTTPS=0` para usar http.
+
+### Problemas comunes
+
+| Síntoma | Solución |
+|---|---|
+| **Not Found** al abrir la página, o el aviso "falta el build del frontend" | `npm --prefix frontend run build` (no hace falta reiniciar el servidor) |
+| **Address already in use** | Ya hay algo en el puerto 5001: `kill $(lsof -t -iTCP:5001 -sTCP:LISTEN)` o usa `PORT=5002` |
+| Error de conexión a **Redis** | Revisa que Redis esté corriendo (`redis-cli ping` → `PONG`) y los datos de `app.cfg` |
+| Desde otro equipo **no cifra** o da error de seguridad | Entra por la dirección **https** que muestra `LAN=1` y acepta el certificado |
+| El celular **no llega** a la IP | Mismo Wi-Fi que la Mac; si macOS lo pregunta, permite conexiones entrantes a Python |
+
+### Desarrollo y pruebas
+
+Con recarga en caliente: `npm --prefix frontend start` (o `run start:lan` para probar desde el celular), con el backend corriendo en el puerto 5001. Más detalles en [frontend/CONFIGURATION.md](frontend/CONFIGURATION.md).
+
+Pruebas: `CRYPTO_SETTINGS=tests/test.cfg venv/bin/python tests/test_api.py` para el backend (contra Redis; el formato de `test.cfg` está al inicio del archivo), `npm --prefix frontend test` para el frontend, y las del CLI en `cli/tests/test_cli.py`.
+
+### Línea de comandos (CLI)
+
+```bash
+venv/bin/pip install -e cli                          # una vez, desde el repo
+source venv/bin/activate
+export CRYPTO_URL=https://192.168.1.231:5001         # tu servidor
+export CRYPTO_INSECURE=1                             # solo con el certificado autofirmado de LAN=1
+
+crypto share "la clave es 1234"                      # → enlace que se abre en la web
+crypto open "https://192.168.1.231:5001/message#c=…&k=…"
+```
+
+Guía completa en [cli/README.md](cli/README.md).
 
 ## Configuración
 

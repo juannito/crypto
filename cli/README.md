@@ -6,13 +6,40 @@ Usa Crypto Messenger desde la terminal, scripts, servidores o agentes de IA. Cif
 
 Requiere Python 3.10+.
 
+**Desde el repo clonado** (lo más simple si ya tienes el proyecto):
+
+```bash
+cd crypto
+venv/bin/pip install -e cli
+source venv/bin/activate        # deja disponible el comando `crypto`
+```
+
+**En cualquier otra máquina o servidor:**
+
 ```bash
 pipx install "git+https://github.com/juannito/crypto.git#subdirectory=cli"
 # o dentro de un entorno virtual:
 pip install "git+https://github.com/juannito/crypto.git#subdirectory=cli"
-
-export CRYPTO_URL=https://crypto.tudominio.com   # tu instancia
 ```
+
+## Configuración
+
+| Variable | Uso |
+|---|---|
+| `CRYPTO_URL` | Servidor al que se conecta (o `--server URL` en cada comando) |
+| `CRYPTO_INSECURE=1` | Acepta certificados autofirmados, como el de `LAN=1` (o `-k` en cada comando). **Solo en tu red**: desactiva la verificación del certificado |
+
+Contra tu servidor en la LAN:
+
+```bash
+export CRYPTO_URL=https://192.168.1.231:5001    # la IP que muestra LAN=1
+export CRYPTO_INSECURE=1
+crypto share "hola"
+```
+
+Contra un servidor con certificado real, solo `CRYPTO_URL`.
+
+Para abrir un enlace no hace falta configurar nada: el servidor se toma del propio enlace.
 
 ## Uso
 
@@ -37,7 +64,19 @@ crypto request status "https://…/inbox#r=…"
 crypto request open   "https://…/inbox#r=…" -o ./recibido
 ```
 
-Las comillas en los enlaces son necesarias: sin ellas la terminal interpreta el `&`.
+Las comillas en los enlaces son necesarias: sin ellas la terminal corta en el `&` y se pierde la clave.
+
+Ayuda de cada comando: `crypto --help`, `crypto share --help`, `crypto request --help`.
+
+## Problemas comunes
+
+| Mensaje | Solución |
+|---|---|
+| `Certificado no válido…` | Servidor con certificado autofirmado: `export CRYPTO_INSECURE=1` o `-k` |
+| `Indica el servidor…` | Falta `export CRYPTO_URL=…` (o `--server URL`) |
+| `No es un enlace de Compartir válido` | El enlace se cortó: ponlo entre comillas y completo, con la parte después de `#` |
+| `No existe, expiró o el enlace está incompleto` | Ya se leyó (si era de un solo uso), expiró o fue borrado |
+| `command not found: crypto` | Activa el entorno (`source venv/bin/activate`) o usa `venv/bin/crypto` |
 
 ## Contraseñas
 
@@ -63,7 +102,5 @@ Si abres un mensaje de un solo uso con una contraseña incorrecta, el servidor y
 Si el agente escribe el mensaje él mismo, el texto sí pasa por el modelo. Para secretos reales, usa el patrón de arriba.
 
 ## Desarrollo
-
-Contra un servidor local con `LAN=1` (certificado autofirmado), agrega `-k`.
 
 Pruebas, incluida la compatibilidad byte a byte con el cifrado del navegador: ver el encabezado de `tests/test_cli.py`.
