@@ -10,11 +10,20 @@ Nació para que cualquiera, sin saber de criptografía (gpg y similares), pueda 
 
 | | Qué hace | Pasa por el servidor |
 |---|---|---|
-| **Compartir** | Cifra un mensaje y archivos y genera un enlace. Puede expirar (30 s a 1 mes), destruirse al leerse y pedir una contraseña adicional. | Sí, cifrado |
+| **Compartir** | Cifra un mensaje y archivos y genera un enlace. Puede expirar (30 s a 1 mes), destruirse al leerse, pedir una contraseña adicional y avisarte cuando lo lean. | Sí, cifrado |
 | **Encriptar** | Cifra con una contraseña y te da un código para mandar por donde quieras. | No |
 | **Solicitar** | Genera un enlace para que **otra persona te envíe** un secreto. Ella lo cifra con tu clave pública y solo tu enlace de buzón lo abre. El buzón se puede guardar en el celular con un QR y proteger con un código. | Sí, cifrado |
 
 La pestaña **Descifrar** abre enlaces y códigos de las tres, incluidos los del formato anterior (CryptoJS).
+
+Arriba a la derecha hay dos accesos con un contador rojo de novedades, que también se ve en el título de la pestaña del navegador:
+
+- **Mis solicitudes:** estado de cada pedido. Avisa cuando alguien responde.
+- **Recibos:** si ya abrieron los mensajes que compartiste, y cuándo. El servidor guarda solo el estado y la fecha, nunca quién ni desde dónde. El destinatario ve un aviso de que el remitente sabrá cuándo lo abrió.
+
+Ambas listas viven solo en tu navegador (`localStorage`), sin enlaces ni claves.
+
+También hay un **cliente de línea de comandos** para scripts, servidores y agentes de IA, que cifra en tu máquina y crea enlaces que se abren en la web: ver [cli/README.md](cli/README.md).
 
 ## Cómo protege los datos
 
@@ -23,6 +32,7 @@ La pestaña **Descifrar** abre enlaces y códigos de las tres, incluidos los del
 - **Sin metadatos a la vista:** nombres, tipos y tamaños de archivos van dentro del contenido cifrado.
 - **El ID solo no sirve:** leer, borrar o quemar un mensaje exige un token derivado de la clave.
 - **De un solo uso de verdad:** la lectura y el borrado ocurren en una única operación atómica en Redis.
+- **Recibos sin datos personales:** solo estado y fecha, protegidos con su propio token. La vista previa de quien lo creó no cuenta como lectura.
 - **Servidor endurecido:** rechaza contenido sin cifrar, limita peticiones por IP y el tamaño (20 MB), borra tras 5 intentos fallidos, envía CSP estricta, HSTS y otras cabeceras, y registra los eventos en `security.log` sin IDs completos.
 
 ## Uso
@@ -71,7 +81,7 @@ Todo es `POST` con `multipart/form-data`. El servidor recibe solo datos cifrados
 
 | Endpoint | Para qué |
 |---|---|
-| `/post` | Guardar un mensaje (`payload`, `expire`, `destroy`, `token`) |
+| `/post` | Guardar un mensaje (`payload`, `expire`, `destroy`, `token` y, opcional, `receipt_token`) |
 | `/meta` | Consultar si es de un solo uso o pide contraseña, y cuándo expira |
 | `/get` | Descargar el mensaje cifrado (lo borra si es de un solo uso) |
 | `/fail_attempt` | Registrar un intento fallido (al quinto se borra) |
@@ -79,6 +89,7 @@ Todo es `POST` con `multipart/form-data`. El servidor recibe solo datos cifrados
 | `/request/create` · `/request/delete` | Crear o borrar una solicitud |
 | `/request/info` · `/request/respond` | Vista de quien responde (una sola respuesta) |
 | `/request/status` · `/request/open` | Vista del dueño (la respuesta se borra al abrirla) |
+| `/activity` | JSON con hasta 50 solicitudes y recibos: el estado de todos en una sola consulta |
 
 Un token incorrecto responde igual que un mensaje inexistente (`404`).
 
@@ -87,6 +98,7 @@ Un token incorrecto responde igual que un mensaje inexistente (`404`).
 ```
 app.py                  Servidor Flask (API, cabeceras, rate limiting)
 tests/test_api.py       Pruebas de la API
+cli/                    Cliente de línea de comandos (crypto)
 frontend/src/
   crypto/               WebCrypto: sobres, cajas selladas, formato anterior
   lib/                  API, enlaces, almacenamiento local

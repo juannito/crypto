@@ -1,8 +1,9 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { Inbox, KeyRound, MailQuestion, RefreshCw, Send, Trash2 } from 'lucide-react';
+import { ChevronRight, Inbox, KeyRound, MailQuestion, RefreshCw, Send, Trash2 } from 'lucide-react';
 import { useNotifications } from '../hooks/useNotifications';
+import { useActivity } from '../hooks/useActivity';
 import { concatBytes } from '../crypto/encoding';
 import { open, seal } from '../crypto/envelope';
 import { decodePayload, DecryptedPayload, encodePayload } from '../crypto/payload';
@@ -160,13 +161,12 @@ const StepTitle: React.FC<{ n: number; title: string }> = ({ n, title }) => (
 //
 // Mis solicitudes
 //
-type ListStatus = RequestStatus | 'gone' | 'loading' | 'error';
+type ListStatus = RequestStatus | 'gone' | 'loading';
 
 const StatusBadge: React.FC<{ status: ListStatus }> = ({ status }) => {
   const { t } = useTranslation();
   const styles: Record<ListStatus, string> = {
     loading: 'bg-gray-100 text-gray-500',
-    error: 'bg-gray-100 text-gray-500',
     pending: 'bg-amber-100 text-amber-800',
     answered: 'bg-green-100 text-green-800',
     gone: 'bg-gray-100 text-gray-500',
@@ -174,27 +174,27 @@ const StatusBadge: React.FC<{ status: ListStatus }> = ({ status }) => {
   return <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-semibold ${styles[status]}`}>{t(`requests.status.${status}`)}</span>;
 };
 
-const MyRequests: React.FC<{ version: number }> = ({ version }) => {
+export const MyRequestsPage: React.FC = () => {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const { showError } = useNotifications();
+  const activity = useActivity();
   const [items, setItems] = useState<StoredRequest[]>(loadRequests);
-  const [statuses, setStatuses] = useState<Record<string, ListStatus>>({});
+  const { refresh } = activity;
 
   useEffect(() => {
-    const list = loadRequests();
-    setItems(list);
-    list.forEach(item => {
-      setStatuses(s => ({ ...s, [item.id]: 'loading' }));
-      getRequestStatus(item.id, item.ownerToken)
-        .then(res => setStatuses(s => ({ ...s, [item.id]: res.status })))
-        .catch(err => setStatuses(s => ({ ...s, [item.id]: err instanceof ApiError && err.status === 404 ? 'gone' : 'error' })));
-    });
-  }, [version]);
+    refresh();
+  }, [refresh]);
+
+  const statusOf = (id: string): ListStatus => {
+    const s = activity.requests[id]?.status;
+    return s === undefined ? 'loading' : s;
+  };
 
   const forget = (id: string) => {
     removeRequest(id);
     setItems(loadRequests());
+    refresh();
   };
 
   const remove = async (item: StoredRequest) => {
@@ -206,49 +206,66 @@ const MyRequests: React.FC<{ version: number }> = ({ version }) => {
     forget(item.id);
   };
 
+  const header = (
+    <div className="mb-4 flex items-center justify-between gap-3">
+      <h2 className="text-lg font-semibold text-gray-900">{t('requests.myRequests')}</h2>
+      <Button variant="secondary" icon={<MailQuestion className="h-4 w-4" />} onClick={() => navigate('/requests')}>
+        {t('requests.new')}
+      </Button>
+    </div>
+  );
+
   if (items.length === 0) {
-    return <p className="rounded-xl border border-dashed border-gray-300 p-6 text-center text-sm text-gray-500">{t('requests.empty')}</p>;
+    return (
+      <>
+        {header}
+        <p className="rounded-xl border border-dashed border-gray-300 p-6 text-center text-sm text-gray-500">{t('requests.empty')}</p>
+      </>
+    );
   }
 
   return (
-    <ul className="space-y-3">
-      {items.map(item => {
-        const status = statuses[item.id] || 'loading';
-        return (
-          <li key={item.id}>
-            <Card className="space-y-3">
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <p className="truncate text-sm font-semibold text-gray-900">{item.label || t('requests.untitled')}</p>
-                  <p className="text-xs text-gray-500">
-                    {new Date(item.createdAt).toLocaleString(i18n.language, { dateStyle: 'short', timeStyle: 'short' })}
-                    {item.locked && ` · ${t('requests.locked')}`}
-                  </p>
+    <>
+      {header}
+      <ul className="space-y-3">
+        {items.map(item => {
+          const status = statusOf(item.id);
+          return (
+            <li key={item.id}>
+              <Card className="space-y-3">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-semibold text-gray-900">{item.label || t('requests.untitled')}</p>
+                    <p className="text-xs text-gray-500">
+                      {new Date(item.createdAt).toLocaleString(i18n.language, { dateStyle: 'short', timeStyle: 'short' })}
+                      {item.locked && ` · ${t('requests.locked')}`}
+                    </p>
+                  </div>
+                  <StatusBadge status={status} />
                 </div>
-                <StatusBadge status={status} />
-              </div>
-              <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
-                {status !== 'gone' && (
-                  <Button variant={status === 'answered' ? 'primary' : 'secondary'} icon={<Inbox className="h-4 w-4" />} onClick={() => navigate(pathOf(item.inboxLink))}>
-                    {t('requests.openInbox')}
-                  </Button>
-                )}
-                {status === 'pending' && <CopyButton text={item.requestLink} label={t('requests.copyRequestLinkShort')} variant="secondary" />}
-                {status === 'gone' ? (
-                  <Button variant="ghost" onClick={() => forget(item.id)} className="col-span-2">
-                    {t('requests.forget')}
-                  </Button>
-                ) : (
-                  <Button variant="ghost" icon={<Trash2 className="h-4 w-4" />} onClick={() => remove(item)} className={status === 'answered' ? '' : 'col-span-2'}>
-                    {t('requests.delete')}
-                  </Button>
-                )}
-              </div>
-            </Card>
-          </li>
-        );
-      })}
-    </ul>
+                <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
+                  {status !== 'gone' && (
+                    <Button variant={status === 'answered' ? 'primary' : 'secondary'} icon={<Inbox className="h-4 w-4" />} onClick={() => navigate(pathOf(item.inboxLink))}>
+                      {t('requests.openInbox')}
+                    </Button>
+                  )}
+                  {status === 'pending' && <CopyButton text={item.requestLink} label={t('requests.copyRequestLinkShort')} variant="secondary" />}
+                  {status === 'gone' ? (
+                    <Button variant="ghost" onClick={() => forget(item.id)} className="col-span-2">
+                      {t('requests.forget')}
+                    </Button>
+                  ) : (
+                    <Button variant="ghost" icon={<Trash2 className="h-4 w-4" />} onClick={() => remove(item)} className={status === 'answered' ? '' : 'col-span-2'}>
+                      {t('requests.delete')}
+                    </Button>
+                  )}
+                </div>
+              </Card>
+            </li>
+          );
+        })}
+      </ul>
+    </>
   );
 };
 
@@ -257,14 +274,33 @@ const MyRequests: React.FC<{ version: number }> = ({ version }) => {
 //
 export const RequestsTab: React.FC = () => {
   const { t } = useTranslation();
-  const [version, setVersion] = useState(0);
+  const navigate = useNavigate();
+  const { refresh, pendingAnswers } = useActivity();
+  const count = loadRequests().length;
   return (
-    <div className="space-y-8">
-      <CreateRequest onCreated={() => setVersion(v => v + 1)} />
-      <section className="space-y-3">
-        <h2 className="text-base font-semibold text-gray-900">{t('requests.myRequests')}</h2>
-        <MyRequests version={version} />
-      </section>
+    <div className="space-y-4">
+      <CreateRequest
+        onCreated={() => {
+          refresh();
+          navigate('/my-requests');
+        }}
+      />
+      {count > 0 && (
+        <button
+          type="button"
+          onClick={() => navigate('/my-requests')}
+          className="flex w-full items-center justify-between gap-3 rounded-xl border border-gray-200 bg-white p-4 text-left text-sm font-medium text-gray-800 hover:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+        >
+          <span className="flex items-center gap-2">
+            <Inbox className="h-5 w-5 text-gray-400" aria-hidden />
+            {t('requests.myRequests')} ({count})
+            {pendingAnswers > 0 && (
+              <span className="rounded-full bg-red-600 px-2 py-0.5 text-xs font-semibold text-white">{t('requests.newAnswers', { count: pendingAnswers })}</span>
+            )}
+          </span>
+          <ChevronRight className="h-5 w-5 text-gray-400" aria-hidden />
+        </button>
+      )}
     </div>
   );
 };
@@ -373,6 +409,7 @@ export const InboxView: React.FC = () => {
   // Se lee una sola vez: al retirar la respuesta la entrada se quita de la lista
   const [stored] = useState(() => (link ? findRequest(link.id) : undefined));
   const [saved, setSaved] = useState(!!stored);
+  const { refresh: refreshActivity } = useActivity();
 
   const refresh = useCallback(async (tok: string) => {
     if (!link) return;
@@ -420,6 +457,7 @@ export const InboxView: React.FC = () => {
       const box = await openRequest(link.id, token);
       setPayload(decodePayload(await openSealed(keys, box)));
       removeRequest(link.id);
+      refreshActivity();
       showSuccess(t('notifications.success.messageDecrypted'));
     } catch (err) {
       if (err instanceof ApiError && err.status === 404) setStatus('gone');
@@ -439,6 +477,7 @@ export const InboxView: React.FC = () => {
     }
     removeRequest(link.id);
     setStatus('gone');
+    refreshActivity();
   };
 
   const saveHere = () => {
@@ -454,9 +493,10 @@ export const InboxView: React.FC = () => {
       ownerToken: token,
     });
     setSaved(true);
+    refreshActivity();
   };
 
-  const backToList = () => navigate('/requests');
+  const backToList = () => navigate('/my-requests');
 
   if (!link) return <GoneView title={t('inbox.invalidTitle')} actionLabel={t('requests.backToList')} onAction={backToList} celebrate={false} />;
 

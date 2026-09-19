@@ -285,6 +285,49 @@ def legacy_fetch(msg_id):
 
 
 #
+# Recibos de lectura: solo estado y fecha, nunca quién ni desde dónde.
+#   rcpt:<id>  hash {h: sha256(token), s: pending|viewed|deleted, v: epoch de apertura}
+# Duran 30 días más que el mensaje, para poder ver que se leyó aunque ya no exista.
+#
+RECEIPT_EXTRA_TTL = 30 * 86400
+MAX_ACTIVITY_ITEMS = 50
+
+
+def receipt_key(msg_id):
+    return f'rcpt:{msg_id}'
+
+
+def create_receipt(msg_id, token, ttl):
+    key = receipt_key(msg_id)
+    p = r.pipeline()
+    p.hset(key, mapping={'h': token_hash(token), 's': 'pending'})
+    p.expire(key, ttl + RECEIPT_EXTRA_TTL)
+    p.execute()
+
+
+def mark_receipt(msg_id, status, skip_token=''):
+    key = receipt_key(msg_id)
+    current = r.hmget(key, 'h', 's')
+    if current[1] != b'pending':
+        return
+    # Quien creó el mensaje puede previsualizarlo sin marcarlo como leído
+    if skip_token and TOKEN_RE.match(skip_token) and hmac.compare_digest(current[0], token_hash(skip_token)):
+        return
+    r.hset(key, mapping={'s': status, 'v': int(time.time())})
+
+
+def receipt_status(msg_id, token):
+    h, s, v = r.hmget(receipt_key(msg_id), 'h', 's', 'v')
+    if not h or not hmac.compare_digest(h, token_hash(token)):
+        return None
+    status = s.decode()
+    # Pendiente pero el mensaje ya no existe: expiró sin abrirse
+    if status == 'pending' and not r.exists(msg_key(msg_id)):
+        status = 'expired'
+    return {'status': status, 'at': int(v) if v else None}
+
+
+#
 # Archivos estáticos y SPA
 #
 @app.route('/favicon.ico')
@@ -347,9 +390,15 @@ def post():
         meta |= META_PASSWORD
     record = bytes([RECORD_VERSION, meta]) + token_hash(token) + blob
 
+    receipt = request.form.get('receipt_token', '')
+    if receipt and (not TOKEN_RE.match(receipt) or receipt == token):
+        return bad_request('receipt_token')
+
     for _ in range(5):
         msg_id = new_id()
         if r.set(msg_key(msg_id), record, ex=expire, nx=True):
+            if receipt:
+                create_receipt(msg_id, receipt, expire)
             return jsonify({'id': msg_id, 'expires_at': expires_at(expire)}), 201
     security_event('id_collision', level=logging.ERROR)
     return jsonify({'error': 'server_error'}), 500
@@ -373,6 +422,7 @@ def meta():
         'legacy': False,
         'destroy': bool(meta_byte & META_DESTROY),
         'protected': bool(meta_byte & META_PASSWORD),
+        'receipt': bool(r.exists(receipt_key(msg_id))),
         'expires_at': expires_at(r.ttl(msg_key(msg_id))),
     })
 
@@ -396,6 +446,7 @@ def get():
     _, record, ttl, destroyed = result
     if destroyed:
         security_event('destroyed_on_read', level=logging.INFO, msg_id=msg_id)
+    mark_receipt(msg_id, 'viewed', skip_token=request.form.get('receipt_token', ''))
     headers = {'X-Destroyed': '1' if destroyed else '0'}
     exp = None if destroyed else expires_at(ttl)
     if exp:
@@ -430,6 +481,7 @@ def fail_attempt():
     attempts_left = max(MAX_FAILED_ATTEMPTS - attempts, 0)
     if attempts_left == 0:
         r.delete(store_key, counter)
+        mark_receipt(msg_id, 'deleted')
         security_event('destroyed_after_failed_attempts', msg_id=msg_id)
         return jsonify({'error': 'too_many_attempts', 'attempts_left': 0}), 403
     return jsonify({'success': True, 'attempts_left': attempts_left})
@@ -451,6 +503,7 @@ def delete():
         store_key = msg_key(msg_id)
     if not r.delete(store_key, fail_key(msg_id)):
         return not_found()
+    mark_receipt(msg_id, 'deleted')
     security_event('deleted_by_user', level=logging.INFO, msg_id=msg_id)
     return jsonify({'success': True})
 
@@ -633,6 +686,38 @@ def request_delete():
     r.delete(req_key(req_id), answer_key(req_id))
     security_event('request_deleted', level=logging.INFO, msg_id=req_id)
     return jsonify({'success': True})
+
+
+#
+# Actividad: estado de "Mis solicitudes" y "Recibos" en una sola consulta.
+# Un token incorrecto o un elemento inexistente se informa igual: 'gone'.
+#
+@app.route('/activity', methods=['POST'])
+@rate_limit('activity', 30, 60)
+def activity():
+    data = request.get_json(silent=True) or {}
+    reqs, rcpts = data.get('requests') or [], data.get('receipts') or []
+    if not isinstance(reqs, list) or not isinstance(rcpts, list) or len(reqs) + len(rcpts) > MAX_ACTIVITY_ITEMS:
+        return bad_request('activity')
+
+    def valid(item):
+        return isinstance(item, dict) and ID_RE.match(str(item.get('id', ''))) and TOKEN_RE.match(str(item.get('token', '')))
+
+    out_reqs = {}
+    for item in filter(valid, reqs):
+        req_id = item['id']
+        head = r.get(req_key(req_id))
+        if not head or head[0] != REQUEST_VERSION or not hmac.compare_digest(head[1:33], token_hash(item['token'])):
+            out_reqs[req_id] = {'status': 'gone'}
+        else:
+            out_reqs[req_id] = {
+                'status': 'answered' if r.exists(answer_key(req_id)) else 'pending',
+                'expires_at': expires_at(r.ttl(req_key(req_id))),
+            }
+    out_rcpts = {}
+    for item in filter(valid, rcpts):
+        out_rcpts[item['id']] = receipt_status(item['id'], item['token']) or {'status': 'gone'}
+    return jsonify({'requests': out_reqs, 'receipts': out_rcpts})
 
 
 #

@@ -18,6 +18,7 @@ import {
   ShareMeta,
 } from '../lib/api';
 import { parseInput, parseLocation, ParsedInput } from '../lib/links';
+import { findReceipt } from '../lib/receiptStore';
 import CountdownTimer from './CountdownTimer';
 import { DecryptedContent, GoneView } from './ResultViews';
 import { Button, Card, inputClass, Notice, PasswordField, Spinner } from './ui';
@@ -66,7 +67,8 @@ const DecryptTab: React.FC = () => {
           payload = await decryptLegacyText(src.ciphertext, pw);
         } else if (src.kind === 'share') {
           if (!cache.current.envelope) {
-            const share = await fetchShare(src.id, token.current!);
+            // Si lo creó este navegador (vista previa), no cuenta como leído
+            const share = await fetchShare(src.id, token.current!, findReceipt(src.id)?.token);
             cache.current.envelope = share.envelope;
             setBurned(share.destroyed);
             if (share.expiresAt) setExpiresAt(share.expiresAt);
@@ -196,6 +198,7 @@ const DecryptTab: React.FC = () => {
     return (
       <div className="space-y-4">
         {burned && <Notice tone="success">{t('decrypt.burnedNotice')}</Notice>}
+        {meta?.receipt && source?.kind === 'share' && !findReceipt(source.id) && <Notice>{t('decrypt.receiptNotice')}</Notice>}
         <DecryptedContent payload={result} />
         {expiresAt && !burned && <CountdownTimer expiresAt={expiresAt} onExpire={() => finish('expired')} />}
         <div className={`grid gap-3 ${canDelete ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-1'}`}>
@@ -263,6 +266,7 @@ const DecryptTab: React.FC = () => {
       {phase !== 'loading' && (
         <>
           {meta?.destroy && <Notice tone="warning">{t('decrypt.destroyWarning')}</Notice>}
+          {meta?.receipt && source?.kind === 'share' && !findReceipt(source.id) && <Notice>{t('decrypt.receiptNotice')}</Notice>}
           {expiresAt && <CountdownTimer expiresAt={expiresAt} onExpire={() => finish('expired')} />}
 
           {needsPassword && (

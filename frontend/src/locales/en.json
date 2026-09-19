@@ -62,7 +62,13 @@
     "note": "Your browser encrypts everything with AES-256-GCM before sending it. The server only stores encrypted data, including file names, and never receives the key.",
     "linkWarning": "This link contains the key: anyone with the full link can read the message. Only send it to the intended person.",
     "passwordReminder": "You added a password: share it through a different channel than the link.",
-    "destroyReminder": "It will be destroyed when opened, so there's no preview: opening it now would delete it."
+    "destroyReminder": "It will be destroyed when opened, so there's no preview: opening it now would delete it.",
+    "receiptLabel": "Notify me when it's read",
+    "receiptHint": "Receipts will show when it was opened (not who or from where).",
+    "noteLabel": "Note to recognize it (optional)",
+    "noteHint": "Only stored in this browser, never sent.",
+    "notePlaceholder": "E.g. server password for Ana",
+    "receiptReminder": "We'll let you know when it's read. Check Receipts, top right."
   },
   "encrypt": {
     "passwordLabel": "Password",
@@ -89,7 +95,8 @@
       "local": "✓ Encrypted code detected",
       "legacyLocal": "✓ Previous-format code detected",
       "none": "Not a valid link or code"
-    }
+    },
+    "receiptNotice": "The sender will be able to see when it was opened (not who or from where)."
   },
   "requests": {
     "labelLabel": "What do you need them to send?",
@@ -126,11 +133,13 @@
     "backToList": "Back to My requests",
     "status": {
       "loading": "…",
-      "error": "Offline",
       "pending": "Pending",
       "answered": "Answered",
       "gone": "Closed"
-    }
+    },
+    "new": "New",
+    "newAnswers_one": "{{count}} new answer",
+    "newAnswers_other": "{{count}} new answers"
   },
   "respond": {
     "title": "You've been asked to send a secret",
@@ -254,5 +263,32 @@
     "en": "English",
     "es": "Español",
     "pt": "Português"
+  },
+  "header": {
+    "requests": "My requests",
+    "receipts": "Receipts"
+  },
+  "activity": {
+    "answered": "Your request \"{{label}}\" was answered",
+    "read": "Your message \"{{note}}\" was read"
+  },
+  "receipts": {
+    "title": "Receipts",
+    "new": "New message",
+    "explanation": "Shows whether the messages you shared from this browser were opened. The server only stores the status and date; neither the link nor the key is stored here.",
+    "empty": "No receipts yet. Turn on \"Notify me when it's read\" when sharing.",
+    "untitled": "Message without a note",
+    "created": "Created {{date}}",
+    "viewedAt": "Opened {{date}}",
+    "deletedAt": "Deleted unopened {{date}}",
+    "forget": "Remove",
+    "status": {
+      "loading": "…",
+      "pending": "Unopened",
+      "viewed": "Read",
+      "deleted": "Deleted",
+      "expired": "Expired unopened",
+      "gone": "No data"
+    }
   }
 }

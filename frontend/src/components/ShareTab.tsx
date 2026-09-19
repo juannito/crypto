@@ -3,6 +3,9 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { Link2 } from 'lucide-react';
 import { useNotifications } from '../hooks/useNotifications';
+import { useActivity } from '../hooks/useActivity';
+import { bytesToBase64Url } from '../crypto/encoding';
+import { addReceipt } from '../lib/receiptStore';
 import { accessToken, LINK_KEY_LEN, randomBytes, seal } from '../crypto/envelope';
 import { encodePayload } from '../crypto/payload';
 import { apiErrorKey, createShare } from '../lib/api';
@@ -15,6 +18,7 @@ interface Result {
   url: string;
   destroy: boolean;
   protected: boolean;
+  receipt: boolean;
 }
 
 const ShareTab: React.FC = () => {
@@ -27,6 +31,9 @@ const ShareTab: React.FC = () => {
   const [password, setPassword] = useState('');
   const [expire, setExpire] = useState('604800');
   const [destroy, setDestroy] = useState(true);
+  const [receipt, setReceipt] = useState(true);
+  const [note, setNote] = useState('');
+  const { refresh: refreshActivity } = useActivity();
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<Result | null>(null);
   const [resetKey, setResetKey] = useState(0);
@@ -35,6 +42,7 @@ const ShareTab: React.FC = () => {
     setMessage('');
     setFiles([]);
     setPassword('');
+    setNote('');
     setResetKey(k => k + 1);
   };
 
@@ -50,8 +58,14 @@ const ShareTab: React.FC = () => {
     try {
       const linkKey = randomBytes(LINK_KEY_LEN);
       const envelope = await seal(await encodePayload(message.trim(), files), { linkKey, password: password || undefined });
-      const { id } = await createShare(envelope, expire, destroy, await accessToken(linkKey));
-      setResult({ url: buildShareLink(id, linkKey), destroy, protected: !!password });
+      // Recibo de lectura: token aleatorio que solo queda en este navegador
+      const receiptToken = receipt ? bytesToBase64Url(randomBytes(32)) : undefined;
+      const { id, expires_at } = await createShare(envelope, expire, destroy, await accessToken(linkKey), receiptToken);
+      if (receiptToken) {
+        addReceipt({ id, token: receiptToken, note: note.trim(), createdAt: Date.now(), expiresAt: expires_at, files: files.length, seen: false });
+        refreshActivity();
+      }
+      setResult({ url: buildShareLink(id, linkKey), destroy, protected: !!password, receipt: !!receiptToken });
       showSuccess(t('notifications.success.messageSaved'));
       reset();
     } catch (err) {
@@ -90,6 +104,20 @@ const ShareTab: React.FC = () => {
               <Toggle checked={destroy} onChange={setDestroy} label={t('form.destroyOnRead')} description={t('share.destroyHint')} disabled={busy} />
             </div>
           </div>
+          <Toggle checked={receipt} onChange={setReceipt} label={t('share.receiptLabel')} description={t('share.receiptHint')} disabled={busy} />
+          {receipt && (
+            <Field label={t('share.noteLabel')} htmlFor="share-note" hint={t('share.noteHint')}>
+              <input
+                id="share-note"
+                className={inputClass}
+                placeholder={t('share.notePlaceholder')}
+                value={note}
+                maxLength={80}
+                onChange={e => setNote(e.target.value)}
+                disabled={busy}
+              />
+            </Field>
+          )}
         </Card>
 
         <div className="grid grid-cols-[1fr_auto] gap-3">
@@ -133,6 +161,7 @@ const ShareTab: React.FC = () => {
             <Notice tone="warning">{t('share.linkWarning')}</Notice>
             {result.protected && <Notice>{t('share.passwordReminder')}</Notice>}
             {result.destroy && <Notice>{t('share.destroyReminder')}</Notice>}
+            {result.receipt && <Notice tone="success">{t('share.receiptReminder')}</Notice>}
           </div>
         </Modal>
       )}

@@ -11,7 +11,7 @@ tests/test.cfg de ejemplo:
 """
 import io, os, secrets, sys
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from app import app, r, looks_like_plaintext
+from app import app, r, looks_like_plaintext, msg_key
 c = app.test_client()
 tok = lambda: secrets.token_urlsafe(32)[:43]
 def env(flags=1, n=200): return b'CM\x02' + bytes([flags]) + os.urandom(28) + os.urandom(n)
@@ -23,7 +23,7 @@ ok = lambda cond, msg: print(('OK  ' if cond else 'FAIL'), msg) or (cond or sys.
 t = tok()
 res = post('/post', payload=env(), expire='86400', destroy='0', token=t); ok(res.status_code == 201, f'post {res.status_code}')
 mid = res.json['id']; ok(len(mid) == 22, 'id len 22')
-ok(post('/meta', id=mid, token=t).json == {'legacy': False, 'destroy': False, 'protected': False, 'expires_at': post('/meta', id=mid, token=t).json['expires_at']}, 'meta')
+m = post('/meta', id=mid, token=t).json; ok(m['legacy'] is False and m['destroy'] is False and m['protected'] is False and m['receipt'] is False and m['expires_at'], 'meta')
 ok(post('/meta', id=mid, token=tok()).status_code == 404, 'meta bad token 404')
 ok(post('/get', id=mid, token=tok()).status_code == 404, 'get bad token 404')
 g = post('/get', id=mid, token=t); ok(g.status_code == 200 and g.data[:3] == b'CM\x02' and g.headers['X-Destroyed'] == '0', 'get ok')
@@ -71,5 +71,38 @@ ok(post('/request/status', id=rid, token=own).json['status'] == 'answered', 'sta
 ok(post('/request/open', id=rid, token=rsp).status_code == 404, 'respond token cannot open')
 o = post('/request/open', id=rid, token=own); ok(o.data == box, 'open returns box')
 ok(post('/request/status', id=rid, token=own).status_code == 404, 'deleted after open')
+# recibos de lectura
+t, rt = tok(), tok()
+mid = post('/post', payload=env(), expire='86400', destroy='0', token=t, receipt_token=rt).json['id']
+ok(post('/meta', id=mid, token=t).json['receipt'] is True, 'meta avisa que hay recibo')
+act = lambda: c.post('/activity', json={'receipts': [{'id': mid, 'token': rt}]}).json['receipts'][mid]
+ok(act()['status'] == 'pending', 'recibo pendiente')
+ok(c.post('/activity', json={'receipts': [{'id': mid, 'token': tok()}]}).json['receipts'][mid]['status'] == 'gone', 'recibo con token ajeno: gone')
+post('/get', id=mid, token=t, receipt_token=rt)
+ok(act()['status'] == 'pending', 'la vista previa del creador no marca lectura')
+post('/get', id=mid, token=t)
+a = act(); ok(a['status'] == 'viewed' and a['at'], 'recibo: abierto, con fecha')
+post('/get', id=mid, token=t)
+ok(act()['at'] == a['at'], 'recibo: conserva la primera apertura')
+post('/delete', id=mid, token=t)
+ok(act()['status'] == 'viewed', 'recibo sigue visible tras borrar el mensaje')
+t, rt = tok(), tok()
+mid = post('/post', payload=env(), expire='86400', token=t, receipt_token=rt).json['id']
+post('/delete', id=mid, token=t)
+ok(act()['status'] == 'deleted', 'recibo: borrado sin abrir')
+t, rt = tok(), tok()
+mid = post('/post', payload=env(), expire='30', token=t, receipt_token=rt).json['id']
+r.delete(msg_key(mid))
+ok(act()['status'] == 'expired', 'recibo: expiró sin abrirse')
+ok(post('/post', payload=env(), expire='86400', token=t, receipt_token=t).status_code == 400, 'recibo: token igual al de acceso rechazado')
+
+# actividad de solicitudes
+own, rsp = tok(), tok()
+rid = post('/request/create', expire='86400', owner_token=own, respond_token=rsp).json['id']
+st = lambda o: c.post('/activity', json={'requests': [{'id': rid, 'token': o}]}).json['requests'][rid]['status']
+ok(st(own) == 'pending' and st(rsp) == 'gone', 'actividad: solicitud pendiente, token de respuesta no sirve')
+post('/request/respond', id=rid, token=rsp, payload=b'CM\x03\x00' + os.urandom(200))
+ok(st(own) == 'answered', 'actividad: solicitud respondida')
+ok(c.post('/activity', json={'requests': [{'id': 'x', 'token': 'y'}] * 51}).status_code == 400, 'actividad: máximo 50 elementos')
 r.delete('LegacyAbc1')
 print('Todas las pruebas pasaron')

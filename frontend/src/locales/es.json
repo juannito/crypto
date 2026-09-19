@@ -62,7 +62,13 @@
     "note": "Tu navegador cifra todo con AES-256-GCM antes de enviarlo. El servidor solo guarda datos cifrados, incluidos los nombres de los archivos, y nunca recibe la clave.",
     "linkWarning": "Este enlace contiene la clave: cualquiera que lo tenga completo puede leer el mensaje. Envíalo solo a quien corresponda.",
     "passwordReminder": "Agregaste una contraseña: compártela por un canal distinto al del enlace.",
-    "destroyReminder": "Se destruirá al abrirse. Por eso no hay vista previa: abrirlo ahora lo borraría."
+    "destroyReminder": "Se destruirá al abrirse. Por eso no hay vista previa: abrirlo ahora lo borraría.",
+    "receiptLabel": "Avisarme cuando lo lean",
+    "receiptHint": "Verás en Recibos cuándo se abrió (no quién ni desde dónde).",
+    "noteLabel": "Nota para reconocerlo (opcional)",
+    "noteHint": "Solo se guarda en este navegador, no se envía.",
+    "notePlaceholder": "Ej.: clave del servidor para Ana",
+    "receiptReminder": "Te avisaremos cuando lo lean. Lo verás en Recibos, arriba a la derecha."
   },
   "encrypt": {
     "passwordLabel": "Contraseña",
@@ -89,7 +95,8 @@
       "local": "✓ Código cifrado detectado",
       "legacyLocal": "✓ Código del formato anterior detectado",
       "none": "No se reconoce un enlace ni un código válido"
-    }
+    },
+    "receiptNotice": "Quien te lo envió podrá ver cuándo se abrió (no quién ni desde dónde)."
   },
   "requests": {
     "labelLabel": "¿Qué necesitas que te envíen?",
@@ -126,11 +133,13 @@
     "backToList": "Volver a Mis solicitudes",
     "status": {
       "loading": "…",
-      "error": "Sin conexión",
       "pending": "Pendiente",
       "answered": "Respondida",
       "gone": "Cerrada"
-    }
+    },
+    "new": "Nueva",
+    "newAnswers_one": "{{count}} respuesta nueva",
+    "newAnswers_other": "{{count}} respuestas nuevas"
   },
   "respond": {
     "title": "Te pidieron que envíes un secreto",
@@ -254,5 +263,32 @@
     "en": "English",
     "es": "Español",
     "pt": "Português"
+  },
+  "header": {
+    "requests": "Mis solicitudes",
+    "receipts": "Recibos"
+  },
+  "activity": {
+    "answered": "Respondieron tu solicitud «{{label}}»",
+    "read": "Leyeron tu mensaje «{{note}}»"
+  },
+  "receipts": {
+    "title": "Recibos",
+    "new": "Nuevo mensaje",
+    "explanation": "Muestra si se abrieron los mensajes que compartiste desde este navegador. El servidor solo guarda el estado y la fecha; aquí no se guarda el enlace ni la clave.",
+    "empty": "Todavía no hay recibos. Activa «Avisarme cuando lo lean» al compartir.",
+    "untitled": "Mensaje sin nota",
+    "created": "Creado el {{date}}",
+    "viewedAt": "Abierto el {{date}}",
+    "deletedAt": "Eliminado sin abrir el {{date}}",
+    "forget": "Quitar",
+    "status": {
+      "loading": "…",
+      "pending": "Sin abrir",
+      "viewed": "Leído",
+      "deleted": "Eliminado",
+      "expired": "Expiró sin abrir",
+      "gone": "Sin datos"
+    }
   }
 }

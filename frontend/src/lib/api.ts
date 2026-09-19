@@ -10,6 +10,7 @@ export interface ShareMeta {
   legacy: boolean;
   destroy: boolean;
   protected: boolean;
+  receipt?: boolean;
   expires_at: number | null;
 }
 
@@ -55,12 +56,13 @@ async function request(path: string, fields: Record<string, string | Blob | unde
   return response;
 }
 
-export async function createShare(envelope: Uint8Array, expire: string, destroy: boolean, token: string) {
+export async function createShare(envelope: Uint8Array, expire: string, destroy: boolean, token: string, receiptToken?: string) {
   const res = await request('/post', {
     payload: new Blob([envelope as BlobPart], { type: 'application/octet-stream' }),
     expire,
     destroy: destroy ? '1' : '0',
     token,
+    receipt_token: receiptToken,
   });
   return (await res.json()) as { id: string; expires_at: number | null };
 }
@@ -69,8 +71,9 @@ export async function getMeta(id: string, token?: string): Promise<ShareMeta> {
   return (await request('/meta', { id, token })).json();
 }
 
-export async function fetchShare(id: string, token: string): Promise<Share> {
-  const res = await request('/get', { id, token });
+// receiptToken: si quien abre es quien lo creó, no se marca como leído
+export async function fetchShare(id: string, token: string, receiptToken?: string): Promise<Share> {
+  const res = await request('/get', { id, token, receipt_token: receiptToken });
   const expires = res.headers.get('X-Expires-At');
   return {
     envelope: new Uint8Array(await res.arrayBuffer()),
@@ -134,4 +137,29 @@ export async function openRequest(id: string, ownerToken: string): Promise<Uint8
 
 export async function deleteRequest(id: string, ownerToken: string) {
   await request('/request/delete', { id, token: ownerToken });
+}
+
+//
+// Actividad: estados de solicitudes y recibos en una sola consulta
+//
+export type ActivityItem = { id: string; token: string };
+export interface ActivityResult {
+  requests: Record<string, { status: RequestStatus | 'gone'; expires_at?: number | null }>;
+  receipts: Record<string, { status: 'pending' | 'viewed' | 'deleted' | 'expired' | 'gone'; at?: number | null }>;
+}
+
+export async function getActivity(requests: ActivityItem[], receipts: ActivityItem[]): Promise<ActivityResult> {
+  let response: Response;
+  try {
+    response = await fetch(getBackendURL() + '/activity', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ requests, receipts }),
+      credentials: 'same-origin',
+    });
+  } catch {
+    throw new ApiError(0, 'network_error');
+  }
+  if (!response.ok) throw new ApiError(response.status, 'server_error');
+  return response.json();
 }
