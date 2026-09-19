@@ -18,11 +18,34 @@ const resources = {
   }
 };
 
+const SUPPORTED = ['en', 'es', 'pt'];
+
+// Idioma guardado, o el del navegador si está soportado
+function initialLanguage(): string {
+  try {
+    const saved = localStorage.getItem('lang');
+    if (saved && SUPPORTED.includes(saved)) return saved;
+  } catch {
+    // almacenamiento no disponible
+  }
+  const browser = (navigator.language || 'en').slice(0, 2).toLowerCase();
+  return SUPPORTED.includes(browser) ? browser : 'en';
+}
+
+i18n.on('languageChanged', lng => {
+  document.documentElement.lang = lng;
+  try {
+    localStorage.setItem('lang', lng);
+  } catch {
+    // almacenamiento no disponible
+  }
+});
+
 i18n
   .use(initReactI18next)
   .init({
     resources,
-    lng: 'en', // idioma por defecto
+    lng: initialLanguage(),
     fallbackLng: 'en',
     interpolation: {
       escapeValue: false // React ya escapa por defecto

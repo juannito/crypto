@@ -2,226 +2,78 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Estilos personalizados para la aplicación */
 @layer base {
-  html { 
-    position: relative; 
-    min-height: 100%; 
+  html {
+    -webkit-text-size-adjust: 100%;
   }
 
-  body { 
-    margin-bottom: 60px; 
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-      'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-      sans-serif;
+  body {
+    @apply bg-gray-50 text-gray-900;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans',
+      'Droid Sans', 'Helvetica Neue', sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    -webkit-tap-highlight-color: transparent;
   }
 }
 
 @layer components {
-  /* Estilos para notificaciones */
+  /* Notificaciones: arriba a la derecha en desktop, a lo ancho en mobile */
   .notification-container {
-    @apply fixed top-5 right-5 z-50 max-w-md;
+    @apply pointer-events-none fixed left-3 right-3 z-[60] flex flex-col items-stretch gap-2 sm:left-auto sm:right-5 sm:w-96;
+    top: max(0.75rem, env(safe-area-inset-top));
   }
 
   .notification {
-    @apply mb-3 p-3 rounded-lg shadow-lg flex items-center transform translate-x-full opacity-0 transition-all duration-300 ease-in-out max-w-full;
+    @apply pointer-events-auto flex translate-y-[-8px] items-center rounded-lg p-3 opacity-0 shadow-lg transition-all duration-300 ease-out;
   }
 
   .notification.show {
-    @apply translate-x-0 opacity-100;
+    @apply translate-y-0 opacity-100;
   }
 
   .notification.hide {
-    @apply translate-x-full opacity-0;
+    @apply translate-y-[-8px] opacity-0;
   }
 
   .notification-content {
-    @apply flex items-center w-full;
+    @apply flex w-full items-center;
   }
 
   .notification-icon {
-    @apply text-lg mr-3 flex-shrink-0;
+    @apply mr-3 flex-shrink-0 text-lg;
   }
 
   .notification-message {
-    @apply flex-1 text-sm leading-relaxed;
+    @apply flex-1 text-sm leading-snug;
   }
 
   .notification-close {
-    @apply bg-transparent border-none text-lg cursor-pointer opacity-60 ml-3 p-0 w-5 h-5 flex items-center justify-center flex-shrink-0 hover:opacity-100;
+    @apply ml-3 flex h-8 w-8 flex-shrink-0 cursor-pointer items-center justify-center rounded border-none bg-transparent p-0 text-lg opacity-60 hover:opacity-100;
   }
 
   .notification-success {
-    @apply bg-green-100 text-green-800 border border-green-200;
+    @apply border border-green-200 bg-green-50 text-green-800;
   }
 
   .notification-error {
-    @apply bg-red-100 text-red-800 border border-red-200;
+    @apply border border-red-200 bg-red-50 text-red-800;
   }
 
   .notification-warning {
-    @apply bg-yellow-100 text-yellow-800 border border-yellow-200;
+    @apply border border-amber-200 bg-amber-50 text-amber-800;
   }
 
   .notification-info {
-    @apply bg-blue-100 text-blue-800 border border-blue-200;
-  }
-
-  /* Efecto de flash para la explosión */
-  @keyframes flash-explosion {
-    0% {
-      opacity: 0;
-    }
-    50% {
-      opacity: 1;
-    }
-    100% {
-      opacity: 0;
-    }
-  }
-
-  /* Animación para el confeti explosivo */
-  @keyframes confetti-explosion {
-    0% {
-      transform: translate(-50%, 0) scale(0);
-      opacity: 1;
-    }
-    5% {
-      transform: translate(-50%, 0) scale(1);
-      opacity: 1;
-    }
-    50% {
-      transform: 
-        translate(
-          calc(-50% + cos(var(--angle)) * var(--velocity) * 0.5),
-          calc(sin(var(--angle)) * var(--velocity) * 0.5 * var(--gravity))
-        ) 
-        rotate(calc(var(--angle) * 180deg));
-      opacity: 1;
-    }
-    100% {
-      transform: 
-        translate(
-          calc(-50% + cos(var(--angle)) * var(--velocity)),
-          calc(sin(var(--angle)) * var(--velocity) * var(--gravity) - 50vh)
-        ) 
-        rotate(calc(var(--angle) * 720deg));
-      opacity: 0;
-    }
-  }
-
-  /* Estilos para el modal */
-  .modal {
-    @apply fixed inset-0 z-50 overflow-hidden outline-none flex items-center justify-center p-4;
-    /* iOS specific fixes */
-    -webkit-overflow-scrolling: touch;
-    -webkit-transform: translateZ(0);
-    transform: translateZ(0);
-  }
-
-  .modal-backdrop {
-    @apply fixed inset-0 z-40 bg-black opacity-50;
-    /* iOS specific fixes */
-    -webkit-backdrop-filter: blur(2px);
-    backdrop-filter: blur(2px);
-  }
-
-  .modal-dialog {
-    @apply relative w-full max-w-md mx-auto z-50;
-    /* iOS specific fixes */
-    -webkit-transform: translateZ(0);
-    transform: translateZ(0);
-  }
-
-  .modal-content {
-    @apply relative bg-white border border-gray-300 rounded-lg shadow-lg bg-clip-padding outline-none z-50 max-h-[90vh] overflow-y-auto;
-    /* iOS specific fixes */
-    -webkit-overflow-scrolling: touch;
-    -webkit-transform: translateZ(0);
-    transform: translateZ(0);
-  }
-
-  .modal-header {
-    @apply p-4 border-b border-gray-200;
-  }
-
-  .modal-header .close {
-    @apply mt-0 float-right text-2xl font-bold leading-none text-black opacity-20 bg-transparent border-none cursor-pointer hover:opacity-50;
-  }
-
-  .modal-title {
-    @apply m-0 leading-relaxed;
-  }
-
-  .modal-body {
-    @apply relative p-4;
-  }
-
-  .modal-footer {
-    @apply p-4 text-right border-t border-gray-200;
+    @apply border border-blue-200 bg-blue-50 text-blue-800;
   }
 }
 
-@layer utilities {
-  /* Utilidades personalizadas */
-  .text-muted {
-    @apply text-gray-600 text-xs mt-1 block;
-  }
-}
-
-/* Responsive */
-@media (min-width: 768px) {
-  .modal-dialog {
-    @apply w-96 mx-auto;
-  }
-}
-
-@media (max-width: 768px) {
-  .notification-container {
-    @apply top-2 right-2 left-2 max-w-none;
-  }
-  
-  .notification {
-    @apply mb-2 p-2;
-  }
-  
-  .notification-message {
-    @apply text-xs;
-  }
-  
-  .modal {
-    @apply p-2;
-    /* iOS specific mobile fixes */
-    -webkit-overflow-scrolling: touch;
-    position: fixed !important;
-  }
-  
-  .modal-dialog {
-    @apply w-full max-w-sm;
-    /* iOS specific mobile fixes */
-    -webkit-transform: translateZ(0);
-    transform: translateZ(0);
-  }
-  
-  .modal-content {
-    @apply max-h-[95vh];
-    /* iOS specific mobile fixes */
-    -webkit-overflow-scrolling: touch;
-    -webkit-transform: translateZ(0);
-    transform: translateZ(0);
-  }
-}
-
-/* iOS Safari specific fixes */
-@supports (-webkit-touch-callout: none) {
-  .modal {
-    position: fixed !important;
-    -webkit-overflow-scrolling: touch;
-  }
-  
-  .modal-content {
-    -webkit-overflow-scrolling: touch;
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
   }
 }

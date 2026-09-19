@@ -1,2 +1,20 @@
 REDIS_HOST = 'put your redis server address'
-REDIS_PASSWORD = 'always use password' 
+REDIS_PASSWORD = 'always use password'
+# REDIS_PORT = 6379
+# REDIS_SSL = True
+
+# Rechaza mensajes nuevos cuando Redis supera este uso de memoria (bytes).
+# Configurar también en Redis: maxmemory y maxmemory-policy volatile-ttl
+# MAX_REDIS_MEMORY_BYTES = 512 * 1024 * 1024
+
+# Proxies inversos de confianza delante de la app (para leer la IP real del cliente)
+# TRUSTED_PROXIES = 1
+
+# Enviar HSTS aunque la app reciba http (TLS terminado en Apache/nginx)
+# FORCE_HSTS = True
+
+# Ruta del registro de eventos de seguridad
+# SECURITY_LOG = '/var/log/crypto/security.log'
+
+# Orígenes extra permitidos por CORS (por defecto solo el mismo origen)
+# CORS_ORIGINS = ['https://otro-dominio.example']

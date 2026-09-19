@@ -1,152 +1,258 @@
 {
+  "appName": "Crypto Messenger",
   "tabs": {
+    "label": "Secciones",
     "online": "Compartir",
     "traditional": "Encriptar",
-    "message": "Desencriptar",
+    "message": "Descifrar",
+    "requests": "Solicitar",
     "help": "Ayuda"
   },
   "descriptions": {
-    "online": "Encripta tu mensaje y obtén un enlace seguro para compartir.",
-    "traditional": "Encripta tu mensaje localmente, sin enviarlo a ningún servidor. Solo tú tienes el código encriptado.",
-    "message": "Desencripta mensajes ingresando la clave secreta y el código encriptado o enlace online."
+    "online": "Cifra un mensaje o archivos y obtén un enlace de un solo uso. La clave viaja en el enlace y nunca llega al servidor.",
+    "traditional": "Cifra localmente con una contraseña, sin enviar nada a ningún servidor. Tú decides cómo compartir el código.",
+    "message": "Pega un enlace o un código cifrado para ver su contenido.",
+    "requests": "Pide a alguien que te envíe un secreto: lo cifra en su navegador y solo tú puedes abrirlo."
   },
   "form": {
-    "message": "Ingresa tu mensaje aquí...",
-    "secretKey": "Ingresa tu clave secreta",
-    "save": "COMPARTIR",
-    "saving": "Guardando...",
+    "message": "Escribe tu mensaje aquí…",
+    "messageLabel": "Mensaje",
+    "secretKey": "Contraseña",
+    "showKey": "Mostrar contraseña",
+    "hideKey": "Ocultar contraseña",
+    "save": "Crear enlace seguro",
     "clear": "Limpiar",
-    "expires": "Expira en:",
+    "expires": "Expira en",
     "destroyOnRead": "Destruir al leer",
-    "encryptFiles": "Encriptar archivos",
-    "encryptingFiles": "Encriptando archivos...",
+    "encrypting": "Cifrando…",
     "encrypt": "Encriptar",
-    "decrypt": "Desencriptar",
-    "deleteMessage": "Eliminar Mensaje",
+    "decrypt": "Descifrar",
+    "decrypting": "Descifrando…",
     "copy": "Copiar",
     "showQR": "Mostrar QR",
     "hideQR": "Ocultar QR",
-    "loading": "Cargando...",
-    "decrypting": "Desencriptando...",
-    "deleteNow": "Borrar mensaje ahora"
+    "loading": "Cargando…",
+    "deleteNow": "Borrar mensaje ahora",
+    "addFiles": "Adjuntar archivos",
+    "onlyMessage": "Quitar archivos"
   },
   "expiration": {
-    "never": "No expira",
     "30seconds": "30 segundos",
     "1day": "1 día",
     "1week": "1 semana",
     "1month": "1 mes"
   },
   "strength": {
-    "insecure": "Insegura",
-    "secure": "Segura",
-    "verySecure": "Muy segura",
-    "tooltip": "Ayuda sobre la fortaleza de la clave",
-    "title": "La clave debe tener:",
+    "insecure": "Débil",
+    "secure": "Aceptable",
+    "verySecure": "Fuerte",
     "requirements": {
-      "length": "8+ caracteres",
+      "length": "12+ caracteres",
       "uppercase": "Mayúscula",
       "lowercase": "Minúscula",
       "number": "Número",
-      "special": "Carácter especial"
+      "special": "Símbolo"
     }
   },
-  "encryptedMessage": "MENSAJE ENCRIPTADO:",
+  "share": {
+    "passwordLabel": "Contraseña adicional (opcional)",
+    "passwordPlaceholder": "Sin contraseña",
+    "passwordHint": "Segundo factor: además del enlace, habrá que ingresar esta contraseña. Compártela por otro canal.",
+    "destroyHint": "Se borra del servidor la primera vez que se abre.",
+    "note": "Tu navegador cifra todo con AES-256-GCM antes de enviarlo. El servidor solo guarda datos cifrados, incluidos los nombres de los archivos, y nunca recibe la clave.",
+    "linkWarning": "Este enlace contiene la clave: cualquiera que lo tenga completo puede leer el mensaje. Envíalo solo a quien corresponda.",
+    "passwordReminder": "Agregaste una contraseña: compártela por un canal distinto al del enlace.",
+    "destroyReminder": "Se destruirá al abrirse. Por eso no hay vista previa: abrirlo ahora lo borraría."
+  },
+  "encrypt": {
+    "passwordLabel": "Contraseña",
+    "passwordHint": "Mínimo 8 caracteres. Mejor una frase larga: es lo único que protege este código.",
+    "note": "Todo ocurre en tu navegador: nada se envía al servidor. Comparte el código y la contraseña por canales distintos.",
+    "download": "Descargar .txt",
+    "qrTooLarge": "El código es demasiado largo para un QR (máximo 1.800 caracteres).",
+    "qrCaption": "Escanéalo para copiar el código cifrado"
+  },
+  "decrypt": {
+    "linkTitle": "Mensaje compartido",
+    "linkDescription": "La clave está en el enlace y se usa solo en este navegador.",
+    "password": "Contraseña",
+    "extraPassword": "Este mensaje también pide una contraseña",
+    "revealOnce": "Ver mensaje (una sola vez)",
+    "destroyWarning": "Este mensaje se borrará del servidor al abrirlo. Solo podrás verlo una vez: guarda lo que necesites.",
+    "burnedNotice": "El mensaje ya se borró del servidor. Si cierras esta página no podrás volver a verlo.",
+    "another": "Descifrar otro mensaje",
+    "notFoundHint": "Puede que haya expirado, que ya se haya leído o que el enlace esté incompleto.",
+    "note": "Acepta enlaces de Compartir y códigos de la pestaña Encriptar, incluidos los del formato anterior.",
+    "detected": {
+      "share": "✓ Enlace compartido detectado",
+      "legacyShare": "✓ Enlace del formato anterior detectado",
+      "local": "✓ Código cifrado detectado",
+      "legacyLocal": "✓ Código del formato anterior detectado",
+      "none": "No se reconoce un enlace ni un código válido"
+    }
+  },
+  "requests": {
+    "labelLabel": "¿Qué necesitas que te envíen?",
+    "labelPlaceholder": "Ej.: contraseña del Wi-Fi",
+    "labelHint": "Lo verá quien responda. Viaja dentro del enlace, no se guarda en el servidor.",
+    "passcodeLabel": "Código para proteger tu buzón (opcional)",
+    "passcodeLabelShort": "Código del buzón",
+    "passcodePlaceholder": "Sin código",
+    "passcodeHint": "Si lo pones, tu enlace de buzón no sirve sin este código. Útil si lo guardas en el celular o en notas.",
+    "saveLabel": "Guardar en este navegador",
+    "saveHint": "Aparecerá en «Mis solicitudes». Si pusiste código, se guarda cifrado.",
+    "create": "Crear solicitud",
+    "created": "Solicitud creada",
+    "note": "Tu navegador genera un par de claves. Quien responda cifra con tu clave pública y solo tu clave privada, que nunca sale de tus enlaces, puede abrirlo.",
+    "step1Title": "Envía este enlace a quien debe responder",
+    "step1Text": "Con él puede enviarte un mensaje o archivos cifrados. Solo se puede responder una vez.",
+    "step2Title": "Guarda tu enlace de buzón (privado)",
+    "step2Text": "Es la única forma de leer la respuesta. Guárdalo ahora: escanea el QR con tu celular o cópialo.",
+    "step2TextSaved": "Quedó guardado en este navegador. Para abrirlo desde otro dispositivo, escanea el QR o cópialo.",
+    "plainNote": "Quien tenga este enlace puede leer la respuesta. No lo compartas.",
+    "lockedNote": "Protegido con código: sin el código, el enlace no abre la respuesta.",
+    "copyRequestLink": "Copiar enlace de solicitud",
+    "copyRequestLinkShort": "Copiar enlace",
+    "copyInboxLink": "Copiar enlace de buzón",
+    "inboxQrCaption": "Escanéalo para guardar el buzón en tu celular",
+    "done": "Listo",
+    "myRequests": "Mis solicitudes",
+    "empty": "Aún no hay solicitudes guardadas en este navegador.",
+    "untitled": "Solicitud sin título",
+    "locked": "con código",
+    "openInbox": "Abrir buzón",
+    "delete": "Eliminar",
+    "forget": "Quitar de la lista",
+    "backToList": "Volver a Mis solicitudes",
+    "status": {
+      "loading": "…",
+      "error": "Sin conexión",
+      "pending": "Pendiente",
+      "answered": "Respondida",
+      "gone": "Cerrada"
+    }
+  },
+  "respond": {
+    "title": "Te pidieron que envíes un secreto",
+    "explanation": "Se cifra en tu navegador con la clave pública de quien lo pidió. Ni el servidor ni nadie más puede leerlo. Solo se puede responder una vez.",
+    "placeholder": "Escribe aquí lo que te pidieron…",
+    "send": "Cifrar y enviar",
+    "note": "Los nombres de los archivos también se cifran.",
+    "sentTitle": "Enviado de forma segura",
+    "sentText": "Quien lo pidió ya puede abrirlo desde su buzón.",
+    "answeredTitle": "Esta solicitud ya fue respondida",
+    "answeredText": "Solo admite una respuesta.",
+    "goneTitle": "La solicitud no existe o expiró",
+    "goneText": "Pide a quien te la envió que genere una nueva.",
+    "home": "Ir al inicio"
+  },
+  "inbox": {
+    "title": "Buzón",
+    "lockedTitle": "Buzón protegido",
+    "lockedText": "Ingresa el código que elegiste al crear la solicitud.",
+    "unlock": "Abrir buzón",
+    "wrongPasscode": "Código incorrecto",
+    "pendingText": "Todavía no hay respuesta. Esta página se actualiza sola cada 15 segundos.",
+    "answeredText": "Llegó la respuesta. Al abrirla se borra del servidor: guarda lo que necesites.",
+    "retrieve": "Abrir respuesta",
+    "refresh": "Actualizar",
+    "saveHere": "Guardar en este navegador",
+    "retrievedNotice": "La respuesta ya se borró del servidor. Si cierras esta página no podrás volver a verla.",
+    "answerTitle": "Respuesta recibida",
+    "goneTitle": "Esta solicitud ya no existe",
+    "goneText": "Expiró, fue eliminada o la respuesta ya se abrió.",
+    "invalidTitle": "El enlace de buzón no es válido"
+  },
+  "encryptedMessage": "Código cifrado",
+  "decryptedMessage": "Mensaje descifrado",
+  "messagePlaceholder": "Pega el enlace o el código cifrado",
+  "decryptWrongKeyAndAttempts": "Contraseña incorrecta. Intentos restantes: {{count}}",
+  "destroyOnNextFail": "el mensaje se borrará si vuelves a fallar",
   "notifications": {
     "success": {
-      "messageSaved": "Mensaje encriptado y guardado exitosamente",
-      "messageDecrypted": "Mensaje desencriptado exitosamente",
-      "formCleared": "Formulario limpiado",
-      "messageLoaded": "Mensaje cargado exitosamente",
-      "messageDeleted": "Mensaje eliminado correctamente"
+      "messageSaved": "Mensaje cifrado y guardado",
+      "messageEncrypted": "Mensaje cifrado",
+      "messageDecrypted": "Mensaje descifrado",
+      "messageDeleted": "Mensaje eliminado"
     },
     "error": {
-      "keyTooShort": "La clave debe tener al menos 3 caracteres",
-      "messageTooLong": "El mensaje se acerca al límite de caracteres",
-      "emptyMessage": "El mensaje encriptado no puede estar vacío",
-      "decryptFailed": "No se pudo desencriptar. Verifica la clave y el mensaje encriptado.",
-      "unexpectedError": "Ocurrió un error inesperado",
-      "copyError": "Error al copiar al portapapeles",
-      "messageNotFound": "Mensaje no encontrado o ha expirado",
+      "noContent": "Escribe un mensaje o adjunta archivos",
+      "messageTooLong": "El mensaje es demasiado largo (máximo 10.000 caracteres)",
+      "wrongKey": "Contraseña incorrecta o contenido alterado",
+      "messageNotFound": "Mensaje no encontrado o expirado",
       "messageDeleted": "El mensaje fue eliminado",
-      "fetchError": "Error al obtener el mensaje",
-      "noMessageToDecrypt": "No hay mensaje para desencriptar",
+      "tooManyAttempts": "Demasiados intentos fallidos. El mensaje fue eliminado.",
       "deleteError": "No se pudo eliminar el mensaje",
-      "noContent": "Por favor proporciona un mensaje o sube archivos",
-      "wrongKey": "Clave incorrecta",
-      "tooManyAttempts": "Demasiados intentos fallidos. El mensaje ha sido eliminado."
+      "network": "Sin conexión con el servidor. Revisa tu conexión.",
+      "rateLimited": "Demasiadas solicitudes. Espera un momento e intenta de nuevo.",
+      "tooLarge": "El contenido supera el tamaño máximo permitido",
+      "storageFull": "El servidor no tiene espacio disponible ahora. Intenta más tarde.",
+      "insecureContext": "El cifrado requiere una conexión segura (https).",
+      "unexpectedError": "Ocurrió un error inesperado"
     },
     "warning": {
-      "keyTooShort": "La clave debe tener al menos 8 caracteres",
-      "messageLimit": "El mensaje se acerca al límite de caracteres"
-    },
-    "info": {
-      "formCleared": "Formulario limpiado"
+      "keyTooShort": "La contraseña debe tener al menos 8 caracteres"
     }
   },
   "modal": {
-    "messageSaved": "Mensaje Encriptado y Compartido",
+    "messageSaved": "Enlace seguro creado",
     "close": "Cerrar",
-    "preview": "Vista Previa",
-    "createNewMessage": "Crear nuevo mensaje"
+    "preview": "Vista previa"
   },
-  "destroyMessage": "El mensaje se borrará después de ser visualizado",
   "countdown": {
     "expiresIn": "Expira en",
-    "expired": "¡Mensaje expirado!",
-    "deleted": "¡Mensaje eliminado!"
+    "expired": "El mensaje expiró",
+    "days_one": "{{count}} día",
+    "days_other": "{{count}} días"
   },
   "help": {
-    "description": "El sistema posee dos modalidades principales: <strong class=\"text-blue-600\">COMPARTIR</strong>, que permite generar un mensaje encriptado y guardarlo para compartir mediante un enlace, y <strong class=\"text-blue-600\">ENCRIPTAR</strong>, que ofrece una interfaz para encriptar un texto localmente, sin almacenamiento en el servidor. En ambos modos, es necesario utilizar una clave para desencriptar información de forma segura desde la tab de Desencriptar.",
-    "onlineSecurity": "Los mensajes en la modalidad <strong class=\"text-blue-600\">COMPARTIR</strong> no se almacenan en texto plano. Al hacer clic en el botón \"Grabar\", el navegador primero encripta los datos localmente y luego los envía al servidor para generar el enlace de intercambio.",
-    "expiration": "Además, esta modalidad permite establecer un tiempo de expiración para el mensaje y activar la opción de destruirlo al ser leído. De esta manera, la persona que recibe el enlace solo tendrá una oportunidad para acceder al mensaje.",
-    "securityRecommendation": "Para mayor seguridad, se recomienda que la clave sea lo más larga posible, preferentemente una frase.",
-    "sourceCode": "El código fuente está disponible en <a href=\"http://github.com/juannito/crypto\" class=\"text-blue-600 hover:underline\">GitHub</a>."
-  },
-  "characters": "caracteres",
-  "nearLimit": "(cerca del límite)",
-  "messagePlaceholder": "Ingresa el código encriptado o enlace online para desencriptar",
-  "importantNote": {
-    "title": "Importante:",
-    "text": "Al guardar, el navegador primero encripta los datos localmente y luego los envía al servidor para generar el enlace de intercambio. Puedes elegir que el mensaje se destruya al leerlo."
+    "share": {
+      "title": "Compartir",
+      "text": "Cifra un mensaje y archivos en tu navegador y genera un enlace. La clave va en la parte del enlace después de #, que los navegadores nunca envían al servidor. Puedes sumar una contraseña como segundo factor, fijar la expiración y hacer que se destruya al leerse."
+    },
+    "encrypt": {
+      "title": "Encriptar",
+      "text": "Cifra localmente con una contraseña (PBKDF2 con 600.000 iteraciones y AES-256-GCM) y te entrega un código para compartir como quieras. No se guarda nada en el servidor."
+    },
+    "requests": {
+      "title": "Solicitar",
+      "text": "Genera un enlace para que otra persona te envíe un secreto. Su navegador lo cifra con tu clave pública y solo tu enlace de buzón puede abrirlo. Puedes protegerlo con un código y guardarlo en el celular escaneando el QR."
+    },
+    "security": {
+      "title": "Qué ve el servidor",
+      "text": "Solo datos cifrados y autenticados: ni el texto, ni los nombres de los archivos, ni la clave. Conocer el identificador de un mensaje no alcanza para leerlo ni borrarlo. Los intentos fallidos y los abusos se limitan y registran."
+    },
+    "recommendation": {
+      "title": "Recomendación",
+      "text": "Usa contraseñas largas, preferentemente una frase, y compártelas por un canal distinto al del enlace o el código."
+    },
+    "sourceCode": "El código fuente está disponible en"
   },
   "fileUpload": {
-    "clickToUpload": "Haz clic para subir",
-    "orDragDrop": "o arrastra y suelta",
-    "maxFiles": "Hasta {{maxFiles}} archivos",
-    "maxSize": "Máx {{maxSize}} cada uno",
-    "selectedFiles": "Archivos seleccionados",
+    "clickToUpload": "Toca para elegir archivos",
+    "orDragDrop": "o arrástralos aquí",
+    "limits": "Hasta {{maxFiles}} archivos · {{maxSize}} cada uno · {{maxTotal}} en total",
+    "selectedFiles": "Archivos",
+    "remove": "Quitar {{name}}",
     "errors": {
-      "fileTooLarge": "El archivo es demasiado grande. Tamaño máximo es {{maxSize}}"
+      "fileTooLarge": "supera el máximo de {{maxSize}}",
+      "tooMany": "Máximo {{maxFiles}} archivos",
+      "totalTooLarge": "El total no puede superar {{maxSize}}"
     }
-  },
-  "response": {
-    "shareLink": "Enlace para compartir:",
-    "qrCode": "Código QR:",
-    "scanWithPhone": "Escanea con tu celular",
-    "copyUrl": "Copiar enlace",
-    "copyLinkCode": "Copiar código del enlace",
-    "copied": "Copiado"
   },
   "fileDownload": {
     "title": "Archivos adjuntos",
-    "download": "Descargar",
-    "decrypting": "Desencriptando...",
-    "decryptAll": "Desencriptar Todo",
-    "errors": {
-      "downloadFailed": "Error al descargar archivo",
-      "decryptionFailed": "Error al desencriptar archivo"
-    }
+    "download": "Descargar"
+  },
+  "response": {
+    "copyUrl": "Copiar enlace",
+    "copied": "Copiado",
+    "scanWithPhone": "Escanéalo con el celular"
   },
   "languageSelector": {
     "title": "Seleccionar idioma",
     "en": "English",
     "es": "Español",
     "pt": "Português"
-  },
-  "decryptAttemptsLeft": "Intentos restantes de descifrado: {{count}}",
-  "decryptAttemptsHelp": "Si fallas demasiados intentos de descifrado, el mensaje se eliminará por seguridad.",
-  "decryptWrongKeyAndAttempts": "Clave incorrecta. Intentos de descifrado restantes: {{count}}",
-  "destroyOnNextFail": "El mensaje se eliminará si fallas el próximo intento",
-  "decryptedMessage": "Mensaje Desencriptado"
+  }
 }

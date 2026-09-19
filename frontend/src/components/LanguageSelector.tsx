@@ -1,9 +1,23 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 const LanguageSelector: React.FC = () => {
   const { i18n, t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  // Cierra el menú al tocar fuera o con Escape
+  useEffect(() => {
+    if (!isOpen) return;
+    const onPointer = (e: PointerEvent) => !ref.current?.contains(e.target as Node) && setIsOpen(false);
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setIsOpen(false);
+    document.addEventListener('pointerdown', onPointer);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('pointerdown', onPointer);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [isOpen]);
 
   const languages = [
     { code: 'en', name: t('languageSelector.en'), flag: '🇺🇸' },
@@ -19,10 +33,12 @@ const LanguageSelector: React.FC = () => {
   };
 
   return (
-    <div className="relative">
+    <div className="relative flex-shrink-0" ref={ref}>
       <button
+        type="button"
+        aria-expanded={isOpen}
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-3 py-2 text-sm bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+        className="flex min-h-[40px] items-center gap-2 px-3 py-2 text-sm bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
         aria-label={t('languageSelector.title')}
       >
         <span className="text-lg">{currentLanguage.flag}</span>
@@ -42,6 +58,7 @@ const LanguageSelector: React.FC = () => {
           <div className="py-1">
             {languages.map((language) => (
               <button
+                type="button"
                 key={language.code}
                 onClick={() => handleLanguageChange(language.code)}
                 className={`w-full flex items-center gap-3 px-4 py-2 text-sm hover:bg-gray-100 focus:outline-none focus:bg-gray-100 ${

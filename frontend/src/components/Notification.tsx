@@ -59,7 +59,7 @@ const Notification: React.FC<NotificationProps> = ({ id, type, message, onRemove
   };
 
   return (
-    <div className={getNotificationClasses()}>
+    <div className={getNotificationClasses()} role={type === 'error' ? 'alert' : 'status'}>
       <div className="notification-content">
         <span className="notification-icon">{getIcon()}</span>
         <span className="notification-message">{message}</span>

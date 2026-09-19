@@ -1,85 +1,44 @@
 # Configuración del Backend
 
-## Configuración Actual
+## Producción
 
-El frontend está configurado para conectarse al backend de la siguiente manera:
+El frontend llama a la API en el **mismo origen** (`/post`, `/get`, `/request/...`).
+Flask sirve el build (`frontend/build`) y la API desde el mismo dominio, así que no hace falta CORS.
 
-### Desarrollo
+## Desarrollo
 
-- **URL del Backend**: `http://192.168.1.231:5001`
-- **Archivo de configuración**: `src/config.ts`
-
-### Producción
-
-- **URL del Backend**: Mismo origen que el frontend (`window.location.origin`)
-- **Configuración**: Automática basada en el entorno
-
-## Cómo cambiar la configuración
-
-### Opción 1: Modificar directamente el archivo de configuración
-
-Edita el archivo `src/config.ts` y cambia la línea:
-
-```typescript
-const localIP = "192.168.1.231"; // Cambia esta IP por la tuya
-```
-
-### Opción 2: Usar variables de entorno (Recomendado)
-
-1. Crea un archivo `.env.local` en la carpeta `frontend/`:
+`npm start` levanta el servidor de desarrollo en `http://localhost:3000` y el proxy de CRA
+(`"proxy"` en `package.json`) reenvía las llamadas a la API a `http://localhost:5001`.
 
 ```bash
-# Configuración del backend
-VITE_BACKEND_URL=http://tu-ip-local:5001
+# Terminal 1 - backend
+python app.py            # escucha en 127.0.0.1:5001
+
+# Terminal 2 - frontend
+cd frontend && npm start
 ```
 
-2. Modifica `src/config.ts` para usar la variable de entorno:
+### Probar desde el celular
 
-```typescript
-const getBackendConfig = (): Config => {
-  const isDevelopment = import.meta.env.DEV;
-  const isProduction = import.meta.env.PROD;
+WebCrypto solo está disponible en contextos seguros (https o localhost). Por eso, desde otro
+dispositivo de la red hay que usar https:
 
-  let backendURL: string;
-
-  if (isDevelopment) {
-    // Usar variable de entorno si está disponible, sino usar IP por defecto
-    backendURL =
-      import.meta.env.VITE_BACKEND_URL || "http://192.168.1.231:5001";
-  } else {
-    backendURL = window.location.origin;
-  }
-
-  return {
-    backendURL,
-    isDevelopment,
-    isProduction,
-  };
-};
+```bash
+npm run start:lan        # HOST=0.0.0.0 HTTPS=true (certificado autofirmado)
 ```
 
-## Verificación de la configuración
+Abre `https://<ip-de-tu-máquina>:3000` en el celular y acepta el certificado.
 
-Para verificar que la configuración es correcta:
+### Backend en otro host
 
-1. Abre la consola del navegador
-2. Busca el log: `🔧 Configuración de la aplicación:`
-3. Verifica que `backendURL` apunte a la IP correcta
+Si el backend corre en otro origen, define `REACT_APP_BACKEND_URL` en `frontend/.env.local`:
 
-## Troubleshooting
+```bash
+REACT_APP_BACKEND_URL=http://192.168.1.50:5001
+```
 
-### Problema: No se conecta desde el celular
+y permite ese origen en el backend (`app.cfg`):
 
-1. Verifica que la IP en `config.ts` sea la IP local de tu computadora
-2. Asegúrate de que el backend esté corriendo en `0.0.0.0:5001`
-3. Verifica que no haya firewall bloqueando el puerto 5001
-
-### Problema: CORS errors
-
-1. El backend debe permitir peticiones desde el frontend
-2. Verifica la configuración de CORS en el backend
-
-### Problema: Timeout en las peticiones
-
-1. Verifica que el backend esté respondiendo
-2. Aumenta el timeout en `errorHandler.ts` si es necesario
+```python
+CORS_ORIGINS = ['http://192.168.1.50:3000']
+```

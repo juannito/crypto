@@ -1,150 +1,258 @@
 {
+  "appName": "Crypto Messenger",
   "tabs": {
+    "label": "Sections",
     "online": "Share",
     "traditional": "Encrypt",
     "message": "Decrypt",
+    "requests": "Request",
     "help": "Help"
   },
   "descriptions": {
-    "online": "Encrypt your message and get a secure link to share.",
-    "traditional": "Encrypt your message locally, without sending it to any server. Only you have the encrypted code.",
-    "message": "Decrypt messages by entering the secret key and encrypted code or online link."
+    "online": "Encrypt a message or files and get a one-time link. The key travels inside the link and never reaches the server.",
+    "traditional": "Encrypt locally with a password, without sending anything to any server. You decide how to share the code.",
+    "message": "Paste a link or an encrypted code to see its content.",
+    "requests": "Ask someone to send you a secret: it's encrypted in their browser and only you can open it."
   },
   "form": {
-    "message": "Enter your message here...",
-    "secretKey": "Enter your secret key",
-    "save": "SHARE",
-    "saving": "Saving...",
+    "message": "Type your message here…",
+    "messageLabel": "Message",
+    "secretKey": "Password",
+    "showKey": "Show password",
+    "hideKey": "Hide password",
+    "save": "Create secure link",
     "clear": "Clear",
-    "expires": "Expires in:",
-    "destroyOnRead": "Destroy on read",
-    "encryptFiles": "Encrypt files",
-    "encryptingFiles": "Encrypting files...",
+    "expires": "Expires in",
+    "destroyOnRead": "Destroy after reading",
+    "encrypting": "Encrypting…",
     "encrypt": "Encrypt",
-    "addFiles": "Add files",
-    "onlyMessage": "Only message",
     "decrypt": "Decrypt",
-    "deleteMessage": "Delete Message",
+    "decrypting": "Decrypting…",
     "copy": "Copy",
     "showQR": "Show QR",
     "hideQR": "Hide QR",
-    "loading": "Loading...",
-    "decrypting": "Decrypting...",
-    "deleteNow": "Delete message now"
+    "loading": "Loading…",
+    "deleteNow": "Delete message now",
+    "addFiles": "Attach files",
+    "onlyMessage": "Remove files"
   },
   "expiration": {
-    "never": "Never expires",
     "30seconds": "30 seconds",
     "1day": "1 day",
     "1week": "1 week",
     "1month": "1 month"
   },
   "strength": {
-    "insecure": "Insecure",
-    "secure": "Secure",
-    "verySecure": "Very secure",
-    "tooltip": "Help about key strength",
-    "title": "The key must have:",
+    "insecure": "Weak",
+    "secure": "Fair",
+    "verySecure": "Strong",
     "requirements": {
-      "length": "8+ characters",
+      "length": "12+ characters",
       "uppercase": "Uppercase",
       "lowercase": "Lowercase",
       "number": "Number",
-      "special": "Special character"
+      "special": "Symbol"
     }
   },
-  "encryptedMessage": "ENCRYPTED MESSAGE:",
+  "share": {
+    "passwordLabel": "Extra password (optional)",
+    "passwordPlaceholder": "No password",
+    "passwordHint": "Second factor: besides the link, this password will be required. Share it through another channel.",
+    "destroyHint": "Deleted from the server the first time it's opened.",
+    "note": "Your browser encrypts everything with AES-256-GCM before sending it. The server only stores encrypted data, including file names, and never receives the key.",
+    "linkWarning": "This link contains the key: anyone with the full link can read the message. Only send it to the intended person.",
+    "passwordReminder": "You added a password: share it through a different channel than the link.",
+    "destroyReminder": "It will be destroyed when opened, so there's no preview: opening it now would delete it."
+  },
+  "encrypt": {
+    "passwordLabel": "Password",
+    "passwordHint": "At least 8 characters. A long passphrase is best: it's the only thing protecting this code.",
+    "note": "Everything happens in your browser: nothing is sent to the server. Share the code and the password through different channels.",
+    "download": "Download .txt",
+    "qrTooLarge": "The code is too long for a QR (1,800 characters max).",
+    "qrCaption": "Scan it to copy the encrypted code"
+  },
+  "decrypt": {
+    "linkTitle": "Shared message",
+    "linkDescription": "The key is in the link and is only used in this browser.",
+    "password": "Password",
+    "extraPassword": "This message also requires a password",
+    "revealOnce": "View message (once)",
+    "destroyWarning": "This message will be deleted from the server when opened. You can only see it once: save what you need.",
+    "burnedNotice": "The message has been deleted from the server. If you close this page you won't be able to see it again.",
+    "another": "Decrypt another message",
+    "notFoundHint": "It may have expired, already been read, or the link may be incomplete.",
+    "note": "Accepts Share links and codes from the Encrypt tab, including the previous format.",
+    "detected": {
+      "share": "✓ Shared link detected",
+      "legacyShare": "✓ Previous-format link detected",
+      "local": "✓ Encrypted code detected",
+      "legacyLocal": "✓ Previous-format code detected",
+      "none": "Not a valid link or code"
+    }
+  },
+  "requests": {
+    "labelLabel": "What do you need them to send?",
+    "labelPlaceholder": "E.g. Wi-Fi password",
+    "labelHint": "Shown to the responder. It travels inside the link and isn't stored on the server.",
+    "passcodeLabel": "Passcode to protect your inbox (optional)",
+    "passcodeLabelShort": "Inbox passcode",
+    "passcodePlaceholder": "No passcode",
+    "passcodeHint": "If set, your inbox link is useless without this passcode. Useful if you save it on your phone or in notes.",
+    "saveLabel": "Save in this browser",
+    "saveHint": "It will show up in \"My requests\". With a passcode, it's stored encrypted.",
+    "create": "Create request",
+    "created": "Request created",
+    "note": "Your browser generates a key pair. The responder encrypts with your public key and only your private key, which never leaves your links, can open it.",
+    "step1Title": "Send this link to whoever should respond",
+    "step1Text": "With it they can send you an encrypted message or files. It can only be answered once.",
+    "step2Title": "Save your inbox link (private)",
+    "step2Text": "It's the only way to read the answer. Save it now: scan the QR with your phone or copy it.",
+    "step2TextSaved": "It's saved in this browser. To open it from another device, scan the QR or copy it.",
+    "plainNote": "Anyone with this link can read the answer. Don't share it.",
+    "lockedNote": "Protected with a passcode: without it, the link can't open the answer.",
+    "copyRequestLink": "Copy request link",
+    "copyRequestLinkShort": "Copy link",
+    "copyInboxLink": "Copy inbox link",
+    "inboxQrCaption": "Scan it to save the inbox on your phone",
+    "done": "Done",
+    "myRequests": "My requests",
+    "empty": "No requests saved in this browser yet.",
+    "untitled": "Untitled request",
+    "locked": "with passcode",
+    "openInbox": "Open inbox",
+    "delete": "Delete",
+    "forget": "Remove from list",
+    "backToList": "Back to My requests",
+    "status": {
+      "loading": "…",
+      "error": "Offline",
+      "pending": "Pending",
+      "answered": "Answered",
+      "gone": "Closed"
+    }
+  },
+  "respond": {
+    "title": "You've been asked to send a secret",
+    "explanation": "It's encrypted in your browser with the requester's public key. Neither the server nor anyone else can read it. It can only be answered once.",
+    "placeholder": "Type what was requested…",
+    "send": "Encrypt and send",
+    "note": "File names are encrypted too.",
+    "sentTitle": "Sent securely",
+    "sentText": "The requester can now open it from their inbox.",
+    "answeredTitle": "This request was already answered",
+    "answeredText": "It only accepts one answer.",
+    "goneTitle": "The request doesn't exist or has expired",
+    "goneText": "Ask whoever sent it to create a new one.",
+    "home": "Go home"
+  },
+  "inbox": {
+    "title": "Inbox",
+    "lockedTitle": "Protected inbox",
+    "lockedText": "Enter the passcode you chose when creating the request.",
+    "unlock": "Open inbox",
+    "wrongPasscode": "Wrong passcode",
+    "pendingText": "No answer yet. This page refreshes every 15 seconds.",
+    "answeredText": "The answer arrived. Opening it deletes it from the server: save what you need.",
+    "retrieve": "Open answer",
+    "refresh": "Refresh",
+    "saveHere": "Save in this browser",
+    "retrievedNotice": "The answer has been deleted from the server. If you close this page you won't be able to see it again.",
+    "answerTitle": "Answer received",
+    "goneTitle": "This request no longer exists",
+    "goneText": "It expired, was deleted, or the answer was already opened.",
+    "invalidTitle": "The inbox link is not valid"
+  },
+  "encryptedMessage": "Encrypted code",
+  "decryptedMessage": "Decrypted message",
+  "messagePlaceholder": "Paste the link or the encrypted code",
+  "decryptWrongKeyAndAttempts": "Wrong password. Attempts left: {{count}}",
+  "destroyOnNextFail": "the message will be deleted if you fail again",
   "notifications": {
     "success": {
-      "messageSaved": "Message encrypted and shared successfully",
-      "messageDecrypted": "Message decrypted successfully",
-      "formCleared": "Form cleared",
-      "messageLoaded": "Message loaded successfully",
-      "messageDeleted": "Message deleted successfully"
+      "messageSaved": "Message encrypted and saved",
+      "messageEncrypted": "Message encrypted",
+      "messageDecrypted": "Message decrypted",
+      "messageDeleted": "Message deleted"
     },
     "error": {
-      "unexpectedError": "An unexpected error occurred",
-      "fetchError": "Error fetching message",
-      "decryptFailed": "Failed to decrypt message. Check your key.",
-      "noMessageToDecrypt": "No message to decrypt",
-      "messageNotFound": "Message not found or has expired",
-      "messageDeleted": "Message was deleted",
-      "deleteError": "Error deleting message",
-      "noContent": "Please provide a message or upload files",
-      "wrongKey": "Incorrect key",
-      "tooManyAttempts": "Too many failed attempts. Message has been deleted."
+      "noContent": "Type a message or attach files",
+      "messageTooLong": "The message is too long (10,000 characters max)",
+      "wrongKey": "Wrong password or tampered content",
+      "messageNotFound": "Message not found or expired",
+      "messageDeleted": "The message was deleted",
+      "tooManyAttempts": "Too many failed attempts. The message was deleted.",
+      "deleteError": "Couldn't delete the message",
+      "network": "Can't reach the server. Check your connection.",
+      "rateLimited": "Too many requests. Wait a moment and try again.",
+      "tooLarge": "The content exceeds the maximum allowed size",
+      "storageFull": "The server has no space available right now. Try again later.",
+      "insecureContext": "Encryption requires a secure connection (https).",
+      "unexpectedError": "An unexpected error occurred"
     },
     "warning": {
-      "keyTooShort": "Key must be at least 8 characters",
-      "messageLimit": "Message is approaching character limit"
-    },
-    "info": {
-      "formCleared": "Form cleared"
+      "keyTooShort": "The password must be at least 8 characters"
     }
   },
   "modal": {
-    "messageSaved": "Message Encrypted and Shared",
+    "messageSaved": "Secure link created",
     "close": "Close",
-    "preview": "Preview",
-    "createNewMessage": "Create new message"
+    "preview": "Preview"
   },
-  "destroyMessage": "Message will be deleted after viewing",
   "countdown": {
     "expiresIn": "Expires in",
-    "expired": "Message expired!",
-    "deleted": "Message deleted!"
+    "expired": "The message expired",
+    "days_one": "{{count}} day",
+    "days_other": "{{count}} days"
   },
   "help": {
-    "description": "The system has two main modes: <strong class=\"text-blue-600\">SHARE</strong>, which allows you to generate an encrypted message and save it to share via a link, and <strong class=\"text-blue-600\">ENCRYPT</strong>, which offers an interface to encrypt text locally, without server storage. In both modes, it is necessary to use a key to decrypt information securely from the Decrypt tab.",
-    "onlineSecurity": "Messages in <strong class=\"text-blue-600\">SHARE</strong> mode are not stored in plain text. When you click the \"Save\" button, the browser first encrypts the data locally and then sends it to the server to generate the exchange link.",
-    "expiration": "Additionally, this mode allows you to set an expiration time for the message and activate the option to destroy it when read. This way, the person who receives the link will only have one opportunity to access the message.",
-    "securityRecommendation": "For greater security, it is recommended that the key be as long as possible, preferably a phrase.",
-    "sourceCode": "The source code is available on <a href=\"http://github.com/juannito/crypto\" class=\"text-blue-600 hover:underline\">GitHub</a>."
-  },
-  "characters": "characters",
-  "nearLimit": "(near limit)",
-  "messagePlaceholder": "Enter encrypted code or online link to decrypt",
-  "importantNote": {
-    "title": "Important:",
-    "text": "When saving, the browser first encrypts the data locally and then sends it to the server to generate the exchange link. You can choose to destroy the message when read."
+    "share": {
+      "title": "Share",
+      "text": "Encrypt a message and files in your browser and get a link. The key goes in the part of the link after #, which browsers never send to the server. You can add a password as a second factor, set an expiration and make it self-destruct after reading."
+    },
+    "encrypt": {
+      "title": "Encrypt",
+      "text": "Encrypt locally with a password (PBKDF2 with 600,000 iterations and AES-256-GCM) and get a code to share however you like. Nothing is stored on the server."
+    },
+    "requests": {
+      "title": "Request",
+      "text": "Create a link so someone else can send you a secret. Their browser encrypts it with your public key and only your inbox link can open it. You can protect it with a passcode and save it on your phone by scanning the QR."
+    },
+    "security": {
+      "title": "What the server sees",
+      "text": "Only encrypted, authenticated data: not the text, not the file names, not the key. Knowing a message's identifier isn't enough to read or delete it. Failed attempts and abuse are rate-limited and logged."
+    },
+    "recommendation": {
+      "title": "Recommendation",
+      "text": "Use long passwords, preferably a passphrase, and share them through a different channel than the link or code."
+    },
+    "sourceCode": "The source code is available on"
   },
   "fileUpload": {
-    "clickToUpload": "Click to upload",
-    "orDragDrop": "or drag and drop",
-    "maxFiles": "Up to {{maxFiles}} files",
-    "maxSize": "Max {{maxSize}} each",
-    "selectedFiles": "Selected files",
+    "clickToUpload": "Tap to choose files",
+    "orDragDrop": "or drag them here",
+    "limits": "Up to {{maxFiles}} files · {{maxSize}} each · {{maxTotal}} total",
+    "selectedFiles": "Files",
+    "remove": "Remove {{name}}",
     "errors": {
-      "fileTooLarge": "File is too large. Maximum size is {{maxSize}}"
+      "fileTooLarge": "exceeds the {{maxSize}} limit",
+      "tooMany": "{{maxFiles}} files max",
+      "totalTooLarge": "The total can't exceed {{maxSize}}"
     }
-  },
-  "response": {
-    "shareLink": "Share link:",
-    "qrCode": "QR Code:",
-    "scanWithPhone": "Scan with your phone",
-    "copyUrl": "Copy URL",
-    "copyLinkCode": "Copy link code",
-    "copied": "Copied"
   },
   "fileDownload": {
-    "title": "Attached files",
-    "download": "Download",
-    "decrypting": "Decrypting...",
-    "decryptAll": "Decrypt All",
-    "errors": {
-      "downloadFailed": "Failed to download file",
-      "decryptionFailed": "Failed to decrypt file"
-    }
+    "title": "Attachments",
+    "download": "Download"
+  },
+  "response": {
+    "copyUrl": "Copy link",
+    "copied": "Copied",
+    "scanWithPhone": "Scan it with your phone"
   },
   "languageSelector": {
     "title": "Select language",
     "en": "English",
     "es": "Español",
     "pt": "Português"
-  },
-  "decryptAttemptsLeft": "Decryption attempts left: {{count}}",
-  "decryptAttemptsHelp": "If you fail too many decryption attempts, the message will be deleted for security.",
-  "decryptWrongKeyAndAttempts": "Incorrect key. Decryption attempts left: {{count}}",
-  "destroyOnNextFail": "The message will be deleted if you fail the next attempt",
-  "decryptedMessage": "Decrypted Message"
+  }
 }

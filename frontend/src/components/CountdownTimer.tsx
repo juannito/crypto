@@ -1,93 +1,57 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import ConfettiExplosion from 'react-confetti-explosion';
+import { Clock } from 'lucide-react';
 
 interface CountdownTimerProps {
-  seconds: number;
-  onExpire: () => void;
-  isVisible: boolean;
+  expiresAt: number; // epoch en segundos
+  onExpire?: () => void;
 }
 
-const CountdownTimer: React.FC<CountdownTimerProps> = ({ seconds, onExpire, isVisible }) => {
+export function formatDuration(seconds: number, t: (k: string, o?: any) => string): string {
+  const days = Math.floor(seconds / 86400);
+  const hours = Math.floor((seconds % 86400) / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const secs = seconds % 60;
+  const clock = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  return days > 0 ? `${t('countdown.days', { count: days })}, ${clock}` : clock;
+}
+
+const CountdownTimer: React.FC<CountdownTimerProps> = ({ expiresAt, onExpire }) => {
   const { t } = useTranslation();
-  const [timeLeft, setTimeLeft] = useState(seconds);
+  const remaining = () => Math.max(0, expiresAt - Math.floor(Date.now() / 1000));
+  const [left, setLeft] = useState(remaining);
+  const total = useRef(Math.max(1, remaining()));
+  const expired = useRef(false);
 
   useEffect(() => {
-    if (!isVisible || seconds <= 0) {
-      setTimeLeft(seconds);
-      return;
-    }
-
-    setTimeLeft(seconds);
-
     const timer = setInterval(() => {
-      setTimeLeft((prev) => {
-        if (prev <= 1) {
-          clearInterval(timer);
-          onExpire();
-          return 0;
-        }
-        return prev - 1;
-      });
+      const value = Math.max(0, expiresAt - Math.floor(Date.now() / 1000));
+      setLeft(value);
+      if (value === 0 && !expired.current) {
+        expired.current = true;
+        clearInterval(timer);
+        onExpire?.();
+      }
     }, 1000);
-
     return () => clearInterval(timer);
-  }, [seconds, isVisible, onExpire]);
+  }, [expiresAt, onExpire]);
 
-  const formatTime = (seconds: number): string => {
-    if (seconds < 60) {
-      return `${seconds}s`;
-    }
-    const days = Math.floor(seconds / 86400);
-    const hours = Math.floor((seconds % 86400) / 3600);
-    const minutes = Math.floor((seconds % 3600) / 60);
-    const remainingSeconds = seconds % 60;
-    if (days > 0) {
-      return `${days} day${days > 1 ? 's' : ''}, ${hours.toString().padStart(2, '0')}:${minutes
-        .toString()
-        .padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
-    }
-    if (hours > 0) {
-      return `${hours}:${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
-    }
-    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
-  };
-
-  const getProgressPercentage = (): number => {
-    return ((seconds - timeLeft) / seconds) * 100;
-  };
-
-  const getProgressColor = (): string => {
-    const percentage = getProgressPercentage();
-    if (percentage > 80) return 'bg-red-500';
-    if (percentage > 60) return 'bg-orange-500';
-    if (percentage > 40) return 'bg-yellow-500';
-    return 'bg-green-500';
-  };
-
-  if (!isVisible || seconds <= 0) {
-    return null;
-  }
+  const progress = 100 - (left / total.current) * 100;
+  const color = progress > 80 ? 'bg-red-500' : progress > 60 ? 'bg-orange-500' : progress > 40 ? 'bg-amber-400' : 'bg-green-500';
 
   return (
-    <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-      <div className="flex items-center justify-between mb-2">
-        <span className="text-sm font-medium text-blue-800">
-          {t('countdown.expiresIn')}: {formatTime(timeLeft)}
-        </span>
-        <span className="text-xs text-blue-600">
-          {timeLeft <= 30 ? '⚠️' : '⏰'}
+    <div className="rounded-lg border border-gray-200 bg-white p-3">
+      <div className="mb-2 flex items-center gap-2 text-sm text-gray-700">
+        <Clock className="h-4 w-4 text-gray-400" aria-hidden />
+        <span>
+          {t('countdown.expiresIn')}: <span className="font-mono font-semibold tabular-nums">{formatDuration(left, t)}</span>
         </span>
       </div>
-      {/* Barra de progreso visual */}
-      <div className="w-full bg-gray-200 rounded-full h-2">
-        <div 
-          className={`h-2 rounded-full transition-all duration-1000 ease-linear ${getProgressColor()}`}
-          style={{ width: `${getProgressPercentage()}%` }}
-        />
+      <div className="h-1.5 w-full overflow-hidden rounded-full bg-gray-200">
+        <div className={`h-full rounded-full transition-all duration-1000 ease-linear ${color}`} style={{ width: `${progress}%` }} />
       </div>
     </div>
   );
 };
 
-export default CountdownTimer; 
+export default CountdownTimer;

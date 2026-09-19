@@ -1,52 +1,55 @@
-import { useState, useCallback } from 'react';
-import { NotificationItem } from '../components/NotificationContainer';
+import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
+import type { NotificationItem } from '../components/NotificationContainer';
 
-export const useNotifications = () => {
+type NotificationType = NotificationItem['type'];
+
+interface NotificationsApi {
+  notifications: NotificationItem[];
+  addNotification: (type: NotificationType, message: string, duration?: number) => void;
+  removeNotification: (id: string) => void;
+  showSuccess: (message: string, duration?: number) => void;
+  showError: (message: string, duration?: number) => void;
+  showWarning: (message: string, duration?: number) => void;
+  showInfo: (message: string, duration?: number) => void;
+}
+
+const NotificationsContext = createContext<NotificationsApi | null>(null);
+
+// Un único estado compartido: antes cada pestaña tenía el suyo y sus avisos nunca se mostraban
+export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
 
-  const addNotification = useCallback((
-    type: 'success' | 'error' | 'warning' | 'info',
-    message: string,
-    duration?: number
-  ) => {
-    const id = Date.now().toString() + Math.random().toString(36).substr(2, 9);
-    const newNotification: NotificationItem = {
-      id,
-      type,
-      message,
-      duration
-    };
-
-    setNotifications(prev => [...prev, newNotification]);
+  const addNotification = useCallback((type: NotificationType, message: string, duration?: number) => {
+    const id = crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`;
+    // Evita apilar el mismo aviso repetido
+    setNotifications(prev =>
+      prev.some(n => n.message === message && n.type === type)
+        ? prev
+        : [...prev.slice(-3), { id, type, message, duration }]
+    );
   }, []);
 
   const removeNotification = useCallback((id: string) => {
-    setNotifications(prev => prev.filter(notification => notification.id !== id));
+    setNotifications(prev => prev.filter(n => n.id !== id));
   }, []);
 
-  const showSuccess = useCallback((message: string, duration?: number) => {
-    addNotification('success', message, duration);
-  }, [addNotification]);
-
-  const showError = useCallback((message: string, duration?: number) => {
-    addNotification('error', message, duration);
-  }, [addNotification]);
-
-  const showWarning = useCallback((message: string, duration?: number) => {
-    addNotification('warning', message, duration);
-  }, [addNotification]);
-
-  const showInfo = useCallback((message: string, duration?: number) => {
-    addNotification('info', message, duration);
-  }, [addNotification]);
-
-  return {
-    notifications,
+  // Funciones estables: se pueden usar como dependencias de efectos
+  const actions = useMemo(() => ({
     addNotification,
     removeNotification,
-    showSuccess,
-    showError,
-    showWarning,
-    showInfo
-  };
-}; 
+    showSuccess: (m: string, d?: number) => addNotification('success', m, d),
+    showError: (m: string, d?: number) => addNotification('error', m, d),
+    showWarning: (m: string, d?: number) => addNotification('warning', m, d),
+    showInfo: (m: string, d?: number) => addNotification('info', m, d),
+  }), [addNotification, removeNotification]);
+
+  const api = useMemo<NotificationsApi>(() => ({ notifications, ...actions }), [notifications, actions]);
+
+  return React.createElement(NotificationsContext.Provider, { value: api }, children);
+};
+
+export const useNotifications = (): NotificationsApi => {
+  const ctx = useContext(NotificationsContext);
+  if (!ctx) throw new Error('useNotifications requiere NotificationsProvider');
+  return ctx;
+};

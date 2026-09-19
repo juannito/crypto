@@ -29,8 +29,9 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "start": "HOST=0.0.0.0 react-scripts start",
-    "build": "react-scripts build",
+    "start": "react-scripts start",
+    "start:lan": "HOST=0.0.0.0 HTTPS=true react-scripts start",
+    "build": "INLINE_RUNTIME_CHUNK=false react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
@@ -40,7 +41,7 @@
       "react-app/jest"
     ]
   },
-  "proxy": "http://192.168.1.231:5001",
+  "proxy": "http://localhost:5001",
   "browserslist": {
     "production": [
       ">0.2%",
@@ -57,5 +58,12 @@
     "autoprefixer": "^10.4.21",
     "postcss": "^8.5.6",
     "tailwindcss": "^3.4.17"
+  },
+  "jest": {
+    "moduleNameMapper": {
+      "^react-router-dom$": "<rootDir>/node_modules/react-router-dom/dist/index.js",
+      "^react-router/dom$": "<rootDir>/node_modules/react-router/dist/development/dom-export.js",
+      "^react-router$": "<rootDir>/node_modules/react-router/dist/development/index.js"
+    }
   }
 }

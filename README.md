@@ -13,26 +13,39 @@
 
 ### 🔒 **Seguridad de Nivel Empresarial**
 
-- **Encriptación AES-256** implementada con CryptoJS
+- **Encriptación AES-256-GCM autenticada** con WebCrypto, nativa del navegador
 - **Encriptación del lado del cliente** antes de cualquier transmisión
-- **Rate limiting inteligente** para prevenir ataques de fuerza bruta
-- **Autodestrucción automática** después de múltiples intentos fallidos
-- **Sin almacenamiento de texto plano** en el servidor
+- **Conocimiento cero:** la clave viaja en el fragmento `#` del enlace, que los navegadores nunca envían al servidor
+- **Metadatos cifrados:** nombres, tipos y tamaños de archivos van dentro del contenido cifrado
+- **Rate limiting inteligente** por IP para prevenir abusos y ataques de fuerza bruta
+- **Autodestrucción atómica** al leer y después de múltiples intentos fallidos
+- **Sin almacenamiento de texto plano** en el servidor: rechaza cualquier contenido que no esté cifrado
 
-### 🌐 **Dos Modalidades de Uso**
+### 🌐 **Tres Modalidades de Uso**
 
 #### **🔗 Modalidad Online (Compartir)**
 
 - **Encripta y almacena** mensajes de forma segura en el servidor
-- **Genera enlaces únicos** de 10 caracteres para compartir
+- **Genera enlaces únicos** con identificador de 131 bits y clave de 256 bits
+- **Contraseña adicional opcional** como segundo factor (PBKDF2-SHA256, 600.000 iteraciones)
 - **Configuración flexible de expiración** (1 día, 1 semana, 1 mes)
-- **Opción de autodestrucción** al primer acceso
+- **Opción de autodestrucción** al primer acceso, con confirmación antes de abrir
 - **Soporte para archivos adjuntos** con encriptación individual
 - **Interfaz moderna y responsive** optimizada para móviles
+
+#### **📨 Modalidad Solicitar (Requests)**
+
+- **Pide un secreto a otra persona**: genera un enlace para que te envíe un mensaje o archivos
+- **Cifrado de clave pública** (ECDH P-256 + HKDF + AES-256-GCM) en el navegador de quien responde
+- **La clave pública viaja en el enlace**: el servidor no puede sustituirla
+- **Enlace de buzón privado** con QR para guardarlo en el celular y **código opcional** que lo protege
+- **Mis solicitudes**: panel con el estado de cada pedido (pendiente / respondida)
+- **Una sola respuesta** por solicitud, borrada del servidor al retirarla
 
 #### **🔐 Modalidad Tradicional (Encriptar)**
 
 - **Encriptación 100% local** sin almacenamiento en servidor
+- **PBKDF2-SHA256 con 600.000 iteraciones** para derivar la clave desde la contraseña
 - **Interfaz intuitiva** para encriptar/desencriptar texto
 - **Generación de códigos QR** para compartir fácilmente
 - **Ideal para** intercambios directos sin persistencia
@@ -60,8 +73,8 @@
 ├── React 19 (Hooks, Context API)
 ├── TypeScript 5.0 (Tipado estático)
 ├── React Router (Navegación SPA)
-├── CryptoJS (Encriptación AES-256)
-├── Axios (Comunicación HTTP)
+├── WebCrypto (AES-256-GCM, PBKDF2, HKDF, ECDH P-256)
+├── Fetch API (Comunicación HTTP)
 ├── Tailwind CSS (Estilos modernos)
 └── React i18next (Internacionalización)
 ```
@@ -73,17 +86,20 @@
 ├── Redis 6.2 (Almacenamiento en memoria)
 ├── Flask-CORS (Cross-origin requests)
 ├── Rate Limiting (Protección contra ataques)
+├── Scripts Lua atómicos (lectura + destrucción en una operación)
 └── WSGI (Despliegue en producción)
 ```
 
 ### **Características de Seguridad**
 
-- ✅ **Encriptación AES-256** del lado del cliente
-- ✅ **Rate limiting** por IP (5 intentos máximo)
+- ✅ **Encriptación AES-256-GCM** del lado del cliente, con cabecera autenticada
+- ✅ **Tokens de acceso** derivados de la clave: el ID solo no alcanza para leer, borrar ni quemar un mensaje
+- ✅ **Rate limiting** por IP en todos los endpoints y 5 intentos máximo por mensaje
 - ✅ **Autodestrucción** después de intentos fallidos
-- ✅ **Validación de entrada** y sanitización
-- ✅ **Headers de seguridad** HTTP
-- ✅ **Logging de eventos** de seguridad
+- ✅ **Validación de entrada** estricta (expiraciones permitidas, formato de sobre cifrado, tamaños)
+- ✅ **Headers de seguridad** HTTP: CSP estricta sin scripts inline, HSTS, X-Frame-Options, Referrer-Policy, Permissions-Policy
+- ✅ **Logging de eventos** de seguridad en `security.log`, sin registrar identificadores completos
+- ✅ **Protección de memoria**: límite de tamaño por mensaje y tope configurable de uso de Redis
 
 ## 📦 Instalación y Configuración
 
@@ -117,9 +133,22 @@ pip install -r requirements.txt
 cp app.cfg-sample app.cfg
 # Editar app.cfg con tus parámetros de Redis
 
-# Ejecutar aplicación
+# Ejecutar aplicación (solo en esta máquina: http://localhost:5001)
 python app.py
+
+# Accesible desde tu red (celular, otra PC): https + muestra la IP en la terminal
+LAN=1 python app.py
 ```
+
+Con `LAN=1` el servidor escucha en todas las interfaces, genera un certificado autofirmado en `.devcert/` y muestra las direcciones:
+
+```
+  Crypto Messenger
+  Local:      https://localhost:5001
+  En tu red:  https://192.168.1.231:5001
+```
+
+El https es obligatorio fuera de localhost: el navegador solo habilita el cifrado (WebCrypto) en contextos seguros. La primera vez hay que aceptar el aviso del certificado. Flask sirve el build, así que antes hay que ejecutar `npm run build` en `frontend/`. Otras variables: `PORT`, `HOST` y `HTTPS=0`.
 
 ### **3. Configurar Frontend**
 
@@ -129,8 +158,11 @@ cd frontend
 # Instalar dependencias
 npm install
 
-# Desarrollo (con hot reload)
+# Desarrollo (con hot reload; el proxy reenvía la API a localhost:5001)
 npm start
+
+# Desarrollo accesible desde el celular (WebCrypto exige https fuera de localhost)
+npm run start:lan
 
 # Construir para producción
 npm run build
@@ -145,12 +177,17 @@ npm run build
 
 ### **Variables de Entorno**
 
-```bash
-# app.cfg
-REDIS_HOST=localhost
-REDIS_PASSWORD=your_redis_password
-SECRET_KEY=your_secret_key
-```
+Ver `app.cfg-sample`. Además de `REDIS_HOST` y `REDIS_PASSWORD`:
+
+| Variable | Uso |
+|---|---|
+| `MAX_REDIS_MEMORY_BYTES` | Rechaza mensajes nuevos si Redis supera ese uso de memoria |
+| `TRUSTED_PROXIES` | Proxies de confianza delante de la app, para leer la IP real |
+| `FORCE_HSTS` | Envía HSTS cuando el TLS termina en Apache/nginx |
+| `SECURITY_LOG` | Ruta del registro de eventos de seguridad |
+| `CORS_ORIGINS` | Orígenes extra permitidos (por defecto, solo el mismo origen) |
+
+En Redis conviene fijar `maxmemory` y `maxmemory-policy volatile-ttl`.
 
 ### **Despliegue con Docker**
 
@@ -169,58 +206,54 @@ CMD ["python", "app.py"]
 
 ### **Endpoints Principales**
 
-#### **POST `/post`** - Crear Mensaje Encriptado
+Todos reciben `multipart/form-data`. El servidor nunca recibe claves: solo sobres cifrados y tokens de acceso derivados en el navegador (HKDF). Solo se guarda el SHA-256 de cada token.
 
-```bash
-curl -X POST http://localhost:5001/post \
-  -F "msg1=MENSAJE_ENCRIPTADO" \
-  -F "expire=86400" \
-  -F "destroy=1"
-```
+| Endpoint | Campos | Respuesta |
+|---|---|---|
+| `POST /post` | `payload` (sobre cifrado), `expire`, `destroy`, `token` | `201 {id, expires_at}` |
+| `POST /meta` | `id`, `token` | `{destroy, protected, expires_at}` |
+| `POST /get` | `id`, `token` | sobre cifrado (binario); si es de un solo uso, se borra en la misma operación |
+| `POST /fail_attempt` | `id`, `token` | `{attempts_left}`; `403` al quinto intento, que borra el mensaje |
+| `POST /delete` | `id`, `token` | `{success}` |
+| `POST /request/create` | `expire`, `owner_token`, `respond_token` | `201 {id, expires_at}` |
+| `POST /request/info` | `id`, `token` (respuesta) | `{status}` |
+| `POST /request/respond` | `id`, `token` (respuesta), `payload` (caja sellada) | `201`; `409` si ya fue respondida |
+| `POST /request/status` | `id`, `token` (dueño) | `{status: pending\|answered}` |
+| `POST /request/open` | `id`, `token` (dueño) | caja sellada (binario), borrada al retirarla |
+| `POST /request/delete` | `id`, `token` (dueño) | `{success}` |
 
-#### **POST `/get`** - Obtener Mensaje
-
-```bash
-curl -X POST http://localhost:5001/get \
-  -F "id=CODIGO_ONLINE"
-```
-
-#### **POST `/delete`** - Eliminar Mensaje
-
-```bash
-curl -X POST http://localhost:5001/delete \
-  -F "id=CODIGO_ONLINE"
-```
+Un token incorrecto responde igual que un mensaje inexistente (`404`). Los enlaces del formato anterior (ID de 10 caracteres) siguen siendo legibles hasta que expiren.
 
 ### **Respuestas de Error**
 
 ```json
-{
-  "error": "too_many_attempts",
-  "attempts_left": 0
-}
+{ "error": "too_many_attempts", "attempts_left": 0 }
+{ "error": "rate_limited" }
+{ "error": "invalid_request", "reason": "expire" }
 ```
 
 ## 🚀 Características Avanzadas
 
 ### **Gestión de Archivos**
 
-- **Soporte para múltiples archivos** (hasta 20 archivos)
-- **Encriptación individual** de cada archivo
-- **Límite de tamaño** configurable (5MB por archivo)
-- **Descarga segura** con desencriptación automática
+- **Soporte para múltiples archivos** (hasta 10 archivos, 10 MB cada uno, 20 MB en total)
+- **Encriptación conjunta** de mensaje, archivos y sus nombres en un único sobre autenticado
+- **Descarga segura** con desencriptación automática y sin interpretar el contenido en el navegador
+- **Preview solo de imágenes de mapa de bits** (nunca SVG ni HTML)
 
 ### **Seguridad Adicional**
 
 - **Validación de fortaleza de claves** en tiempo real
 - **Indicadores visuales** de seguridad
-- **Prevención de ataques** de timing
+- **Prevención de ataques** de timing (comparación de tokens en tiempo constante)
 - **Logging detallado** de eventos de seguridad
+- **Compatibilidad de lectura** con mensajes y códigos del formato CryptoJS anterior
 
 ### **Experiencia de Usuario**
 
 - **Interfaz intuitiva** con feedback visual
-- **Soporte para códigos QR** para compartir fácilmente
+- **Soporte para códigos QR** para compartir enlaces y guardar el buzón en el celular
+- **Diseño mobile-first** con objetivos táctiles de 44 px y hojas inferiores en mobile
 - **Notificaciones toast** para acciones importantes
 - **Modo oscuro** (preparado para futuras implementaciones)
 - **Flujo de desencriptación optimizado** que oculta elementos innecesarios
@@ -241,8 +274,9 @@ crypto/
 ├── frontend/             # Aplicación React
 │   ├── src/
 │   │   ├── components/   # Componentes React
-│   │   ├── locales/      # Traducciones
-│   │   └── utils/        # Utilidades
+│   │   ├── crypto/       # WebCrypto: sobres, cajas selladas, formato anterior
+│   │   ├── lib/          # API, enlaces, almacenamiento local
+│   │   └── locales/      # Traducciones
 │   └── package.json
 └── README.md
 ```

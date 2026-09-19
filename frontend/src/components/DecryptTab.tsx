@@ -1,569 +1,305 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
-import CryptoJS from 'crypto-js';
-import axios from 'axios';
-import { useParams } from 'react-router-dom';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { Eye, Link2, Lock, Trash2, Unlock } from 'lucide-react';
 import { useNotifications } from '../hooks/useNotifications';
-import { 
-  validateKeyForDecrypt, 
-  handleCryptoError, 
-  cleanEncryptedMessage,
-  retryRequest 
-} from '../utils/errorHandler';
-import FileDownload from './FileDownload';
+import { accessToken, DecryptError, open } from '../crypto/envelope';
+import { decodePayload, DecryptedPayload } from '../crypto/payload';
+import { decryptLegacyShare, decryptLegacyText } from '../crypto/legacy';
+import {
+  apiErrorKey,
+  ApiError,
+  deleteShare,
+  fetchLegacyShare,
+  fetchShare,
+  getMeta,
+  LegacyShare,
+  reportFailedAttempt,
+  ShareMeta,
+} from '../lib/api';
+import { parseInput, parseLocation, ParsedInput } from '../lib/links';
 import CountdownTimer from './CountdownTimer';
-import ConfettiExplosion from 'react-confetti-explosion';
-import Lottie from 'lottie-react';
-import groovyWalkAnimation from '../assets/groovyWalk.json';
+import { DecryptedContent, GoneView } from './ResultViews';
+import { Button, Card, inputClass, Notice, PasswordField, Spinner } from './ui';
 
-// Función para verificar si una cadena es base64 válido
-function isValidBase64(str: string): boolean {
-  try {
-    return btoa(atob(str)) === str;
-  } catch (e) {
-    return false;
-  }
-}
+type Phase = 'input' | 'loading' | 'ready' | 'decrypting' | 'decrypted' | 'gone';
+type GoneReason = 'notFound' | 'deleted' | 'attempts' | 'expired';
 
-// Función para evaluar la fortaleza de la clave
-function getKeyStrengthIndicators(key: string) {
-  return {
-    length: key.length >= 8,
-    upper: /[A-Z]/.test(key),
-    lower: /[a-z]/.test(key),
-    number: /[0-9]/.test(key),
-    special: /[^A-Za-z0-9]/.test(key),
-  };
-}
+const isRemote = (s: ParsedInput | null) => s?.kind === 'share' || s?.kind === 'legacyShare';
 
-interface DecryptTabProps {
-  onMessageDeleted?: (deleted: boolean, status?: 'expired' | 'deleted') => void;
-  onDecryptError?: (hasError: boolean) => void;
-  onMessageDecrypted?: () => void;
-}
-
-const DecryptTab: React.FC<DecryptTabProps> = ({ onMessageDeleted, onDecryptError, onMessageDecrypted }) => {
+const DecryptTab: React.FC = () => {
   const { t } = useTranslation();
-  const [key, setKey] = useState('');
-  const [message, setMessage] = useState('');
-  const [files, setFiles] = useState<any[]>([]);
-  const [info, setInfo] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [isDecrypting, setIsDecrypting] = useState(false);
-  const [onlineCode, setOnlineCode] = useState<string | null>(null);
-  const [isDecrypted, setIsDecrypted] = useState(false); // Nuevo estado para controlar si el mensaje fue descifrado
-  const [destroyOnRead, setDestroyOnRead] = useState(false);
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { showError, showSuccess } = useNotifications();
+
+  const [text, setText] = useState('');
+  const [source, setSource] = useState<ParsedInput | null>(null);
+  const [fromLink, setFromLink] = useState(false);
+  const [meta, setMeta] = useState<ShareMeta | null>(null);
+  const [password, setPassword] = useState('');
+  const [phase, setPhase] = useState<Phase>('input');
+  const [gone, setGone] = useState<GoneReason | null>(null);
+  const [result, setResult] = useState<DecryptedPayload | null>(null);
   const [attemptsLeft, setAttemptsLeft] = useState<number | null>(null);
-  const [lastDecryptFailed, setLastDecryptFailed] = useState(false);
-  const [messageDeleted, setMessageDeleted] = useState(false); // Nuevo estado para mensaje eliminado
-  const [expirationSeconds, setExpirationSeconds] = useState<number>(0); // Segundos hasta expiración
-  const [showCountdown, setShowCountdown] = useState(false); // Mostrar countdown
-  const [showDeleteConfetti, setShowDeleteConfetti] = useState(false); // Confetti for delete/expire
-  const [showPassword, setShowPassword] = useState(false); // Para mostrar/ocultar contraseña
-  const confettiTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const { id } = useParams<{ id: string }>();
-  const { showSuccess, showError, showWarning } = useNotifications();
-  const indicators = getKeyStrengthIndicators(key);
+  const [expiresAt, setExpiresAt] = useState<number | null>(null);
+  const [burned, setBurned] = useState(false);
 
-  // Función para manejar cuando expira el mensaje
-  const handleMessageExpire = () => {
-    setMessageDeleted(true);
-    if (onMessageDeleted) onMessageDeleted(true, 'expired');
-    setMessage(t('notifications.error.messageNotFound'));
-    setInfo('');
-    setDestroyOnRead(false);
-    setFiles([]);
-    setShowCountdown(false);
-    setShowDeleteConfetti(true);
-    if (confettiTimeoutRef.current) clearTimeout(confettiTimeoutRef.current);
-    confettiTimeoutRef.current = setTimeout(() => setShowDeleteConfetti(false), 3000);
-    showError(t('countdown.expired'));
-  };
+  // Texto cifrado ya descargado: permite reintentar la contraseña sin volver a pedirlo
+  const cache = useRef<{ envelope?: Uint8Array; legacy?: LegacyShare }>({});
+  const token = useRef<string | undefined>(undefined);
 
-  // Detectar si hay un código online en la URL
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const code = params.get('code');
-    if (code) {
-      setOnlineCode(code);
-    } else {
-      setOnlineCode(null);
-    }
+  const finish = useCallback((reason: GoneReason) => {
+    cache.current = {};
+    setGone(reason);
+    setPhase('gone');
   }, []);
 
-  const fetchMessage = useCallback(async (messageId: string) => {
-    setIsLoading(true);
-    setIsDecrypted(false); // Resetear estado de descifrado
-    setFiles([]); // Limpiar archivos al cargar nuevo mensaje
-    setMessageDeleted(false); // Resetear estado de eliminado
-    try {
-      const formData = new FormData();
-      formData.append('id', messageId);
-      
-      const response = await retryRequest(async () => {
-        return await axios.post('/get', formData);
-      });
-      
-      setMessage(response.data.msg);
-      setInfo(response.data.info);
-      setDestroyOnRead(!!response.data.destroy_on_read);
-      // Extraer intentos restantes del info si existe
-      const match = response.data.info.match(/Intentos restantes:\s*(\d+)/);
-      setAttemptsLeft(match ? parseInt(match[1], 10) : null);
-      
-      // Usar expiration_ts del backend si está disponible
-      if (typeof response.data.expiration_ts === 'number' && response.data.expiration_ts > 0) {
-        const now = Math.floor(Date.now() / 1000);
-        const seconds = response.data.expiration_ts - now;
-        setExpirationSeconds(seconds > 0 ? seconds : 0);
-        setShowCountdown(seconds > 0);
-      } else {
-        setExpirationSeconds(0);
-        setShowCountdown(false);
-      }
-      
-      if (response.data.msg === 'No existe el mensaje' || response.data.msg === t('notifications.error.messageNotFound')) {
-        setMessageDeleted(true);
-        setOnlineCode(null);
-        setMessage('');
-        if (onMessageDeleted) onMessageDeleted(true, 'expired');
-        showError(t('notifications.error.messageNotFound'));
-        return;
-      } else {
-        showSuccess(t('notifications.success.messageLoaded'));
-        // NO obtener archivos aquí - solo se obtendrán después del descifrado
-      }
-    } catch (error: any) {
-      console.error('Error al obtener mensaje:', error);
-      setMessageDeleted(true);
-      if (error.message.includes('conexión') || error.message.includes('servidor')) {
-        showError(error.message);
-      } else {
-        showError(t('notifications.error.fetchError'));
-      }
-      setMessage(t('notifications.error.fetchError'));
-      setInfo('');
-      setDestroyOnRead(false);
-      setAttemptsLeft(null);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [showError, showSuccess, t, onMessageDeleted]);
-
-  useEffect(() => {
-    // Si hay un ID en la URL, cargar el mensaje automáticamente
-    if (id && id.length === 10) {
-      fetchMessage(id);
-    }
-  }, [id, fetchMessage]);
-
-  // Si el usuario pega un código corto manualmente, buscar en backend
-  useEffect(() => {
-    // Solo si el mensaje es un ID de 10 caracteres alfanuméricos
-    if (/^[a-zA-Z0-9]{10}$/.test(message)) {
-      fetchMessage(message);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [message]);
-
-  // Autocompletar el mensaje si hay ?code= en la URL
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const code = params.get('code');
-    if (code) {
-      setMessage(code);
-    }
-  }, []);
-
-  // Escuchar evento personalizado para cargar código desde el modal
-  useEffect(() => {
-    const handleLoadCode = (event: CustomEvent) => {
-      const { code } = event.detail;
-      setMessage(code);
-      setOnlineCode(code);
-      // Cargar el mensaje automáticamente
-      fetchMessage(code);
-    };
-
-    window.addEventListener('loadCode', handleLoadCode as EventListener);
-    
-    return () => {
-      window.removeEventListener('loadCode', handleLoadCode as EventListener);
-    };
-  }, [fetchMessage]);
-
-  // Cuando el mensaje se elimina o expira:
-  useEffect(() => {
-    if (!messageDeleted && onMessageDeleted) onMessageDeleted(false);
-    // eslint-disable-next-line
-  }, [messageDeleted]);
-
-  // Notificar errores de desencriptación
-  useEffect(() => {
-    if (onDecryptError) {
-      onDecryptError(attemptsLeft === 0 || messageDeleted);
-    }
-  }, [attemptsLeft, messageDeleted, onDecryptError]);
-
-  const handleDecrypt = async () => {
-    try {
-      // Validaciones
-      validateKeyForDecrypt(key); // Solo valida que no esté vacía
-      if (!message.trim()) {
-        showError(t('notifications.error.noMessageToDecrypt'));
-        return;
-      }
-      setIsDecrypting(true);
-      setIsDecrypted(false); // Resetear estado de descifrado
-      setFiles([]); // Limpiar archivos antes del descifrado
-      const cleaned = cleanEncryptedMessage(message);
-      const decrypted = CryptoJS.AES.decrypt(cleaned, key);
-      const result = decrypted.toString(CryptoJS.enc.Utf8);
-      if (!result) {
-        setLastDecryptFailed(true);
-        // Si hay un código online, descontar intento en el backend
-        if (onlineCode) {
-          const formData = new FormData();
-          formData.append('id', onlineCode);
-          try {
-            const response = await axios.post('/fail_attempt', formData);
-            setAttemptsLeft(response.data.attempts_left);
-            if (response.data.attempts_left === 0) {
-              setMessageDeleted(true);
-              showError(t('notifications.error.tooManyAttempts'));
-              setMessage(t('notifications.error.messageNotFound'));
-              setInfo('');
-              setDestroyOnRead(false);
-              setFiles([]);
-              setIsDecrypting(false);
-              return;
-            }
-          } catch (error: any) {
-            if (error.response?.data?.error === 'too_many_attempts') {
-              setAttemptsLeft(0);
-              setMessageDeleted(true);
-              showError(t('notifications.error.tooManyAttempts'));
-              setMessage(t('notifications.error.messageNotFound'));
-              setInfo('');
-              setDestroyOnRead(false);
-              setFiles([]);
-              setIsDecrypting(false);
-              return;
-            }
-          }
-        }
-        showError(t('notifications.error.wrongKey'));
-        setIsDecrypting(false);
-        return;
-      }
-      // Intentar parsear como JSON para ver si contiene archivos
-      let filesToSet: any[] = [];
+  const decrypt = useCallback(
+    async (src: ParsedInput, pw: string) => {
+      setPhase('decrypting');
       try {
-        const data = JSON.parse(result);
-        if (data.message !== undefined && data.files) {
-          setMessage(data.message || ''); // Permitir mensaje vacío
-          // Desencriptar todos los archivos automáticamente
-          filesToSet = data.files.map((file: any) => {
-            try {
-              const decryptedFile = CryptoJS.AES.decrypt(file.content, key);
-              const decryptedBase64 = decryptedFile.toString(CryptoJS.enc.Utf8);
-              return {
-                ...file,
-                content: decryptedBase64,
-                isDecrypted: true
-              };
-            } catch {
-              return { ...file, content: '', isDecrypted: false };
-            }
-          });
-        } else {
-          setMessage(result);
-        }
-      } catch (e) {
-        setMessage(result);
-      }
-      // Si hay un código online, obtener archivos del servidor después del descifrado exitoso
-      if (onlineCode) {
-        try {
-          const formData = new FormData();
-          formData.append('id', onlineCode);
-          const filesResponse = await axios.post('/get_files', formData);
-          if (filesResponse.data.files && filesResponse.data.files.length > 0) {
-            filesToSet = filesResponse.data.files.map((file: any) => {
-              try {
-                const decryptedFile = CryptoJS.AES.decrypt(file.content, key);
-                const decryptedBase64 = decryptedFile.toString(CryptoJS.enc.Utf8);
-                return {
-                  ...file,
-                  content: decryptedBase64,
-                  isDecrypted: true
-                };
-              } catch {
-                return { ...file, content: '', isDecrypted: false };
-              }
-            });
+        let payload: DecryptedPayload | null = null;
+        if (src.kind === 'local') {
+          payload = decodePayload(await open(src.envelope, { password: pw }));
+        } else if (src.kind === 'legacyLocal') {
+          payload = await decryptLegacyText(src.ciphertext, pw);
+        } else if (src.kind === 'share') {
+          if (!cache.current.envelope) {
+            const share = await fetchShare(src.id, token.current!);
+            cache.current.envelope = share.envelope;
+            setBurned(share.destroyed);
+            if (share.expiresAt) setExpiresAt(share.expiresAt);
           }
-        } catch (error) {
-          // Si no hay archivos o hay error, no hacer nada
-          console.log('No files found or error getting files');
+          payload = decodePayload(await open(cache.current.envelope, { linkKey: src.linkKey, password: pw || undefined }));
+        } else {
+          if (!cache.current.legacy) {
+            const legacy = await fetchLegacyShare(src.id);
+            cache.current.legacy = legacy;
+            setBurned(legacy.destroyed);
+            if (legacy.expires_at) setExpiresAt(legacy.expires_at);
+          }
+          payload = await decryptLegacyShare(cache.current.legacy.msg, cache.current.legacy.files, pw);
+        }
+        if (!payload) throw new DecryptError('wrong_key');
+        setResult(payload);
+        setPhase('decrypted');
+        showSuccess(t('notifications.success.messageDecrypted'));
+      } catch (err) {
+        if (err instanceof DecryptError || (err instanceof Error && err.message === 'malformed_payload')) {
+          const remote = src.kind === 'share' || src.kind === 'legacyShare';
+          const alreadyBurned = src.kind === 'share' ? false : cache.current.legacy?.destroyed;
+          // Si el servidor ya lo borró al leerlo, los reintentos son locales y no descuentan intentos
+          if (remote && !alreadyBurned && !(src.kind === 'share' && meta?.destroy)) {
+            const left = await reportFailedAttempt(src.id, token.current).catch(() => null);
+            if (left === 0) return finish('attempts');
+            setAttemptsLeft(left);
+          }
+          showError(t('notifications.error.wrongKey'));
+          setPhase(remote ? 'ready' : 'input');
+        } else if (err instanceof ApiError && err.status === 404) {
+          finish('notFound');
+        } else {
+          showError(t(apiErrorKey(err)));
+          setPhase(isRemote(src) ? 'ready' : 'input');
         }
       }
-      setFiles(filesToSet);
-      setLastDecryptFailed(false);
-      setIsDecrypted(true); // Marcar como descifrado exitosamente
-      if (onMessageDecrypted) onMessageDecrypted();
-      showSuccess(t('notifications.success.messageDecrypted'));
-    } catch (error: any) {
-      console.error('Error al desencriptar:', error);
-      const errorMessage = handleCryptoError(error);
-      showError(errorMessage);
-      setIsDecrypted(false);
-    } finally {
-      setIsDecrypting(false);
+    },
+    [finish, meta, showError, showSuccess, t]
+  );
+
+  const loadRemote = useCallback(
+    async (src: ParsedInput) => {
+      if (src.kind !== 'share' && src.kind !== 'legacyShare') return;
+      setPhase('loading');
+      cache.current = {};
+      try {
+        token.current = src.kind === 'share' ? await accessToken(src.linkKey) : undefined;
+        const info = await getMeta(src.id, token.current);
+        setMeta(info);
+        setExpiresAt(info.expires_at);
+        setPhase('ready');
+        // Sin contraseña ni autodestrucción no hace falta ningún paso más
+        if (src.kind === 'share' && !info.destroy && !info.protected) decrypt(src, '');
+      } catch (err) {
+        if (err instanceof ApiError && err.status === 404) finish('notFound');
+        else {
+          showError(t(apiErrorKey(err)));
+          setPhase('input');
+        }
+      }
+    },
+    [decrypt, finish, showError, t]
+  );
+
+  // Enlace abierto directamente (/message#c=…&k=… o el antiguo ?code=…)
+  useEffect(() => {
+    const parsed = parseLocation(location as unknown as Location);
+    if (parsed) {
+      setSource(parsed);
+      setFromLink(true);
+      loadRemote(parsed);
     }
+    // Solo al montar: cada navegación vuelve a montar la pestaña
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const onTextChange = (value: string) => {
+    setText(value);
+    const parsed = parseInput(value);
+    setSource(parsed);
+    setMeta(null);
+    setAttemptsLeft(null);
+    if (isRemote(parsed)) loadRemote(parsed!);
+    else setPhase('input');
   };
 
-  const handleKeyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newKey = e.target.value;
-    setKey(newKey);
-    
-    // Validación en tiempo real
-    if (newKey.length > 0 && newKey.length < 3) {
-      showWarning(t('notifications.warning.keyTooShort'));
-    }
-  };
-
-  // Handler para eliminar mensaje online
-  const handleDeleteMessage = async () => {
-    if (!onlineCode) return;
+  const handleDelete = async () => {
+    if (!source || !isRemote(source)) return;
     try {
-      setIsLoading(true);
-      const formData = new FormData();
-      formData.append('id', onlineCode);
-      await axios.post('/delete', formData);
-      setMessage('');
-      setInfo('');
-      setFiles([]);
-      setIsDecrypted(false);
-      setMessageDeleted(true);
-      if (onMessageDeleted) onMessageDeleted(true, 'deleted');
-      setShowDeleteConfetti(true);
-      if (confettiTimeoutRef.current) clearTimeout(confettiTimeoutRef.current);
-      confettiTimeoutRef.current = setTimeout(() => setShowDeleteConfetti(false), 3000);
+      await deleteShare((source as { id: string }).id, token.current);
       showSuccess(t('notifications.success.messageDeleted'));
-    } catch (error: any) {
-      showError(t('notifications.error.deleteError'));
-    } finally {
-      setIsLoading(false);
+      finish('deleted');
+    } catch (err) {
+      if (err instanceof ApiError && err.status === 404) finish('notFound');
+      else showError(t('notifications.error.deleteError'));
     }
   };
+
+  const startOver = () => navigate('/message', { replace: fromLink });
+
+  const needsPassword =
+    source?.kind === 'local' || source?.kind === 'legacyLocal' || source?.kind === 'legacyShare' || (source?.kind === 'share' && !!meta?.protected);
+  const canSubmit = !!source && (!needsPassword || password.length > 0) && (phase === 'input' || phase === 'ready');
+  const busy = phase === 'loading' || phase === 'decrypting';
+
+  if (phase === 'gone') {
+    const titles: Record<GoneReason, string> = {
+      notFound: t('notifications.error.messageNotFound'),
+      deleted: t('notifications.error.messageDeleted'),
+      attempts: t('notifications.error.tooManyAttempts'),
+      expired: t('countdown.expired'),
+    };
+    return (
+      <GoneView
+        title={titles[gone || 'notFound']}
+        description={gone === 'notFound' ? t('decrypt.notFoundHint') : undefined}
+        actionLabel={t('decrypt.another')}
+        onAction={startOver}
+        celebrate={gone !== 'notFound'}
+      />
+    );
+  }
+
+  if (phase === 'decrypted' && result) {
+    const canDelete = isRemote(source) && !burned;
+    return (
+      <div className="space-y-4">
+        {burned && <Notice tone="success">{t('decrypt.burnedNotice')}</Notice>}
+        <DecryptedContent payload={result} />
+        {expiresAt && !burned && <CountdownTimer expiresAt={expiresAt} onExpire={() => finish('expired')} />}
+        <div className={`grid gap-3 ${canDelete ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-1'}`}>
+          {canDelete && (
+            <Button variant="danger" icon={<Trash2 className="h-4 w-4" />} onClick={handleDelete} block>
+              {t('form.deleteNow')}
+            </Button>
+          )}
+          <Button variant="secondary" onClick={startOver} block>
+            {t('decrypt.another')}
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  const detected = source
+    ? {
+        share: t('decrypt.detected.share'),
+        legacyShare: t('decrypt.detected.legacyShare'),
+        local: t('decrypt.detected.local'),
+        legacyLocal: t('decrypt.detected.legacyLocal'),
+      }[source.kind]
+    : null;
 
   return (
-    <div className="tab-pane fade">
-      <div className="space-y-4">
-        
-        {/* Mostrar mensaje de eliminado/expirado si corresponde */}
-        {messageDeleted ? (
-          <div className="flex flex-col items-center justify-center text-center min-h-[300px]">
-            {/* Lottie animation */}
-            <div className="w-48 h-48 mb-4">
-              <Lottie animationData={groovyWalkAnimation} loop={true} />
-            </div>
-            {/* Confetti explosion for delete/expire */}
-            {showDeleteConfetti && (
-              <div className="fixed inset-0 flex items-center justify-center pointer-events-none z-50">
-                <ConfettiExplosion
-                  force={0.8}
-                  duration={3000}
-                  particleCount={200}
-                  width={1400}
-                  colors={['#FFC700', '#FF0000', '#2E3191', '#41BBC7', '#FF8800', '#8800FF', '#00FF88']}
-                />
-              </div>
-            )}
-            <span className="text-lg font-semibold text-black mb-6">
-              {/* Mostrar mensaje según el motivo */}
-              {message === t('notifications.error.messageNotFound') || message === ''
-                ? t('notifications.error.messageNotFound')
-                : t('notifications.error.messageDeleted')}
-            </span>
-            <button
-              type="button"
-              className="mt-2 px-6 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                                onClick={() => {
-                    setMessage('');
-                    setKey('');
-                    setFiles([]);
-                    setInfo('');
-                    setIsDecrypted(false);
-                    setMessageDeleted(false);
-                    if (onMessageDeleted) onMessageDeleted(false);
-                    if (onDecryptError) onDecryptError(false);
-                    setAttemptsLeft(null);
-                    setLastDecryptFailed(false);
-                    setShowCountdown(false);
-                    setExpirationSeconds(0);
-                    setShowDeleteConfetti(false);
-                    setDestroyOnRead(false);
-                    setOnlineCode(null);
-                  }}
-            >
-              {t('form.decrypt') + ' another message'}
-            </button>
+    <form
+      className="space-y-4"
+      onSubmit={e => {
+        e.preventDefault();
+        if (canSubmit && source) decrypt(source, password);
+      }}
+    >
+      {fromLink ? (
+        <Card className="flex items-start gap-3">
+          <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-blue-50 text-blue-600">
+            <Link2 className="h-5 w-5" aria-hidden />
+          </span>
+          <div className="min-w-0">
+            <p className="text-sm font-semibold text-gray-900">{t('decrypt.linkTitle')}</p>
+            <p className="text-sm text-gray-500">{t('decrypt.linkDescription')}</p>
           </div>
-        ) : (
-          <>
-            {/* Campo de mensaje solo si no se desencriptó aún */}
-            {!isDecrypted && (
-              <div className="relative">
-                <textarea
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-vertical"
-                  rows={10}
-                  placeholder={t('messagePlaceholder')}
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
-                  readOnly={isLoading || messageDeleted || attemptsLeft === 0}
-                />
-              </div>
-            )}
-            
-            {/* Mostrar mensaje desencriptado si está disponible */}
-            {isDecrypted && message && (
-              <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-md">
-                <h3 className="text-lg font-medium text-green-800 mb-2">{t('decryptedMessage')}</h3>
-                <div className="text-green-700 whitespace-pre-wrap">{message}</div>
-              </div>
-            )}
-            {/* Mostrar archivos si existen */}
-            {isDecrypted && files.length > 0 && (
-              <FileDownload files={files} />
-            )}
-            {/* Countdown Timer - mostrar debajo del mensaje y archivos */}
-            {showCountdown && !messageDeleted && (
-              <CountdownTimer
-                seconds={expirationSeconds}
-                onExpire={handleMessageExpire}
-                isVisible={true}
+        </Card>
+      ) : (
+        <div>
+          <textarea
+            className={`${inputClass} min-h-[8rem] resize-y font-mono sm:min-h-[10rem]`}
+            rows={5}
+            placeholder={t('messagePlaceholder')}
+            value={text}
+            onChange={e => onTextChange(e.target.value)}
+            disabled={busy}
+            aria-label={t('messagePlaceholder')}
+            spellCheck={false}
+            autoCapitalize="off"
+          />
+          {text.trim() && (
+            <p className={`mt-1 text-xs ${detected ? 'text-green-700' : 'text-amber-700'}`}>{detected || t('decrypt.detected.none')}</p>
+          )}
+        </div>
+      )}
+
+      {phase === 'loading' && <Spinner label={t('form.loading')} />}
+
+      {phase !== 'loading' && (
+        <>
+          {meta?.destroy && <Notice tone="warning">{t('decrypt.destroyWarning')}</Notice>}
+          {expiresAt && <CountdownTimer expiresAt={expiresAt} onExpire={() => finish('expired')} />}
+
+          {needsPassword && (
+            <Card>
+              <PasswordField
+                label={source?.kind === 'share' ? t('decrypt.extraPassword') : t('decrypt.password')}
+                placeholder={t('form.secretKey')}
+                value={password}
+                onChange={setPassword}
+                autoComplete="off"
+                autoFocus={fromLink}
+                disabled={busy}
               />
-            )}
-            {/* Botón delete centrado debajo del mensaje y/o archivos */}
-            {onlineCode && isDecrypted && !messageDeleted && (
-              <div className="flex justify-center mt-6">
-                <button
-                  type="button"
-                  className="px-6 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                  onClick={handleDeleteMessage}
-                  disabled={isLoading}
-                >
-                  {t('form.deleteNow')}
-                </button>
-              </div>
-            )}
-            {/* Si NO está desencriptado, mostrar input, timer, etc */}
-            {!isDecrypted && (
-              <>
-                {/* Countdown Timer - solo mostrar si hay expiración y NO hay archivos */}
-                {/* Mensaje de destrucción si corresponde */}
-                {destroyOnRead && (
-                  <div className="flex items-center gap-2 text-orange-600 font-medium">
-                    <span>⚠️</span>
-                    <span>{t('destroyMessage')}</span>
-                  </div>
-                )}
-                {/* Intentos restantes de descifrado solo si la clave fue incorrecta */}
-                {attemptsLeft !== null && attemptsLeft > 0 && lastDecryptFailed && (
-                  <div className="flex items-center gap-2 text-orange-600 font-medium mt-2">
-                    <span>{t('decryptWrongKeyAndAttempts', { count: attemptsLeft })}</span>
-                    {attemptsLeft === 1 && (
-                      <span className="flex items-center gap-1 text-orange-600 font-medium">
-                        <span>⚠️</span>
-                        <span>{t('destroyOnNextFail')}</span>
-                      </span>
-                    )}
-                  </div>
-                )}
-                {/* Mensaje cuando el mensaje fue eliminado por demasiados intentos */}
-                {attemptsLeft === 0 && (
-                  <div className="flex flex-col gap-2 text-red-600 font-medium mt-2">
-                    <div className="flex items-center gap-2">
-                      <span>🚫</span>
-                      <span>{t('notifications.error.tooManyAttempts')}</span>
-                    </div>
-                    <button
-                      type="button"
-                      className="mt-2 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 text-sm"
-                      onClick={() => {
-                        setMessage('');
-                        setKey('');
-                        setFiles([]);
-                        setInfo('');
-                        setIsDecrypted(false);
-                        setMessageDeleted(false);
-                        if (onMessageDeleted) onMessageDeleted(false);
-                        if (onDecryptError) onDecryptError(false);
-                        setAttemptsLeft(null);
-                        setLastDecryptFailed(false);
-                        setShowCountdown(false);
-                        setExpirationSeconds(0);
-                        setShowDeleteConfetti(false);
-                        setDestroyOnRead(false);
-                        setOnlineCode(null);
-                      }}
-                    >
-                      {t('form.decrypt') + ' another message'}
-                    </button>
-                  </div>
-                )}
-                {/* Solo mostrar campo de clave y botón decrypt si NO está desencriptado y NO hay archivos */}
-                <div className="flex flex-col gap-4 w-full">
-                  {/* Campo de clave con icono de ojo */}
-                  <div className="relative">
-                    <input
-                      type={showPassword ? "text" : "password"}
-                      className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder={t('form.secretKey')}
-                      value={key}
-                      onChange={handleKeyChange}
-                      required
-                      disabled={isLoading || messageDeleted || attemptsLeft === 0}
-                    />
-                    <button
-                      type="button"
-                      className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                      onClick={() => setShowPassword(!showPassword)}
-                      disabled={isLoading || messageDeleted || attemptsLeft === 0}
-                    >
-                      {showPassword ? (
-                        <svg className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21" />
-                        </svg>
-                      ) : (
-                        <svg className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268-2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                        </svg>
-                      )}
-                    </button>
-                  </div>
-                  {/* Botón de decrypt */}
-                  <div className="flex items-center gap-4">
-                    <button
-                      type="button"
-                      className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                      onClick={handleDecrypt}
-                      disabled={isLoading || isDecrypting || messageDeleted || attemptsLeft === 0}
-                    >
-                      {isLoading ? t('form.loading') : isDecrypting ? t('form.decrypting') : t('form.decrypt')}
-                    </button>
-                  </div>
-                </div>
-              </>
-            )}
-          </>
-        )}
-      </div>
-    </div>
+              {attemptsLeft !== null && attemptsLeft > 0 && (
+                <p className="mt-2 text-sm font-medium text-amber-700">
+                  {t('decryptWrongKeyAndAttempts', { count: attemptsLeft })}
+                  {attemptsLeft === 1 && <> — {t('destroyOnNextFail')}</>}
+                </p>
+              )}
+            </Card>
+          )}
+
+          <Button
+            type="submit"
+            block
+            loading={phase === 'decrypting'}
+            disabled={!canSubmit}
+            icon={meta?.destroy ? <Eye className="h-4 w-4" /> : needsPassword ? <Unlock className="h-4 w-4" /> : <Lock className="h-4 w-4" />}
+          >
+            {phase === 'decrypting' ? t('form.decrypting') : meta?.destroy ? t('decrypt.revealOnce') : t('form.decrypt')}
+          </Button>
+
+          {!fromLink && !source && <Notice>{t('decrypt.note')}</Notice>}
+        </>
+      )}
+    </form>
   );
 };
 
-export default DecryptTab; 
+export default DecryptTab;

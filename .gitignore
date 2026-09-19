@@ -2,3 +2,6 @@
 venv/
 test/
 *.cfg
+*.log
+.DS_Store
+.devcert/

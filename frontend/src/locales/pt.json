@@ -1,152 +1,258 @@
 {
+  "appName": "Crypto Messenger",
   "tabs": {
+    "label": "Seções",
     "online": "Compartilhar",
     "traditional": "Criptografar",
-    "message": "Descriptografar",
+    "message": "Decifrar",
+    "requests": "Solicitar",
     "help": "Ajuda"
   },
   "descriptions": {
-    "online": "Criptografe sua mensagem e obtenha um link seguro para compartilhar.",
-    "traditional": "Criptografe sua mensagem localmente, sem enviá-la para nenhum servidor. Apenas você tem o código criptografado.",
-    "message": "Descriptografe mensagens inserindo a chave secreta e o código criptografado ou link online."
+    "online": "Criptografe uma mensagem ou arquivos e receba um link de uso único. A chave viaja no link e nunca chega ao servidor.",
+    "traditional": "Criptografe localmente com uma senha, sem enviar nada a nenhum servidor. Você decide como compartilhar o código.",
+    "message": "Cole um link ou um código criptografado para ver o conteúdo.",
+    "requests": "Peça para alguém te enviar um segredo: ele é criptografado no navegador dessa pessoa e só você pode abri-lo."
   },
   "form": {
-    "message": "Digite sua mensagem aqui...",
-    "secretKey": "Digite sua chave secreta",
-    "save": "COMPARTILHAR",
-    "saving": "Salvando...",
+    "message": "Escreva sua mensagem aqui…",
+    "messageLabel": "Mensagem",
+    "secretKey": "Senha",
+    "showKey": "Mostrar senha",
+    "hideKey": "Ocultar senha",
+    "save": "Criar link seguro",
     "clear": "Limpar",
-    "expires": "Expira em:",
+    "expires": "Expira em",
     "destroyOnRead": "Destruir ao ler",
-    "encryptFiles": "Criptografar arquivos",
-    "encryptingFiles": "Criptografando arquivos...",
+    "encrypting": "Criptografando…",
     "encrypt": "Criptografar",
-    "decrypt": "Descriptografar",
-    "deleteMessage": "Excluir Mensagem",
+    "decrypt": "Decifrar",
+    "decrypting": "Decifrando…",
     "copy": "Copiar",
     "showQR": "Mostrar QR",
     "hideQR": "Ocultar QR",
-    "loading": "Carregando...",
-    "decrypting": "Descriptografando...",
-    "deleteNow": "Excluir mensagem agora"
+    "loading": "Carregando…",
+    "deleteNow": "Apagar mensagem agora",
+    "addFiles": "Anexar arquivos",
+    "onlyMessage": "Remover arquivos"
   },
   "expiration": {
-    "never": "Nunca expira",
     "30seconds": "30 segundos",
     "1day": "1 dia",
     "1week": "1 semana",
     "1month": "1 mês"
   },
   "strength": {
-    "insecure": "Insegura",
-    "secure": "Segura",
-    "verySecure": "Muito segura",
-    "tooltip": "Ajuda sobre a força da chave",
-    "title": "A chave deve ter:",
+    "insecure": "Fraca",
+    "secure": "Razoável",
+    "verySecure": "Forte",
     "requirements": {
-      "length": "8+ caracteres",
+      "length": "12+ caracteres",
       "uppercase": "Maiúscula",
       "lowercase": "Minúscula",
       "number": "Número",
-      "special": "Caractere especial"
+      "special": "Símbolo"
     }
   },
-  "encryptedMessage": "MENSAGEM CRIPTOGRAFADA:",
+  "share": {
+    "passwordLabel": "Senha adicional (opcional)",
+    "passwordPlaceholder": "Sem senha",
+    "passwordHint": "Segundo fator: além do link, será preciso digitar esta senha. Compartilhe-a por outro canal.",
+    "destroyHint": "É apagada do servidor na primeira vez que for aberta.",
+    "note": "Seu navegador criptografa tudo com AES-256-GCM antes de enviar. O servidor só guarda dados criptografados, incluindo os nomes dos arquivos, e nunca recebe a chave.",
+    "linkWarning": "Este link contém a chave: qualquer pessoa com o link completo pode ler a mensagem. Envie-o apenas a quem deve recebê-lo.",
+    "passwordReminder": "Você adicionou uma senha: compartilhe-a por um canal diferente do link.",
+    "destroyReminder": "Será destruída ao ser aberta, por isso não há pré-visualização: abri-la agora a apagaria."
+  },
+  "encrypt": {
+    "passwordLabel": "Senha",
+    "passwordHint": "Mínimo de 8 caracteres. Melhor uma frase longa: é a única coisa que protege este código.",
+    "note": "Tudo acontece no seu navegador: nada é enviado ao servidor. Compartilhe o código e a senha por canais diferentes.",
+    "download": "Baixar .txt",
+    "qrTooLarge": "O código é longo demais para um QR (máximo 1.800 caracteres).",
+    "qrCaption": "Escaneie para copiar o código criptografado"
+  },
+  "decrypt": {
+    "linkTitle": "Mensagem compartilhada",
+    "linkDescription": "A chave está no link e só é usada neste navegador.",
+    "password": "Senha",
+    "extraPassword": "Esta mensagem também pede uma senha",
+    "revealOnce": "Ver mensagem (uma única vez)",
+    "destroyWarning": "Esta mensagem será apagada do servidor ao ser aberta. Você só poderá vê-la uma vez: guarde o que precisar.",
+    "burnedNotice": "A mensagem já foi apagada do servidor. Se fechar esta página, não poderá vê-la de novo.",
+    "another": "Decifrar outra mensagem",
+    "notFoundHint": "Pode ter expirado, já ter sido lida ou o link pode estar incompleto.",
+    "note": "Aceita links de Compartilhar e códigos da aba Criptografar, inclusive do formato anterior.",
+    "detected": {
+      "share": "✓ Link compartilhado detectado",
+      "legacyShare": "✓ Link do formato anterior detectado",
+      "local": "✓ Código criptografado detectado",
+      "legacyLocal": "✓ Código do formato anterior detectado",
+      "none": "Não é um link nem um código válido"
+    }
+  },
+  "requests": {
+    "labelLabel": "O que você precisa que te enviem?",
+    "labelPlaceholder": "Ex.: senha do Wi-Fi",
+    "labelHint": "Quem responder verá isto. Viaja dentro do link e não é guardado no servidor.",
+    "passcodeLabel": "Código para proteger sua caixa (opcional)",
+    "passcodeLabelShort": "Código da caixa",
+    "passcodePlaceholder": "Sem código",
+    "passcodeHint": "Se definido, o link da sua caixa não funciona sem este código. Útil se você o guardar no celular ou em notas.",
+    "saveLabel": "Guardar neste navegador",
+    "saveHint": "Aparecerá em «Minhas solicitações». Com código, é guardado criptografado.",
+    "create": "Criar solicitação",
+    "created": "Solicitação criada",
+    "note": "Seu navegador gera um par de chaves. Quem responder criptografa com sua chave pública e só sua chave privada, que nunca sai dos seus links, pode abrir.",
+    "step1Title": "Envie este link para quem deve responder",
+    "step1Text": "Com ele a pessoa pode te enviar uma mensagem ou arquivos criptografados. Só pode ser respondido uma vez.",
+    "step2Title": "Guarde o link da sua caixa (privado)",
+    "step2Text": "É a única forma de ler a resposta. Guarde agora: escaneie o QR com o celular ou copie.",
+    "step2TextSaved": "Ficou guardado neste navegador. Para abrir em outro dispositivo, escaneie o QR ou copie.",
+    "plainNote": "Quem tiver este link pode ler a resposta. Não o compartilhe.",
+    "lockedNote": "Protegido com código: sem o código, o link não abre a resposta.",
+    "copyRequestLink": "Copiar link de solicitação",
+    "copyRequestLinkShort": "Copiar link",
+    "copyInboxLink": "Copiar link da caixa",
+    "inboxQrCaption": "Escaneie para guardar a caixa no celular",
+    "done": "Pronto",
+    "myRequests": "Minhas solicitações",
+    "empty": "Ainda não há solicitações guardadas neste navegador.",
+    "untitled": "Solicitação sem título",
+    "locked": "com código",
+    "openInbox": "Abrir caixa",
+    "delete": "Excluir",
+    "forget": "Remover da lista",
+    "backToList": "Voltar para Minhas solicitações",
+    "status": {
+      "loading": "…",
+      "error": "Sem conexão",
+      "pending": "Pendente",
+      "answered": "Respondida",
+      "gone": "Encerrada"
+    }
+  },
+  "respond": {
+    "title": "Pediram que você envie um segredo",
+    "explanation": "Ele é criptografado no seu navegador com a chave pública de quem pediu. Nem o servidor nem ninguém mais pode lê-lo. Só pode ser respondido uma vez.",
+    "placeholder": "Escreva aqui o que foi pedido…",
+    "send": "Criptografar e enviar",
+    "note": "Os nomes dos arquivos também são criptografados.",
+    "sentTitle": "Enviado com segurança",
+    "sentText": "Quem pediu já pode abrir pela caixa.",
+    "answeredTitle": "Esta solicitação já foi respondida",
+    "answeredText": "Ela aceita apenas uma resposta.",
+    "goneTitle": "A solicitação não existe ou expirou",
+    "goneText": "Peça a quem enviou que crie uma nova.",
+    "home": "Ir para o início"
+  },
+  "inbox": {
+    "title": "Caixa",
+    "lockedTitle": "Caixa protegida",
+    "lockedText": "Digite o código que você escolheu ao criar a solicitação.",
+    "unlock": "Abrir caixa",
+    "wrongPasscode": "Código incorreto",
+    "pendingText": "Ainda não há resposta. Esta página se atualiza a cada 15 segundos.",
+    "answeredText": "A resposta chegou. Ao abri-la, ela é apagada do servidor: guarde o que precisar.",
+    "retrieve": "Abrir resposta",
+    "refresh": "Atualizar",
+    "saveHere": "Guardar neste navegador",
+    "retrievedNotice": "A resposta já foi apagada do servidor. Se fechar esta página, não poderá vê-la de novo.",
+    "answerTitle": "Resposta recebida",
+    "goneTitle": "Esta solicitação não existe mais",
+    "goneText": "Expirou, foi excluída ou a resposta já foi aberta.",
+    "invalidTitle": "O link da caixa não é válido"
+  },
+  "encryptedMessage": "Código criptografado",
+  "decryptedMessage": "Mensagem decifrada",
+  "messagePlaceholder": "Cole o link ou o código criptografado",
+  "decryptWrongKeyAndAttempts": "Senha incorreta. Tentativas restantes: {{count}}",
+  "destroyOnNextFail": "a mensagem será apagada se você errar de novo",
   "notifications": {
     "success": {
-      "messageSaved": "Mensagem criptografada e salva com sucesso",
-      "messageDecrypted": "Mensagem descriptografada com sucesso",
-      "formCleared": "Formulário limpo",
-      "messageLoaded": "Mensagem carregada com sucesso",
-      "messageDeleted": "Mensagem excluída com sucesso"
+      "messageSaved": "Mensagem criptografada e salva",
+      "messageEncrypted": "Mensagem criptografada",
+      "messageDecrypted": "Mensagem decifrada",
+      "messageDeleted": "Mensagem apagada"
     },
     "error": {
-      "keyTooShort": "A chave deve ter pelo menos 3 caracteres",
-      "messageTooLong": "A mensagem está se aproximando do limite de caracteres",
-      "emptyMessage": "A mensagem criptografada não pode estar vazia",
-      "decryptFailed": "Não foi possível descriptografar. Verifique a chave e a mensagem criptografada.",
-              "unexpectedError": "Ocorreu um erro inesperado",
-        "copyError": "Erro ao copiar para a área de transferência",
-        "messageNotFound": "Mensagem não encontrada ou expirou",
-      "messageDeleted": "A mensagem foi excluída",
-      "fetchError": "Erro ao buscar a mensagem",
-      "noMessageToDecrypt": "Não há mensagem para descriptografar",
-      "deleteError": "Erro ao excluir a mensagem",
-      "noContent": "Por favor, forneça uma mensagem ou faça upload de arquivos",
-      "wrongKey": "Chave incorreta",
-      "tooManyAttempts": "Muitas tentativas falharam. A mensagem foi excluída."
+      "noContent": "Escreva uma mensagem ou anexe arquivos",
+      "messageTooLong": "A mensagem é longa demais (máximo 10.000 caracteres)",
+      "wrongKey": "Senha incorreta ou conteúdo alterado",
+      "messageNotFound": "Mensagem não encontrada ou expirada",
+      "messageDeleted": "A mensagem foi apagada",
+      "tooManyAttempts": "Muitas tentativas falhas. A mensagem foi apagada.",
+      "deleteError": "Não foi possível apagar a mensagem",
+      "network": "Sem conexão com o servidor. Verifique sua conexão.",
+      "rateLimited": "Muitas requisições. Aguarde um momento e tente de novo.",
+      "tooLarge": "O conteúdo excede o tamanho máximo permitido",
+      "storageFull": "O servidor está sem espaço no momento. Tente mais tarde.",
+      "insecureContext": "A criptografia requer uma conexão segura (https).",
+      "unexpectedError": "Ocorreu um erro inesperado"
     },
     "warning": {
-      "keyTooShort": "A chave deve ter pelo menos 8 caracteres",
-      "messageLimit": "A mensagem está se aproximando do limite de caracteres"
-    },
-    "info": {
-      "formCleared": "Formulário limpo"
+      "keyTooShort": "A senha deve ter pelo menos 8 caracteres"
     }
   },
   "modal": {
-    "messageSaved": "Mensagem Criptografada e Compartilhada",
+    "messageSaved": "Link seguro criado",
     "close": "Fechar",
-    "preview": "Visualizar",
-    "createNewMessage": "Criar nova mensagem"
+    "preview": "Pré-visualizar"
   },
-  "destroyMessage": "A mensagem será excluída após ser visualizada",
   "countdown": {
     "expiresIn": "Expira em",
-    "expired": "Mensagem expirada!",
-    "deleted": "Mensagem excluída!"
+    "expired": "A mensagem expirou",
+    "days_one": "{{count}} dia",
+    "days_other": "{{count}} dias"
   },
   "help": {
-    "description": "O sistema possui duas modalidades principais: <strong class=\"text-blue-600\">COMPARTILHAR</strong>, que permite gerar uma mensagem criptografada e salvá-la para compartilhar através de um link, e <strong class=\"text-blue-600\">CRIPTOGRAFAR</strong>, que oferece uma interface para criptografar texto localmente, sem armazenamento no servidor. Em ambos os modos, é necessário usar uma chave para descriptografar informações de forma segura na aba Descriptografar.",
-    "onlineSecurity": "As mensagens na modalidade <strong class=\"text-blue-600\">COMPARTILHAR</strong> não são armazenadas em texto simples. Ao clicar no botón \"Salvar\", o navegador primeiro criptografa os dados localmente e depois os envia ao servidor para gerar o link de troca.",
-    "expiration": "Além disso, esta modalidade permite definir um tempo de expiração para a mensagem e ativar a opção de destruí-la quando lida. Dessa forma, a pessoa que recebe o link terá apenas uma oportunidade de acessar a mensagem.",
-    "securityRecommendation": "Para maior segurança, recomenda-se que a chave seja o mais longa possível, preferencialmente uma frase.",
-    "sourceCode": "O código fonte está disponível no <a href=\"http://github.com/juannito/crypto\" class=\"text-blue-600 hover:underline\">GitHub</a>."
-  },
-  "characters": "caracteres",
-  "nearLimit": "(próximo ao limite)",
-  "messagePlaceholder": "Digite o código criptografado ou link online para descriptografar",
-  "importantNote": {
-    "title": "Importante:",
-    "text": "Ao salvar, o navegador primeiro criptografa os dados localmente e depois os envia ao servidor para gerar o link de troca. Você pode escolher destruir a mensagem quando lida."
+    "share": {
+      "title": "Compartilhar",
+      "text": "Criptografe uma mensagem e arquivos no seu navegador e gere um link. A chave vai na parte do link depois do #, que os navegadores nunca enviam ao servidor. Você pode adicionar uma senha como segundo fator, definir a expiração e fazer com que seja destruída ao ser lida."
+    },
+    "encrypt": {
+      "title": "Criptografar",
+      "text": "Criptografe localmente com uma senha (PBKDF2 com 600.000 iterações e AES-256-GCM) e receba um código para compartilhar como quiser. Nada é guardado no servidor."
+    },
+    "requests": {
+      "title": "Solicitar",
+      "text": "Gere um link para que outra pessoa te envie um segredo. O navegador dela criptografa com sua chave pública e só o link da sua caixa pode abri-lo. Você pode protegê-lo com um código e guardá-lo no celular escaneando o QR."
+    },
+    "security": {
+      "title": "O que o servidor vê",
+      "text": "Apenas dados criptografados e autenticados: nem o texto, nem os nomes dos arquivos, nem a chave. Conhecer o identificador de uma mensagem não basta para lê-la ou apagá-la. Tentativas falhas e abusos são limitados e registrados."
+    },
+    "recommendation": {
+      "title": "Recomendação",
+      "text": "Use senhas longas, de preferência uma frase, e compartilhe-as por um canal diferente do link ou do código."
+    },
+    "sourceCode": "O código-fonte está disponível no"
   },
   "fileUpload": {
-    "clickToUpload": "Clique para fazer upload",
-    "orDragDrop": "ou arraste e solte",
-    "maxFiles": "Até {{maxFiles}} arquivos",
-    "maxSize": "Máx {{maxSize}} cada",
-    "selectedFiles": "Arquivos selecionados",
+    "clickToUpload": "Toque para escolher arquivos",
+    "orDragDrop": "ou arraste-os aqui",
+    "limits": "Até {{maxFiles}} arquivos · {{maxSize}} cada · {{maxTotal}} no total",
+    "selectedFiles": "Arquivos",
+    "remove": "Remover {{name}}",
     "errors": {
-      "fileTooLarge": "O arquivo é muito grande. Tamanho máximo é {{maxSize}}"
+      "fileTooLarge": "excede o limite de {{maxSize}}",
+      "tooMany": "Máximo de {{maxFiles}} arquivos",
+      "totalTooLarge": "O total não pode passar de {{maxSize}}"
     }
-  },
-  "response": {
-    "shareLink": "Link para compartilhar:",
-    "qrCode": "Código QR:",
-    "scanWithPhone": "Escaneie com seu celular",
-    "copyUrl": "Copiar link",
-    "copyLinkCode": "Copiar código do link",
-    "copied": "Copiado"
   },
   "fileDownload": {
-    "title": "Arquivos anexados",
-    "download": "Baixar",
-    "decrypting": "Descriptografando...",
-    "decryptAll": "Descriptografar Tudo",
-    "errors": {
-      "downloadFailed": "Erro ao baixar arquivo",
-      "decryptionFailed": "Erro ao descriptografar arquivo"
-    }
+    "title": "Anexos",
+    "download": "Baixar"
+  },
+  "response": {
+    "copyUrl": "Copiar link",
+    "copied": "Copiado",
+    "scanWithPhone": "Escaneie com o celular"
   },
   "languageSelector": {
     "title": "Selecionar idioma",
     "en": "English",
     "es": "Español",
     "pt": "Português"
-  },
-  "decryptAttemptsLeft": "Tentativas de descriptografia restantes: {{count}}",
-  "decryptAttemptsHelp": "Se você errar muitas tentativas de descriptografia, a mensagem será excluída por segurança.",
-  "decryptWrongKeyAndAttempts": "Chave incorreta. Tentativas de descriptografia restantes: {{count}}",
-  "destroyOnNextFail": "A mensagem será excluída se você errar a próxima tentativa",
-  "decryptedMessage": "Mensagem Descriptografada"
+  }
 }
