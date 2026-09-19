@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "crypto-messenger-cli"
+version = "1.0.0"
+description = "Mensajes y archivos cifrados de extremo a extremo desde la terminal"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "BEERWARE" }
+dependencies = ["cryptography>=41"]
+
+[project.scripts]
+crypto = "crypto_cli.__main__:main"
+
+[tool.setuptools]
+packages = ["crypto_cli"]
