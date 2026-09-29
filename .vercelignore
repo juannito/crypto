@@ -10,7 +10,7 @@ venv/
 __pycache__/
 frontend/node_modules/
 frontend/build/
-public/
+/public/
 /static/
 cli/
 tests/
