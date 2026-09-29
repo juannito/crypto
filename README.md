@@ -124,6 +124,20 @@ En `app.cfg` (ver `app.cfg-sample`):
 
 En producción se usa Apache + mod_wsgi (ver `app.wsgi`). En Redis conviene `maxmemory` con `maxmemory-policy volatile-ttl`.
 
+### Vercel + Upstash
+
+`vercel.json` compila el frontend, aplica las mismas cabeceras de seguridad que la app a las páginas estáticas y programa un heartbeat diario (`/heartbeat`) para que Upstash no archive la base gratuita por inactividad.
+
+1. Importar el repo en Vercel.
+2. En el proyecto, **Storage → Upstash Redis**: una base **sin regiones de lectura** y en la misma región que las funciones (por defecto `iad1`, Washington → `us-east-1`). Con **Eviction desactivado**, para que no borre mensajes antes de que expiren. La integración define `REDIS_URL`.
+3. Agregar `CRON_SECRET`: un valor aleatorio, por ejemplo `openssl rand -hex 32`.
+4. Desplegar.
+
+Diferencias con el servidor propio:
+- **Tope de 4 MB por mensaje**, porque Vercel no acepta cuerpos de más de 4,5 MB.
+- El registro de seguridad va a los logs de Vercel.
+- Upstash persiste en disco y hace backups, así que un mensaje borrado puede quedar un tiempo en esas copias, siempre cifrado y sin la clave, que nunca llega al servidor.
+
 ## API
 
 Todo es `POST` con `multipart/form-data`. El servidor recibe solo datos cifrados y tokens, y de cada token guarda únicamente su SHA-256.

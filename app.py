@@ -50,8 +50,17 @@ app.config.update(
     # Desactivar solo en tests
     RATE_LIMITS=True,
 )
+if os.environ.get('VERCEL'):
+    app.config.update(
+        # Vercel corta los cuerpos de más de 4,5 MB; el frontend se compila con tope de 4 MB
+        MAX_PAYLOAD_BYTES=4 * 1024 * 1024 + 64 * 1024,
+        # Vercel reescribe X-Forwarded-For con la IP real del cliente (no se puede falsificar)
+        TRUSTED_PROXIES=1,
+    )
 app.config.from_pyfile('app.cfg', silent=True)
 app.config.from_envvar('CRYPTO_SETTINGS', silent=True)
+# En plataformas sin archivos de config (Vercel): CRYPTO_TRUSTED_PROXIES=1, etc.
+app.config.from_prefixed_env('CRYPTO')
 app.config['MAX_CONTENT_LENGTH'] = app.config['MAX_PAYLOAD_BYTES'] + 64 * 1024
 
 if app.config['TRUSTED_PROXIES']:
@@ -62,12 +71,19 @@ if app.config['CORS_ORIGINS']:
     from flask_cors import CORS
     CORS(app, origins=list(app.config['CORS_ORIGINS']))
 
-r = Redis(
-    host=app.config['REDIS_HOST'],
-    port=app.config['REDIS_PORT'],
-    password=app.config['REDIS_PASSWORD'],
-    ssl=app.config['REDIS_SSL'],
-)
+# REDIS_URL (o KV_URL) la inyecta la integración de Upstash en Vercel
+redis_url = os.environ.get('REDIS_URL') or os.environ.get('KV_URL')
+if redis_url:
+    if os.environ.get('VERCEL') and not redis_url.startswith('rediss://'):
+        sys.exit('REDIS_URL debe usar TLS (rediss://): los datos viajan por internet.')
+    r = Redis.from_url(redis_url)
+else:
+    r = Redis(
+        host=app.config['REDIS_HOST'],
+        port=app.config['REDIS_PORT'],
+        password=app.config['REDIS_PASSWORD'],
+        ssl=app.config['REDIS_SSL'],
+    )
 
 #
 # Registro de eventos de seguridad
@@ -76,6 +92,8 @@ security_log = logging.getLogger('crypto.security')
 security_log.setLevel(logging.INFO)
 security_log.propagate = False
 try:
+    if os.environ.get('VERCEL'):
+        raise OSError('sistema de archivos de solo lectura: va a los logs de Vercel')
     _handler = logging.FileHandler(app.config['SECURITY_LOG'])
 except OSError:
     _handler = logging.StreamHandler(sys.stderr)
@@ -718,6 +736,26 @@ def activity():
     for item in filter(valid, rcpts):
         out_rcpts[item['id']] = receipt_status(item['id'], item['token']) or {'status': 'gone'}
     return jsonify({'requests': out_reqs, 'receipts': out_rcpts})
+
+
+#
+# Heartbeat: Vercel Cron lo llama una vez al día para que el Redis gratuito de
+# Upstash no se archive por inactividad. Vercel envía CRON_SECRET como Bearer.
+#
+HEARTBEAT_KEY = 'heartbeat'
+
+
+@app.route('/heartbeat', methods=['GET'])
+def heartbeat():
+    secret = os.environ.get('CRON_SECRET', '')
+    auth = request.headers.get('Authorization', '')
+    if not secret or not hmac.compare_digest(auth.encode(), f'Bearer {secret}'.encode()):
+        return not_found()
+    now = int(time.time())
+    # Escritura y lectura reales: cuentan como actividad para el proveedor
+    r.set(HEARTBEAT_KEY, now, ex=90 * 86400)
+    ok = int(r.get(HEARTBEAT_KEY) or 0) == now
+    return jsonify({'ok': ok}), 200 if ok else 503, {'Cache-Control': 'no-store'}
 
 
 #

@@ -1,0 +1,18 @@
+# Nunca subir secretos ni datos locales
+app.cfg
+*.cfg
+*.log
+.devcert/
+.env*
+
+# Entorno local y material que no se despliega
+venv/
+__pycache__/
+frontend/node_modules/
+frontend/build/
+public/
+/static/
+cli/
+tests/
+*.md
+!README.md

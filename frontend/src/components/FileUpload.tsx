@@ -6,8 +6,9 @@ import { formatBytes } from './ui';
 import { useNotifications } from '../hooks/useNotifications';
 
 export const MAX_FILES = 10;
-export const MAX_FILE_SIZE = 10 * 1024 * 1024;
-export const MAX_TOTAL_SIZE = 20 * 1024 * 1024;
+// REACT_APP_MAX_TOTAL_MB baja el tope donde el hosting limita el cuerpo (Vercel: 4,5 MB)
+export const MAX_TOTAL_SIZE = (Number(process.env.REACT_APP_MAX_TOTAL_MB) || 20) * 1024 * 1024;
+export const MAX_FILE_SIZE = Math.min(10 * 1024 * 1024, MAX_TOTAL_SIZE);
 
 interface Item {
   id: string;
