@@ -11,7 +11,7 @@ Nació para que cualquiera, sin saber de criptografía (gpg y similares), pueda 
 | | Qué hace | Pasa por el servidor |
 |---|---|---|
 | **Compartir** | Cifra un mensaje y archivos y genera un enlace. Puede expirar (30 s a 1 mes), destruirse al leerse, pedir una contraseña adicional y avisarte cuando lo lean. | Sí, cifrado |
-| **Encriptar** | Cifra con una contraseña y te da un código para mandar por donde quieras. | No |
+| **Encriptar** | Cifra con una contraseña y te da un código para mandar por donde quieras. Si el código no entra en un QR, puedes convertirlo en un enlace que sí entra. | No (el enlace para el QR sí, cifrado) |
 | **Solicitar** | Genera un enlace para que **otra persona te envíe** un secreto. Ella lo cifra con tu clave pública y solo tu enlace de buzón lo abre. El buzón se puede guardar en el celular con un QR y proteger con un código. | Sí, cifrado |
 
 La pestaña **Descifrar** abre enlaces y códigos de las tres, incluidos los del formato anterior (CryptoJS).

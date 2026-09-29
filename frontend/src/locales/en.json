@@ -75,8 +75,13 @@
     "passwordHint": "At least 8 characters. A long passphrase is best: it's the only thing protecting this code.",
     "note": "Everything happens in your browser: nothing is sent to the server. Share the code and the password through different channels.",
     "download": "Download .txt",
-    "qrTooLarge": "The code is too long for a QR (1,800 characters max).",
-    "qrCaption": "Scan it to copy the encrypted code"
+    "qrTooLarge": "The code is too long for a QR. Use “Show QR” to create a link that fits.",
+    "qrCaption": "Scan it to copy the encrypted code",
+    "linkTitle": "QR with a link",
+    "linkWarning": "The code does not fit in a QR. To make one, the content is uploaded encrypted with your password and with a key that travels only in the link: the server cannot read it. Unlike Encrypt, it now goes through the server.",
+    "linkCreate": "Create link",
+    "linkQrCaption": "Scan it to open the message",
+    "linkPasswordReminder": "The password is also needed to open it. Share it through another channel."
   },
   "decrypt": {
     "linkTitle": "Shared message",

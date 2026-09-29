@@ -1,14 +1,14 @@
 import React, { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Download, Lock, QrCode } from 'lucide-react';
+import { Download, Link2, Lock, QrCode } from 'lucide-react';
 import { useNotifications } from '../hooks/useNotifications';
-import { seal } from '../crypto/envelope';
+import { accessToken, LINK_KEY_LEN, randomBytes, seal } from '../crypto/envelope';
 import { encodePayload } from '../crypto/payload';
-import { apiErrorKey } from '../lib/api';
-import { formatLocalCiphertext } from '../lib/links';
+import { apiErrorKey, createShare } from '../lib/api';
+import { buildShareLink, formatLocalCiphertext } from '../lib/links';
 import Composer, { contentError, MIN_PASSWORD_LENGTH } from './Composer';
 import Modal from './Modal';
-import { Button, Card, CopyButton, Notice, PasswordField, QrBlock } from './ui';
+import { Button, Card, CopyButton, Field, inputClass, LinkBox, Notice, PasswordField, QrBlock, Toggle, useExpireOptions } from './ui';
 
 const QR_MAX_CHARS = 1800;
 
@@ -21,6 +21,13 @@ const EncryptTab: React.FC = () => {
   const [encrypted, setEncrypted] = useState('');
   const [busy, setBusy] = useState(false);
   const [showQr, setShowQr] = useState(false);
+  // Código demasiado largo para un QR: se sube cifrado y el QR lleva solo el enlace
+  const expireOptions = useExpireOptions();
+  const [showLinkQr, setShowLinkQr] = useState(false);
+  const [expire, setExpire] = useState('604800');
+  const [destroy, setDestroy] = useState(true);
+  const [linkUrl, setLinkUrl] = useState('');
+  const [linkBusy, setLinkBusy] = useState(false);
   const [resetKey, setResetKey] = useState(0);
   const resultRef = useRef<HTMLDivElement>(null);
 
@@ -28,8 +35,14 @@ const EncryptTab: React.FC = () => {
     setMessage('');
     setFiles([]);
     setPassword('');
-    setEncrypted('');
+    clearResult();
     setResetKey(k => k + 1);
+  };
+
+  // Cualquier cambio en el contenido invalida el código y el enlace
+  const clearResult = () => {
+    setEncrypted('');
+    setLinkUrl('');
   };
 
   const handleEncrypt = async (e: React.FormEvent) => {
@@ -41,6 +54,7 @@ const EncryptTab: React.FC = () => {
     setBusy(true);
     try {
       const envelope = await seal(await encodePayload(message.trim(), files), { password });
+      setLinkUrl('');
       setEncrypted(formatLocalCiphertext(envelope));
       showSuccess(t('notifications.success.messageEncrypted'));
       setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
@@ -60,11 +74,26 @@ const EncryptTab: React.FC = () => {
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   };
 
+  const createLink = async () => {
+    setLinkBusy(true);
+    try {
+      // El servidor exige clave de enlace; la contraseña sigue siendo obligatoria para abrirlo
+      const linkKey = randomBytes(LINK_KEY_LEN);
+      const envelope = await seal(await encodePayload(message.trim(), files), { linkKey, password });
+      const { id } = await createShare(envelope, expire, destroy, await accessToken(linkKey));
+      setLinkUrl(buildShareLink(id, linkKey));
+    } catch (err) {
+      showError(t(apiErrorKey(err)));
+    } finally {
+      setLinkBusy(false);
+    }
+  };
+
   const qrAllowed = encrypted.length < QR_MAX_CHARS;
 
   return (
     <form className="space-y-4" onSubmit={handleEncrypt}>
-      <Composer key={resetKey} message={message} onMessageChange={v => { setMessage(v); setEncrypted(''); }} onFilesChange={setFiles} disabled={busy} />
+      <Composer key={resetKey} message={message} onMessageChange={v => { setMessage(v); clearResult(); }} onFilesChange={f => { setFiles(f); clearResult(); }} disabled={busy} />
 
       <Card>
         <PasswordField
@@ -74,7 +103,7 @@ const EncryptTab: React.FC = () => {
           value={password}
           onChange={v => {
             setPassword(v);
-            setEncrypted('');
+            clearResult();
           }}
           showStrength
           disabled={busy}
@@ -107,9 +136,7 @@ const EncryptTab: React.FC = () => {
               <Button
                 variant="secondary"
                 icon={<QrCode className="h-4 w-4" />}
-                onClick={() => setShowQr(true)}
-                disabled={!qrAllowed}
-                title={qrAllowed ? undefined : t('encrypt.qrTooLarge')}
+                onClick={() => (qrAllowed ? setShowQr(true) : setShowLinkQr(true))}
                 block
               >
                 {t('form.showQR')}
@@ -123,6 +150,45 @@ const EncryptTab: React.FC = () => {
       {showQr && (
         <Modal title={t('encryptedMessage')} onClose={() => setShowQr(false)}>
           <QrBlock value={encrypted} size={240} caption={t('encrypt.qrCaption')} />
+        </Modal>
+      )}
+
+      {showLinkQr && (
+        <Modal
+          title={t('encrypt.linkTitle')}
+          onClose={() => setShowLinkQr(false)}
+          footer={
+            !linkUrl && (
+              <Button onClick={createLink} loading={linkBusy} icon={<Link2 className="h-4 w-4" />} block>
+                {t('encrypt.linkCreate')}
+              </Button>
+            )
+          }
+        >
+          {linkUrl ? (
+            <div className="space-y-3">
+              <LinkBox url={linkUrl} qrCaption={t('encrypt.linkQrCaption')} qrOpen />
+              <Notice>{t('encrypt.linkPasswordReminder')}</Notice>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              <Notice tone="warning">{t('encrypt.linkWarning')}</Notice>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <Field label={t('form.expires')} htmlFor="encrypt-link-expire">
+                  <select id="encrypt-link-expire" className={inputClass} value={expire} onChange={e => setExpire(e.target.value)} disabled={linkBusy}>
+                    {expireOptions.map(o => (
+                      <option key={o.value} value={o.value}>
+                        {o.label}
+                      </option>
+                    ))}
+                  </select>
+                </Field>
+                <div className="sm:pt-6">
+                  <Toggle checked={destroy} onChange={setDestroy} label={t('form.destroyOnRead')} description={t('share.destroyHint')} disabled={linkBusy} />
+                </div>
+              </div>
+            </div>
+          )}
         </Modal>
       )}
     </form>

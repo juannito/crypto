@@ -75,8 +75,13 @@
     "passwordHint": "Mínimo 8 caracteres. Mejor una frase larga: es lo único que protege este código.",
     "note": "Todo ocurre en tu navegador: nada se envía al servidor. Comparte el código y la contraseña por canales distintos.",
     "download": "Descargar .txt",
-    "qrTooLarge": "El código es demasiado largo para un QR (máximo 1.800 caracteres).",
-    "qrCaption": "Escanéalo para copiar el código cifrado"
+    "qrTooLarge": "El código es demasiado largo para un QR. Con «Mostrar QR» puedes crear un enlace que sí entra.",
+    "qrCaption": "Escanéalo para copiar el código cifrado",
+    "linkTitle": "QR con enlace",
+    "linkWarning": "El código no entra en un QR. Para generarlo, el contenido se sube al servidor cifrado con tu contraseña y con una clave que viaja solo en el enlace: el servidor no puede leerlo. A diferencia de Encriptar, ahora pasa por el servidor.",
+    "linkCreate": "Crear enlace",
+    "linkQrCaption": "Escanéalo para abrir el mensaje",
+    "linkPasswordReminder": "Para abrirlo también hace falta la contraseña. Compártela por otro canal."
   },
   "decrypt": {
     "linkTitle": "Mensaje compartido",
